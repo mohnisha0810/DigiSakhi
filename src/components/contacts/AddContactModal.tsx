@@ -34,7 +34,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
   isOpen,
   onClose,
 }) => {
-  const { inviteContact, contacts } = useSafeSphere();
+  const { inviteContact, contacts, currentUser } = useSafeSphere();
 
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState('');
@@ -476,6 +476,32 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
 
             {/* Action Buttons */}
             <div className="flex flex-col gap-2 pt-2">
+              {!inviteResult.success && (
+                <div className="grid grid-cols-2 gap-2">
+                  <a
+                    href={`sms:${encodeURIComponent(phoneNumber)}?&body=${encodeURIComponent(
+                      `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${relationship}). Open this link to review and accept: ${inviteResult.inviteUrl || `${window.location.origin}/invite?token=${inviteResult.token}`}`
+                    )}`}
+                    className="py-2.5 px-3 bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal border border-teal-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99] text-center"
+                  >
+                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
+                    <span>Send via Phone SMS</span>
+                  </a>
+
+                  <a
+                    href={`https://wa.me/${encodeURIComponent(phoneNumber.replace(/\D/g, ''))}?text=${encodeURIComponent(
+                      `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${relationship}). Open this link to review and accept: ${inviteResult.inviteUrl || `${window.location.origin}/invite?token=${inviteResult.token}`}`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99] text-center"
+                  >
+                    <Phone className="w-3.5 h-3.5 shrink-0" />
+                    <span>Send via WhatsApp</span>
+                  </a>
+                </div>
+              )}
+
               <button
                 type="button"
                 onClick={handleCopyLink}
@@ -488,9 +514,9 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
               <button
                 type="button"
                 onClick={handleOpenRecipientView}
-                className="w-full py-2.5 bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal border border-teal-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
+                className="w-full py-2.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
               >
-                <ExternalLink className="w-4 h-4" />
+                <ExternalLink className="w-4 h-4 text-brand-muted" />
                 <span>Open Recipient Screen (Test in New Tab)</span>
               </button>
 

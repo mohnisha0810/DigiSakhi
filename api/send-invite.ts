@@ -150,7 +150,10 @@ export default async function handler(req: any, res: any) {
 
     // Provider is configured: Make real Twilio REST API call
     const twilioEndpoint = `https://api.twilio.com/2010-04-01/Accounts/${accountSid}/Messages.json`;
-    const basicAuth = Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+    const basicAuth =
+      typeof Buffer !== 'undefined'
+        ? Buffer.from(`${accountSid}:${authToken}`).toString('base64')
+        : btoa(`${accountSid}:${authToken}`);
 
     const messageText = `DigiSakhi: ${inviterName} has invited you as their trusted emergency safety contact (${relationship || 'Friend'}). Open this link to review & accept: ${inviteUrl}`;
 

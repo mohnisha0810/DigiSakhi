@@ -18,6 +18,7 @@ import {
   Phone,
   Mail,
   AlertTriangle,
+  MessageSquare,
 } from 'lucide-react';
 
 export const ContactList: React.FC = () => {
@@ -27,6 +28,7 @@ export const ContactList: React.FC = () => {
     removeContact,
     invitations,
     resendInvitation,
+    currentUser,
   } = useSafeSphere();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -277,6 +279,34 @@ export const ContactList: React.FC = () => {
 
                   {/* Actions for Pending Contacts */}
                   <div className="flex items-center gap-2 flex-wrap">
+                    {matchedInv?.invitation_token && contact.phone_number && (
+                      <div className="flex items-center gap-1.5">
+                        <a
+                          href={`sms:${encodeURIComponent(contact.phone_number)}?&body=${encodeURIComponent(
+                            `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${contact.relationship}). Open this link to review and accept: ${window.location.origin}/invite?token=${matchedInv.invitation_token}`
+                          )}`}
+                          className="px-2.5 py-1.5 bg-brand-aqua/80 hover:bg-brand-aqua text-brand-deepTeal rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          title="Open phone's native Messages app with invitation pre-filled"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5" />
+                          <span>SMS</span>
+                        </a>
+
+                        <a
+                          href={`https://wa.me/${encodeURIComponent(contact.phone_number.replace(/\D/g, ''))}?text=${encodeURIComponent(
+                            `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${contact.relationship}). Open this link to review and accept: ${window.location.origin}/invite?token=${matchedInv.invitation_token}`
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          title="Share invitation link on WhatsApp"
+                        >
+                          <Phone className="w-3.5 h-3.5" />
+                          <span>WhatsApp</span>
+                        </a>
+                      </div>
+                    )}
+
                     {matchedInv?.invitation_token && (
                       <>
                         <button
