@@ -4,6 +4,11 @@ import { AddContactModal } from './AddContactModal';
 import { EmptyState } from '@/components/common/EmptyState';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import {
+  triggerWhatsAppShare,
+  triggerSmsShare,
+  buildInvitationMessage,
+} from '@/lib/messaging';
+import {
   Users,
   UserPlus,
   ArrowUp,
@@ -14,11 +19,10 @@ import {
   ExternalLink,
   Copy,
   Check,
-  RefreshCw,
   Phone,
   Mail,
-  AlertTriangle,
   MessageSquare,
+  Share2,
 } from 'lucide-react';
 
 export const ContactList: React.FC = () => {
@@ -27,13 +31,13 @@ export const ContactList: React.FC = () => {
     reorderContacts,
     removeContact,
     invitations,
-    resendInvitation,
     currentUser,
   } = useSafeSphere();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [resendingId, setResendingId] = useState<string | null>(null);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
+  const [copiedMsgToken, setCopiedMsgToken] = useState<string | null>(null);
+  const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
 
   const acceptedContacts = contacts
     .filter((c) => c.status === 'accepted')
@@ -53,25 +57,68 @@ export const ContactList: React.FC = () => {
     reorderContacts(newArr);
   };
 
-  const handleCopyInviteLink = (token: string) => {
-    const url = `${window.location.origin}/invite?token=${token}`;
+  const showFeedback = (msg: string) => {
+    setFeedbackNotice(msg);
+    setTimeout(() => setFeedbackNotice(null), 4000);
+  };
+
+  const getInviteUrl = (token: string, contact: any) => {
+    const origin =
+      typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost:5173')
+        ? window.location.origin
+        : 'https://safesphere-liart.vercel.app';
+    return `${origin}/invite?token=${token}&inviter=${encodeURIComponent(currentUser.full_name)}&name=${encodeURIComponent(contact.full_name)}&rel=${encodeURIComponent(contact.relationship)}&phone=${encodeURIComponent(contact.phone_number)}`;
+  };
+
+  const getFullMessage = (token: string, contact: any) => {
+    const inviteUrl = getInviteUrl(token, contact);
+    return buildInvitationMessage({
+      inviterName: currentUser.full_name,
+      relationship: contact.relationship,
+      inviteUrl,
+    });
+  };
+
+  const handleWhatsApp = (contact: any, token: string) => {
+    const message = getFullMessage(token, contact);
+    showFeedback(`Opening WhatsApp for ${contact.full_name}...`);
+    const res = triggerWhatsAppShare(contact.phone_number, message);
+    if (!res.success) {
+      showFeedback(res.error || 'Could not open WhatsApp.');
+    }
+  };
+
+  const handleSms = (contact: any, token: string) => {
+    const message = getFullMessage(token, contact);
+    const res = triggerSmsShare(contact.phone_number, message);
+    if (!res.success) {
+      showFeedback(res.error || 'Could not open SMS.');
+    } else if (!res.isMobile) {
+      showFeedback(`Invitation message copied! Paste it into your messaging app to send to ${contact.full_name}.`);
+    } else {
+      showFeedback(`Opening Messages app for ${contact.full_name}...`);
+    }
+  };
+
+  const handleCopyInviteLink = (token: string, contact: any) => {
+    const url = getInviteUrl(token, contact);
     navigator.clipboard.writeText(url);
     setCopiedToken(token);
+    showFeedback('Invitation link copied to clipboard!');
     setTimeout(() => setCopiedToken(null), 2500);
   };
 
-  const handleOpenRecipientPage = (token: string) => {
-    const url = `${window.location.origin}/invite?token=${token}`;
-    window.open(url, '_blank');
+  const handleCopyMessage = (contact: any, token: string) => {
+    const message = getFullMessage(token, contact);
+    navigator.clipboard.writeText(message);
+    setCopiedMsgToken(token);
+    showFeedback(`Complete invitation message for ${contact.full_name} copied to clipboard!`);
+    setTimeout(() => setCopiedMsgToken(null), 2500);
   };
 
-  const handleResend = async (invitationId: string) => {
-    setResendingId(invitationId);
-    try {
-      await resendInvitation(invitationId);
-    } finally {
-      setResendingId(null);
-    }
+  const handleOpenRecipientPage = (token: string, contact: any) => {
+    const url = getInviteUrl(token, contact);
+    window.open(url, '_blank');
   };
 
   return (
@@ -98,6 +145,14 @@ export const ContactList: React.FC = () => {
           Add Trusted Contact
         </button>
       </div>
+
+      {/* Floating Feedback Banner */}
+      {feedbackNotice && (
+        <div className="p-3 bg-brand-aqua border border-teal-200 rounded-xl text-brand-deepTeal text-xs font-semibold flex items-center gap-2 shadow-xs animate-fadeIn">
+          <Check className="w-4 h-4 text-brand-teal shrink-0" />
+          <span>{feedbackNotice}</span>
+        </div>
+      )}
 
       {/* Escalation Hierarchy List */}
       <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-4">
@@ -211,7 +266,7 @@ export const ContactList: React.FC = () => {
               <span>Pending Contact Invitations (Awaiting Recipient Acceptance)</span>
             </h3>
             <p className="text-xs text-brand-muted mt-0.5">
-              These contacts have been invited but have not yet accepted on their phone. Under DigiSakhi safety protocols, only verified contacts receive active distress alerts.
+              These contacts have been saved but have not yet accepted on their phone. Use WhatsApp, SMS, or link sharing to send their verification link.
             </p>
           </div>
           <span className="text-xs text-amber-600 font-mono font-bold">
@@ -230,11 +285,7 @@ export const ContactList: React.FC = () => {
                   (contact.phone_number && i.invitee_phone === contact.phone_number)
               );
 
-              const currentDeliveryStatus =
-                matchedInv?.delivery_status ||
-                contact.invitation_status ||
-                matchedInv?.status ||
-                'pending';
+              const token = matchedInv?.invitation_token || 'inv_pending';
 
               return (
                 <div
@@ -244,7 +295,7 @@ export const ContactList: React.FC = () => {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-extrabold text-brand-text text-sm">{contact.full_name}</span>
-                      <StatusBadge status={currentDeliveryStatus as any} />
+                      <StatusBadge status="pending" />
                       <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white text-brand-muted border border-brand-border">
                         {contact.relationship}
                       </span>
@@ -260,61 +311,40 @@ export const ContactList: React.FC = () => {
                         <Mail className="w-3 h-3" />
                         {contact.email}
                       </span>
-                      {matchedInv?.provider_message_id && (
-                        <>
-                          <span>•</span>
-                          <span className="text-brand-teal font-mono text-[10px]" title="Twilio Message SID">
-                            SID: {matchedInv.provider_message_id.substring(0, 16)}...
-                          </span>
-                        </>
-                      )}
                     </div>
-
-                    {matchedInv?.provider_error && (
-                      <div className="text-[11px] text-coral-700 bg-coral-50 px-2 py-1 rounded border border-coral-200 mt-1 max-w-lg">
-                        <strong>SMS Notice: </strong>{matchedInv.provider_error}
-                      </div>
-                    )}
                   </div>
 
-                  {/* Actions for Pending Contacts */}
+                  {/* Actions for Pending Contacts: Direct WhatsApp, SMS, Copy, Review */}
                   <div className="flex items-center gap-2 flex-wrap">
-                    {matchedInv?.invitation_token && contact.phone_number && (
-                      <div className="flex items-center gap-1.5">
-                        <a
-                          href={`sms:${encodeURIComponent(contact.phone_number)}?&body=${encodeURIComponent(
-                            `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${contact.relationship}). Open this link to review and accept: ${window.location.origin}/invite?token=${matchedInv.invitation_token}`
-                          )}`}
-                          className="px-2.5 py-1.5 bg-brand-aqua/80 hover:bg-brand-aqua text-brand-deepTeal rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
-                          title="Open phone's native Messages app with invitation pre-filled"
-                        >
-                          <MessageSquare className="w-3.5 h-3.5" />
-                          <span>SMS</span>
-                        </a>
-
-                        <a
-                          href={`https://wa.me/${encodeURIComponent(contact.phone_number.replace(/\D/g, ''))}?text=${encodeURIComponent(
-                            `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${contact.relationship}). Open this link to review and accept: ${window.location.origin}/invite?token=${matchedInv.invitation_token}`
-                          )}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2.5 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
-                          title="Share invitation link on WhatsApp"
-                        >
-                          <Phone className="w-3.5 h-3.5" />
-                          <span>WhatsApp</span>
-                        </a>
-                      </div>
-                    )}
-
                     {matchedInv?.invitation_token && (
                       <>
                         <button
-                          onClick={() => handleCopyInviteLink(matchedInv.invitation_token)}
-                          className="px-3 py-1.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs"
-                          title="Copy secure verification link to clipboard"
+                          type="button"
+                          onClick={() => handleWhatsApp(contact, token)}
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
+                          title="Open WhatsApp chat with pre-filled invitation"
                         >
-                          {copiedToken === matchedInv.invitation_token ? (
+                          <Phone className="w-3.5 h-3.5 fill-current" />
+                          <span>WhatsApp</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleSms(contact, token)}
+                          className="px-3 py-1.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
+                          title="Open phone Messages app (or copy message on desktop)"
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 fill-current" />
+                          <span>SMS</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleCopyMessage(contact, token)}
+                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          title="Copy complete invitation text to clipboard"
+                        >
+                          {copiedMsgToken === token ? (
                             <>
                               <Check className="w-3.5 h-3.5 text-brand-teal" />
                               <span className="text-brand-teal">Copied!</span>
@@ -322,37 +352,46 @@ export const ContactList: React.FC = () => {
                           ) : (
                             <>
                               <Copy className="w-3.5 h-3.5 text-brand-muted" />
-                              <span>Copy Link</span>
+                              <span>Copy Msg</span>
                             </>
                           )}
                         </button>
 
                         <button
-                          onClick={() => handleOpenRecipientPage(matchedInv.invitation_token)}
-                          className="px-3 py-1.5 bg-brand-aqua/70 hover:bg-brand-aqua text-brand-deepTeal border border-teal-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs"
-                          title="Open invitation acceptance page in new tab"
+                          type="button"
+                          onClick={() => handleCopyInviteLink(token, contact)}
+                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          title="Copy verification link only"
+                        >
+                          {copiedToken === token ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-brand-teal" />
+                              <span className="text-brand-teal">Link!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5 text-brand-muted" />
+                              <span>Link</span>
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenRecipientPage(token, contact)}
+                          className="px-2.5 py-1.5 bg-brand-aqua/70 hover:bg-brand-aqua text-brand-deepTeal border border-teal-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          title="Test recipient acceptance screen in new tab"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
-                          <span>Review Screen</span>
+                          <span>Review</span>
                         </button>
                       </>
                     )}
 
-                    {matchedInv && (
-                      <button
-                        onClick={() => handleResend(matchedInv.id)}
-                        disabled={resendingId === matchedInv.id}
-                        className="px-3 py-1.5 bg-white hover:bg-slate-50 text-brand-teal border border-teal-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
-                        title="Resend SMS invitation to contact's phone"
-                      >
-                        <RefreshCw className={`w-3.5 h-3.5 ${resendingId === matchedInv.id ? 'animate-spin' : ''}`} />
-                        <span>{resendingId === matchedInv.id ? 'Sending...' : 'Resend SMS'}</span>
-                      </button>
-                    )}
-
                     <button
+                      type="button"
                       onClick={() => removeContact(contact.id)}
-                      className="p-1.5 text-brand-muted hover:text-brand-coral hover:bg-brand-peach rounded-lg transition-colors"
+                      className="p-1.5 text-brand-muted hover:text-brand-coral hover:bg-brand-peach rounded-lg transition-colors ml-1"
                       title="Cancel invitation and remove"
                     >
                       <Trash2 className="w-4 h-4" />

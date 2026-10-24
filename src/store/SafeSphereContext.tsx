@@ -979,42 +979,19 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     error?: string;
     inviteUrl: string;
   }> => {
-    let apiResult: any = { success: false, delivery_status: 'pending' };
     const origin =
       typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost:5173')
         ? window.location.origin
         : 'https://safesphere-liart.vercel.app';
 
-    try {
-      const res = await fetch('/api/send-invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inviterId: currentUser.id,
-          inviterName: currentUser.full_name,
-          inviteeName: data.fullName,
-          inviteePhone: data.phoneNumber,
-          inviteeEmail: data.email,
-          relationship: data.relationship,
-          escalationOrder: data.escalationOrder,
-          origin,
-        }),
-      });
-      apiResult = await res.json();
-    } catch (err: any) {
-      console.warn('Network call to /api/send-invite failed, falling back:', err);
-      apiResult = {
-        success: false,
-        error: `Could not reach SMS gateway: ${err.message}`,
-        delivery_status: 'failed',
-      };
-    }
-
     const token =
-      apiResult.invitation_token || ('inv_' + Math.random().toString(36).substring(2, 12));
+      'inv_' +
+      (typeof crypto !== 'undefined' && crypto.randomUUID
+        ? crypto.randomUUID().replace(/-/g, '')
+        : Math.random().toString(36).substring(2, 12) + Math.random().toString(36).substring(2, 12));
+
     const expires = new Date(Date.now() + 7 * 86400000).toISOString();
-    const finalDeliveryStatus: InvitationDeliveryStatus =
-      apiResult.delivery_status || (apiResult.success ? 'sent' : 'failed');
+    const inviteUrl = `${origin}/invite?token=${token}&inviter=${encodeURIComponent(currentUser.full_name)}&name=${encodeURIComponent(data.fullName)}&rel=${encodeURIComponent(data.relationship)}&phone=${encodeURIComponent(data.phoneNumber)}`;
 
     const createdInv = await backendService.createInvitation({
       inviter_id: currentUser.id,
@@ -1025,12 +1002,9 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       relationship: data.relationship,
       escalation_order: data.escalationOrder,
       invitation_token: token,
-      status: finalDeliveryStatus,
-      delivery_status: finalDeliveryStatus,
-      provider: apiResult.provider || (apiResult.success ? 'twilio' : 'unconfigured'),
-      provider_message_id: apiResult.provider_message_id,
-      provider_error: apiResult.error,
-      sent_at: apiResult.success ? new Date().toISOString() : undefined,
+      status: 'pending',
+      delivery_status: 'pending',
+      provider: 'manual',
       expires_at: expires,
     });
 
@@ -1043,27 +1017,18 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       escalation_order: data.escalationOrder,
       status: 'pending', // Strictly pending until accepted!
       invitation_id: createdInv.id,
-      invitation_status: finalDeliveryStatus,
+      invitation_status: 'pending',
       can_view_location: false,
       avatar_color: 'bg-teal-600',
     });
 
     await loadUserData(currentUser);
-
-    const inviteUrl = apiResult.invite_url || `${origin}/invite?token=${token}`;
-
-    if (apiResult.success) {
-      setSuccessMessage(`SMS invitation dispatched via Twilio to ${data.phoneNumber}.`);
-    } else if (apiResult.error) {
-      setError(apiResult.error);
-    }
+    setSuccessMessage(`Contact ${data.fullName} saved! Choose WhatsApp or SMS to send their invitation.`);
 
     return {
       token,
-      success: !!apiResult.success,
-      deliveryStatus: finalDeliveryStatus,
-      messageId: apiResult.provider_message_id,
-      error: apiResult.error,
+      success: true,
+      deliveryStatus: 'pending',
       inviteUrl,
     };
   };
@@ -1084,49 +1049,15 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const inv = invitations.find((i) => i.id === invitationId);
     if (!inv) return { success: false, error: 'Invitation not found.' };
 
-    const origin =
-      typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost:5173')
-        ? window.location.origin
-        : 'https://safesphere-liart.vercel.app';
+    await backendService.updateInvitationDelivery(invitationId, {
+      status: 'pending',
+      delivery_status: 'pending',
+      sent_at: new Date().toISOString(),
+    });
 
-    try {
-      const res = await fetch('/api/send-invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          inviterId: currentUser.id,
-          inviterName: currentUser.full_name,
-          inviteeName: inv.invitee_name,
-          inviteePhone: inv.invitee_phone,
-          inviteeEmail: inv.invitee_email,
-          relationship: inv.relationship,
-          token: inv.invitation_token,
-          origin,
-        }),
-      });
-      const result = await res.json();
-
-      const newStatus = result.delivery_status || (result.success ? 'sent' : 'failed');
-      await backendService.updateInvitationDelivery(invitationId, {
-        status: newStatus,
-        delivery_status: newStatus,
-        provider_message_id: result.provider_message_id,
-        provider_error: result.error,
-        sent_at: result.success ? new Date().toISOString() : undefined,
-      });
-
-      await loadUserData(currentUser);
-      if (result.success) {
-        setSuccessMessage(`SMS re-dispatched via Twilio to ${inv.invitee_phone}`);
-        return { success: true };
-      } else {
-        setError(result.error || 'Failed to resend SMS.');
-        return { success: false, error: result.error };
-      }
-    } catch (err: any) {
-      setError(err.message || 'Network error resending SMS.');
-      return { success: false, error: err.message };
-    }
+    await loadUserData(currentUser);
+    setSuccessMessage(`Ready to send invitation to ${inv.invitee_name}. Choose WhatsApp or SMS.`);
+    return { success: true };
   };
 
   const reorderContacts = async (reordered: TrustedContact[]) => {

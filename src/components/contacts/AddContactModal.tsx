@@ -4,6 +4,13 @@ import { StepProgress } from '@/components/common/StepProgress';
 import { StatusBadge } from '@/components/common/StatusBadge';
 import { InvitationDeliveryStatus } from '@/types';
 import {
+  normalizePhoneNumber,
+  buildInvitationMessage,
+  triggerWhatsAppShare,
+  triggerSmsShare,
+  isMobileDevice,
+} from '@/lib/messaging';
+import {
   X,
   UserPlus,
   ArrowRight,
@@ -18,6 +25,8 @@ import {
   ExternalLink,
   MessageSquare,
   Phone,
+  Share2,
+  Send,
   Info,
 } from 'lucide-react';
 
@@ -25,8 +34,6 @@ interface InviteResultState {
   token: string;
   success: boolean;
   deliveryStatus: InvitationDeliveryStatus;
-  messageId?: string;
-  error?: string;
   inviteUrl: string;
 }
 
@@ -45,9 +52,11 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
   const [canViewLocation, setCanViewLocation] = useState(true);
   const [canReceiveDistress, setCanReceiveDistress] = useState(true);
   const [inviteResult, setInviteResult] = useState<InviteResultState | null>(null);
-  const [copied, setCopied] = useState(false);
+  const [copiedLink, setCopiedLink] = useState(false);
+  const [copiedMsg, setCopiedMsg] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [validationError, setValidationError] = useState<string | null>(null);
+  const [actionNotice, setActionNotice] = useState<string | null>(null);
 
   if (!isOpen) return null;
 
@@ -61,8 +70,10 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
     setCanViewLocation(true);
     setCanReceiveDistress(true);
     setInviteResult(null);
-    setCopied(false);
+    setCopiedLink(false);
+    setCopiedMsg(false);
     setValidationError(null);
+    setActionNotice(null);
   };
 
   const handleClose = () => {
@@ -88,12 +99,12 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
         return;
       }
       if (!phoneNumber.trim()) {
-        setValidationError('Please enter a mobile phone number for SMS delivery.');
+        setValidationError('Please enter a mobile phone number.');
         return;
       }
-      const digits = phoneNumber.replace(/\D/g, '');
-      if (digits.length < 10) {
-        setValidationError('Phone number must have at least 10 digits (including country code if outside India).');
+      const norm = normalizePhoneNumber(phoneNumber);
+      if (!norm.valid) {
+        setValidationError(norm.error || 'Please enter a valid 10-15 digit mobile number.');
         return;
       }
     }
@@ -110,17 +121,28 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
     setValidationError(null);
     if (!fullName.trim() || !email.trim() || !phoneNumber.trim()) return;
 
+    const norm = normalizePhoneNumber(phoneNumber);
+    if (!norm.valid) {
+      setValidationError(norm.error || 'Please enter a valid mobile number.');
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const result = await inviteContact({
         fullName: fullName.trim(),
         email: email.trim(),
-        phoneNumber: phoneNumber.trim(),
+        phoneNumber: norm.formattedSms,
         relationship,
         escalationOrder: escalationTier,
       });
 
-      setInviteResult(result);
+      setInviteResult({
+        token: result.token,
+        success: true,
+        deliveryStatus: result.deliveryStatus,
+        inviteUrl: result.inviteUrl,
+      });
     } catch (err: any) {
       setValidationError(err.message || 'An error occurred while creating the invitation.');
     } finally {
@@ -128,27 +150,70 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
     }
   };
 
-  const handleCopyLink = () => {
+  // Invitation Message builder
+  const fullInviteMessage = inviteResult
+    ? buildInvitationMessage({
+        inviterName: currentUser.full_name,
+        relationship,
+        inviteUrl: inviteResult.inviteUrl,
+      })
+    : '';
+
+  const handleSendWhatsApp = () => {
     if (!inviteResult) return;
-    const url =
-      inviteResult.inviteUrl ||
-      `${window.location.origin}/invite?token=${inviteResult.token}`;
-    navigator.clipboard.writeText(url);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2500);
+    setActionNotice('Opening WhatsApp...');
+    const res = triggerWhatsAppShare(phoneNumber, fullInviteMessage);
+    if (!res.success) {
+      setValidationError(res.error || 'Could not open WhatsApp. Please check the phone number or use copy message.');
+    } else {
+      setTimeout(() => setActionNotice(null), 3000);
+    }
+  };
+
+  const handleSendSms = () => {
+    if (!inviteResult) return;
+    const res = triggerSmsShare(phoneNumber, fullInviteMessage);
+    if (!res.success) {
+      setValidationError(res.error || 'Could not launch SMS app. Please use Copy Message below.');
+    } else if (!res.isMobile) {
+      setActionNotice('SMS message copied to clipboard! Paste it into your desktop messaging app (iMessage, Skype, etc.).');
+      setTimeout(() => setActionNotice(null), 5000);
+    } else {
+      setActionNotice('Launching your phone\'s Messages app...');
+      setTimeout(() => setActionNotice(null), 3000);
+    }
+  };
+
+  const handleCopyMessage = () => {
+    if (!fullInviteMessage) return;
+    navigator.clipboard.writeText(fullInviteMessage);
+    setCopiedMsg(true);
+    setActionNotice('Full invitation message copied to clipboard!');
+    setTimeout(() => {
+      setCopiedMsg(false);
+      setActionNotice(null);
+    }, 3000);
+  };
+
+  const handleCopyLinkOnly = () => {
+    if (!inviteResult) return;
+    navigator.clipboard.writeText(inviteResult.inviteUrl);
+    setCopiedLink(true);
+    setActionNotice('Invitation link copied to clipboard!');
+    setTimeout(() => {
+      setCopiedLink(false);
+      setActionNotice(null);
+    }, 3000);
   };
 
   const handleOpenRecipientView = () => {
     if (!inviteResult) return;
-    const url =
-      inviteResult.inviteUrl ||
-      `${window.location.origin}/invite?token=${inviteResult.token}`;
-    window.open(url, '_blank');
+    window.open(inviteResult.inviteUrl, '_blank');
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-      <div className="bg-white border border-brand-border rounded-3xl max-w-md w-full p-6 shadow-elevated relative my-8 animate-fadeIn">
+      <div className="bg-white border border-brand-border rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-elevated relative my-8 animate-fadeIn">
         <button
           onClick={handleClose}
           className="absolute top-5 right-5 text-brand-muted hover:text-brand-text p-1 transition-colors"
@@ -166,7 +231,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
               <div>
                 <h3 className="text-base font-extrabold text-brand-text">Add Trusted Contact</h3>
                 <p className="text-xs text-brand-muted">
-                  Add a verified responder and dispatch an SMS invitation.
+                  Add a verified responder and send an invite via WhatsApp or SMS.
                 </p>
               </div>
             </div>
@@ -215,21 +280,21 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
 
                 <div>
                   <label className="block text-xs font-bold text-brand-text mb-1">
-                    Mobile Phone Number (for SMS delivery) *
+                    Mobile Phone Number (for WhatsApp / SMS) *
                   </label>
                   <div className="relative">
                     <Phone className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
                     <input
                       type="tel"
                       required
-                      placeholder="+91 98765 43210 or +1 555 123 4567"
+                      placeholder="e.g. 9876543210 or +91 98765 43210"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
                       className="w-full bg-slate-50 border border-brand-border rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-brand-text focus:outline-none focus:border-brand-teal font-medium"
                     />
                   </div>
                   <p className="text-[11px] text-brand-muted mt-1 leading-relaxed">
-                    Enter with country code (e.g. <span className="font-mono text-brand-teal">+91</span> for India, <span className="font-mono text-brand-teal">+1</span> for US). 10-digit Indian numbers auto-default to +91.
+                    Indian numbers (10 digits starting with 6-9) auto-format to <span className="font-mono text-brand-teal font-semibold">+91</span>. International numbers are supported.
                   </p>
                 </div>
 
@@ -342,11 +407,11 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-[11px] text-teal-900 leading-relaxed flex items-start gap-2">
-                  <MessageSquare className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
+                  <Share2 className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
                   <div>
-                    <strong className="font-bold">Real SMS Dispatch: </strong>
-                    Clicking "Send Invitation SMS" sends an SMS to{' '}
-                    <span className="font-mono font-bold text-brand-deepTeal">{phoneNumber}</span> via Twilio with a verification link. The contact remains in <strong className="font-bold text-amber-700">Pending</strong> state until they explicitly accept on their device.
+                    <strong className="font-bold">Instant Device Sharing: </strong>
+                    On the next screen, you will be able to dispatch the invitation directly via{' '}
+                    <strong>WhatsApp</strong> or your phone's <strong>Messages (SMS)</strong> app. No third-party SMS provider setup required.
                   </div>
                 </div>
               </div>
@@ -392,138 +457,124 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
                   {isSubmitting ? (
                     <>
                       <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                      <span>Dispatching SMS...</span>
+                      <span>Saving Contact...</span>
                     </>
                   ) : (
-                    <span>Send Invitation SMS</span>
+                    <span>Create & Send Invitation</span>
                   )}
                 </button>
               )}
             </div>
           </form>
         ) : (
-          /* Real Post-Invitation Status View */
+          /* User-Initiated Sharing View */
           <div className="space-y-4 py-2 animate-fadeIn">
-            {inviteResult.success ? (
-              <div className="space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-brand-aqua text-brand-teal flex items-center justify-center">
-                  <CheckCircle2 className="w-7 h-7 stroke-[2.2]" />
-                </div>
-
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <StatusBadge status="sent" />
-                    <span className="text-[10px] uppercase font-bold text-brand-muted">
-                      Twilio REST API
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-brand-text">
-                    SMS Dispatched to {fullName}
-                  </h3>
-                  <p className="text-xs text-brand-muted leading-relaxed mt-1">
-                    An SMS invitation has been queued with carrier delivery to{' '}
-                    <strong className="text-brand-text">{phoneNumber}</strong>.
-                    {inviteResult.messageId && (
-                      <span className="block font-mono text-[11px] text-brand-teal mt-0.5">
-                        Message SID: {inviteResult.messageId}
-                      </span>
-                    )}
-                  </p>
-                </div>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-brand-aqua text-brand-teal flex items-center justify-center shrink-0">
+                <CheckCircle2 className="w-7 h-7 stroke-[2.2]" />
               </div>
-            ) : (
-              <div className="space-y-3">
-                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
-                  <AlertTriangle className="w-7 h-7 stroke-[2.2]" />
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <StatusBadge status="pending" />
+                  <span className="text-[10px] uppercase font-bold text-brand-muted">
+                    Tier {escalationTier} Responder
+                  </span>
                 </div>
+                <h3 className="text-lg font-extrabold text-brand-text">
+                  Invitation Ready for {fullName}
+                </h3>
+                <p className="text-xs text-brand-muted">
+                  Choose your messaging app to send the invitation to <strong className="text-brand-text">{phoneNumber}</strong>:
+                </p>
+              </div>
+            </div>
 
-                <div>
-                  <div className="flex items-center gap-2 mb-1.5">
-                    <StatusBadge status="failed" />
-                    <span className="text-[10px] uppercase font-bold text-amber-700">
-                      SMS Notice
-                    </span>
-                  </div>
-                  <h3 className="text-lg font-extrabold text-brand-text">
-                    Contact Saved • SMS Gateway Notice
-                  </h3>
-                  <div className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2 leading-relaxed">
-                    <p className="font-semibold">{inviteResult.error || 'Carrier delivery not completed.'}</p>
-                    {inviteResult.error && inviteResult.error.includes('TWILIO_') && (
-                      <p className="text-[11px] text-amber-800 mt-1.5">
-                        To enable automated SMS delivery, configure <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">TWILIO_ACCOUNT_SID</code>, <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">TWILIO_AUTH_TOKEN</code>, and <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">TWILIO_PHONE_NUMBER</code> in Vercel project settings.
-                      </p>
-                    )}
-                  </div>
-                </div>
+            {/* Action Notice Toast */}
+            {actionNotice && (
+              <div className="p-3 bg-brand-aqua border border-teal-200 rounded-xl text-brand-deepTeal text-xs font-semibold flex items-center gap-2 animate-fadeIn">
+                <Check className="w-4 h-4 shrink-0 text-brand-teal" />
+                <span>{actionNotice}</span>
               </div>
             )}
 
-            {/* Generated Invitation Link */}
-            <div className="p-3.5 bg-slate-50 border border-brand-border rounded-xl">
-              <p className="text-[10px] text-brand-muted uppercase font-bold tracking-wider">
-                Direct Verification Link (for {fullName})
-              </p>
-              <p className="font-mono text-xs text-brand-teal break-all mt-1 select-all bg-white p-2 rounded-lg border border-brand-border">
-                {inviteResult.inviteUrl || `${window.location.origin}/invite?token=${inviteResult.token}`}
-              </p>
-            </div>
-
-            <div className="p-3 rounded-xl bg-slate-50 border border-brand-border text-[11px] text-brand-muted leading-relaxed">
-              <strong className="text-brand-text">DigiSakhi Trust Protocol: </strong>
-              {fullName} will remain in <strong className="text-amber-700">Pending</strong> status and cannot view your location or receive alerts until they click this link and tap <strong>"Accept Invitation"</strong>.
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex flex-col gap-2 pt-2">
-              {!inviteResult.success && (
-                <div className="grid grid-cols-2 gap-2">
-                  <a
-                    href={`sms:${encodeURIComponent(phoneNumber)}?&body=${encodeURIComponent(
-                      `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${relationship}). Open this link to review and accept: ${inviteResult.inviteUrl || `${window.location.origin}/invite?token=${inviteResult.token}`}`
-                    )}`}
-                    className="py-2.5 px-3 bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal border border-teal-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99] text-center"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5 shrink-0" />
-                    <span>Send via Phone SMS</span>
-                  </a>
-
-                  <a
-                    href={`https://wa.me/${encodeURIComponent(phoneNumber.replace(/\D/g, ''))}?text=${encodeURIComponent(
-                      `DigiSakhi: ${currentUser.full_name} has invited you as their trusted emergency safety contact (${relationship}). Open this link to review and accept: ${inviteResult.inviteUrl || `${window.location.origin}/invite?token=${inviteResult.token}`}`
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="py-2.5 px-3 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors active:scale-[0.99] text-center"
-                  >
-                    <Phone className="w-3.5 h-3.5 shrink-0" />
-                    <span>Send via WhatsApp</span>
-                  </a>
-                </div>
-              )}
-
+            {/* Primary Sharing Action Buttons */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <button
                 type="button"
-                onClick={handleCopyLink}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
+                onClick={handleSendWhatsApp}
+                className="py-3 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
               >
-                {copied ? <Check className="w-4 h-4 text-brand-teal" /> : <Copy className="w-4 h-4" />}
-                {copied ? 'Link Copied to Clipboard!' : 'Copy Invitation Link'}
+                <Phone className="w-4 h-4 fill-current" />
+                <span>Send via WhatsApp</span>
               </button>
 
               <button
                 type="button"
+                onClick={handleSendSms}
+                className="py-3 px-4 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-2xl text-xs font-bold flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all active:scale-[0.98]"
+              >
+                <MessageSquare className="w-4 h-4 fill-current" />
+                <span>Send via Messages (SMS)</span>
+              </button>
+            </div>
+
+            {/* Complete Invitation Message Preview Box */}
+            <div className="p-3.5 bg-slate-50 border border-brand-border rounded-2xl space-y-2">
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] text-brand-muted uppercase font-bold tracking-wider">
+                  Invitation Message Preview
+                </span>
+                <span className="text-[10px] text-brand-teal font-mono font-semibold">
+                  {phoneNumber}
+                </span>
+              </div>
+              <p className="font-mono text-xs text-brand-text bg-white p-3 rounded-xl border border-brand-border whitespace-pre-wrap select-all leading-relaxed max-h-36 overflow-y-auto">
+                {fullInviteMessage}
+              </p>
+            </div>
+
+            {/* Direct Copy Options */}
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={handleCopyMessage}
+                className="py-2.5 px-3 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs active:scale-[0.99]"
+              >
+                {copiedMsg ? <Check className="w-4 h-4 text-brand-teal" /> : <Copy className="w-4 h-4 text-brand-muted" />}
+                <span>{copiedMsg ? 'Message Copied!' : 'Copy Message'}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleCopyLinkOnly}
+                className="py-2.5 px-3 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors shadow-xs active:scale-[0.99]"
+              >
+                {copiedLink ? <Check className="w-4 h-4 text-brand-teal" /> : <Copy className="w-4 h-4 text-brand-muted" />}
+                <span>{copiedLink ? 'Link Copied!' : 'Copy Link Only'}</span>
+              </button>
+            </div>
+
+            {/* Verification / Security Protocol Notice */}
+            <div className="p-3 rounded-xl bg-amber-50/80 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
+              <strong className="font-bold">DigiSakhi Security Rule: </strong>
+              {fullName} is saved in <strong className="text-amber-800">Pending</strong> state. They cannot view your live location or receive distress broadcasts until they open your link and click <strong>"Accept Invitation"</strong>.
+            </div>
+
+            {/* Bottom Actions */}
+            <div className="flex flex-col gap-2 pt-1">
+              <button
+                type="button"
                 onClick={handleOpenRecipientView}
-                className="w-full py-2.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
               >
                 <ExternalLink className="w-4 h-4 text-brand-muted" />
-                <span>Open Recipient Screen (Test in New Tab)</span>
+                <span>Test Recipient Screen (Opens in New Tab)</span>
               </button>
 
               <button
                 type="button"
                 onClick={handleClose}
-                className="w-full py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal transition-all active:scale-[0.98] mt-1"
+                className="w-full py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal transition-all active:scale-[0.98]"
               >
                 Done
               </button>

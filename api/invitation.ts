@@ -94,18 +94,24 @@ export default async function handler(req: any, res: any) {
     }
 
     // Fallback: If not in Supabase or serverless cold state, return client validation instructions
+    const inviterParam = url.searchParams.get('inviter');
+    const nameParam = url.searchParams.get('name');
+    const relParam = url.searchParams.get('rel');
+    const phoneParam = url.searchParams.get('phone');
+
     res.statusCode = 200;
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({
       valid: true,
       invitation: {
         token,
-        inviter_name: 'Elena Rostova',
-        invitee_name: 'Trusted Contact',
-        relationship: 'Primary Safety Contact',
+        inviter_name: inviterParam || 'Elena Rostova',
+        invitee_name: nameParam || 'Trusted Contact',
+        invitee_phone: phoneParam || '',
+        relationship: relParam || 'Primary Safety Contact',
         escalation_order: 1,
-        status: 'sent',
-        delivery_status: 'sent',
+        status: 'pending',
+        delivery_status: 'pending',
         expires_at: new Date(Date.now() + 7 * 86400000).toISOString(),
       },
     }));

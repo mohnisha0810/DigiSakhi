@@ -77,8 +77,10 @@ export const InvitationResponseScreen: React.FC<{
         } catch {}
       }
 
-      // 2. Fetch from backend API
-      const res = await fetch(`/api/invitation?token=${encodeURIComponent(invToken)}`);
+      // 2. Fetch from backend API with query parameters
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryStr = urlParams.toString() ? `&${urlParams.toString()}` : '';
+      const res = await fetch(`/api/invitation?token=${encodeURIComponent(invToken)}${queryStr}`);
       const data = await res.json();
 
       if (!res.ok || !data.valid) {
@@ -87,9 +89,16 @@ export const InvitationResponseScreen: React.FC<{
         return;
       }
 
-      setInvitation(data.invitation);
-      if (data.invitation.status === 'accepted' || data.invitation.status === 'declined') {
-        setRespondedStatus(data.invitation.status);
+      const invData = {
+        ...data.invitation,
+        inviter_name: data.invitation?.inviter_name || urlParams.get('inviter') || 'Elena Rostova',
+        invitee_name: data.invitation?.invitee_name || urlParams.get('name') || 'Trusted Contact',
+        relationship: data.invitation?.relationship || urlParams.get('rel') || 'Primary Safety Contact',
+      };
+
+      setInvitation(invData);
+      if (invData.status === 'accepted' || invData.status === 'declined') {
+        setRespondedStatus(invData.status);
       }
     } catch (err: any) {
       // Network error or local offline fallback

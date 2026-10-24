@@ -1118,4 +1118,79 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal(declinedInv?.status, 'declined', 'Invitation status updated to declined');
     });
   });
+
+  // =========================================================================
+  // 12. USER-INITIATED MESSAGING: WHATSAPP CLICK-TO-CHAT & NATIVE SMS
+  // =========================================================================
+  describe('12. User-Initiated Messaging: WhatsApp & Native SMS Composer', () => {
+    it('accurately normalizes Indian and international phone numbers for WhatsApp and SMS schemes', async () => {
+      const {
+        normalizePhoneNumber,
+        normalizeForWhatsApp,
+        normalizeForSms,
+        buildWhatsAppUrl,
+        buildSmsUrl,
+        buildInvitationMessage,
+      } = await import('../src/lib/messaging');
+
+      // 1. Indian 10-digit mobile number
+      const norm1 = normalizePhoneNumber('9876543210');
+      assert.equal(norm1.valid, true);
+      assert.equal(norm1.digits, '919876543210', 'WhatsApp requires digits only with 91 country code');
+      assert.equal(norm1.formattedSms, '+919876543210', 'SMS requires +91 prefix');
+
+      // 2. Indian mobile with leading 0
+      const norm2 = normalizePhoneNumber('09876543210');
+      assert.equal(norm2.valid, true);
+      assert.equal(norm2.digits, '919876543210');
+      assert.equal(norm2.formattedSms, '+919876543210');
+
+      // 3. Indian mobile with +91 and spaces
+      const norm3 = normalizePhoneNumber('+91 98765 43210');
+      assert.equal(norm3.valid, true);
+      assert.equal(norm3.digits, '919876543210');
+      assert.equal(norm3.formattedSms, '+919876543210');
+
+      // 4. US International number
+      const normUS = normalizePhoneNumber('+1 (555) 234-5678');
+      assert.equal(normUS.valid, true);
+      assert.equal(normUS.digits, '15552345678', 'Must not prepend 91 to international numbers');
+      assert.equal(normUS.formattedSms, '+15552345678');
+
+      // 5. UK International number
+      const normUK = normalizePhoneNumber('+44 7911 123456');
+      assert.equal(normUK.valid, true);
+      assert.equal(normUK.digits, '447911123456');
+      assert.equal(normUK.formattedSms, '+447911123456');
+
+      // 6. Invalid numbers
+      const normBad = normalizePhoneNumber('12345');
+      assert.equal(normBad.valid, false, 'Short numbers must be flagged as invalid');
+
+      // 7. Message construction
+      const inviteUrl = 'https://safesphere-liart.vercel.app/invite?token=inv_test_123';
+      const msg = buildInvitationMessage({
+        inviterName: 'Elena Rostova',
+        relationship: 'Sister',
+        inviteUrl,
+      });
+
+      assert.ok(msg.includes('DigiSakhi'), 'Message must include brand name DigiSakhi');
+      assert.ok(msg.includes('Elena Rostova'), 'Message must include inviter name');
+      assert.ok(msg.includes('Sister'), 'Message must include relationship');
+      assert.ok(msg.includes(inviteUrl), 'Message must contain exact invite URL');
+
+      // 8. WhatsApp URL generation
+      const wa = buildWhatsAppUrl('9876543210', msg);
+      assert.ok(wa.url.startsWith('https://wa.me/919876543210?text='), 'WhatsApp URL must start with https://wa.me/91...');
+      assert.ok(!wa.url.includes('+'), 'WhatsApp URL must not contain + sign');
+      assert.ok(wa.url.includes(encodeURIComponent(inviteUrl)), 'URL must encode the invitation link');
+
+      // 9. SMS URL generation
+      const sms = buildSmsUrl('9876543210', msg);
+      assert.ok(sms.url.startsWith('sms:+919876543210'), 'SMS URL must preserve + on phone number');
+      assert.ok(sms.url.includes('body='), 'SMS URL must have body parameter');
+      assert.ok(sms.url.includes(encodeURIComponent(inviteUrl)), 'SMS URL must encode the invitation link');
+    });
+  });
 });
