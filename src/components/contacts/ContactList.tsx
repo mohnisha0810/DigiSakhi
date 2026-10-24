@@ -23,6 +23,7 @@ import {
   Mail,
   MessageSquare,
   Share2,
+  RefreshCw,
 } from 'lucide-react';
 
 export const ContactList: React.FC = () => {
@@ -32,12 +33,14 @@ export const ContactList: React.FC = () => {
     removeContact,
     invitations,
     currentUser,
+    syncPendingInvitations,
   } = useSafeSphere();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [copiedToken, setCopiedToken] = useState<string | null>(null);
   const [copiedMsgToken, setCopiedMsgToken] = useState<string | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState<string | null>(null);
+  const [isSyncing, setIsSyncing] = useState(false);
 
   const acceptedContacts = contacts
     .filter((c) => c.status === 'accepted')
@@ -60,6 +63,18 @@ export const ContactList: React.FC = () => {
   const showFeedback = (msg: string) => {
     setFeedbackNotice(msg);
     setTimeout(() => setFeedbackNotice(null), 4000);
+  };
+
+  const handleManualSync = async () => {
+    setIsSyncing(true);
+    try {
+      const updated = await syncPendingInvitations();
+      if (!updated) {
+        showFeedback('Checked invitation status: waiting for recipient to accept.');
+      }
+    } finally {
+      setIsSyncing(false);
+    }
   };
 
   const getInviteUrl = (token: string, contact: any) => {
@@ -259,7 +274,7 @@ export const ContactList: React.FC = () => {
 
       {/* Pending Invitations Section (Unverified) */}
       <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-brand-border">
           <div>
             <h3 className="font-extrabold text-brand-text text-base flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
@@ -269,9 +284,23 @@ export const ContactList: React.FC = () => {
               These contacts have been saved but have not yet accepted on their phone. Use WhatsApp, SMS, or link sharing to send their verification link.
             </p>
           </div>
-          <span className="text-xs text-amber-600 font-mono font-bold">
-            {pendingContacts.length} pending
-          </span>
+          <div className="flex items-center gap-2.5">
+            {pendingContacts.length > 0 && (
+              <button
+                type="button"
+                onClick={handleManualSync}
+                disabled={isSyncing}
+                className="px-3 py-1.5 rounded-lg border border-brand-teal/40 bg-brand-teal/5 hover:bg-brand-teal/10 text-brand-teal text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
+                title="Check server to see if any recipient has accepted"
+              >
+                <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
+                <span>{isSyncing ? 'Checking...' : 'Check Status'}</span>
+              </button>
+            )}
+            <span className="text-xs text-amber-600 font-mono font-bold bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+              {pendingContacts.length} pending
+            </span>
+          </div>
         </div>
 
         {pendingContacts.length === 0 ? (

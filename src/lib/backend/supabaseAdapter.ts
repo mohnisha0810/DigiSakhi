@@ -149,7 +149,49 @@ export class SupabaseBackendAdapter implements BackendAdapter {
       .order('escalation_order', { ascending: true });
 
     if (error) throw new Error(error.message);
-    return (data || []) as TrustedContact[];
+    const contacts = (data || []) as TrustedContact[];
+
+    // Auto-reconciliation: check for any pending contacts with accepted invitations
+    const pendingContacts = contacts.filter((c) => c.status !== 'accepted');
+    if (pendingContacts.length > 0) {
+      try {
+        const { data: acceptedInvs } = await this.supabase
+          .from('contact_invitations')
+          .select('*')
+          .eq('inviter_id', userId)
+          .eq('status', 'accepted');
+
+        if (acceptedInvs && acceptedInvs.length > 0) {
+          for (const contact of pendingContacts) {
+            const match = acceptedInvs.find((inv: any) =>
+              (inv.invitee_email && contact.email && inv.invitee_email.toLowerCase() === contact.email.toLowerCase()) ||
+              (inv.invitee_phone && contact.phone_number && inv.invitee_phone === contact.phone_number)
+            );
+            if (match) {
+              contact.status = 'accepted';
+              contact.can_view_location = true;
+              contact.contact_user_id = (match as any).responder_user_id || contact.contact_user_id;
+
+              // Fire and forget background update to persist it
+              (this.supabase.from('trusted_contacts') as any)
+                .update({
+                  status: 'accepted',
+                  can_view_location: true,
+                  contact_user_id: contact.contact_user_id,
+                  updated_at: new Date().toISOString(),
+                })
+                .eq('id', contact.id)
+                .then(() => {})
+                .catch(() => {});
+            }
+          }
+        }
+      } catch (reconcileErr) {
+        console.warn('Contacts auto-reconciliation error:', reconcileErr);
+      }
+    }
+
+    return contacts;
   }
 
   async createContact(contact: Omit<TrustedContact, 'id' | 'created_at'>): Promise<TrustedContact> {
@@ -238,23 +280,42 @@ export class SupabaseBackendAdapter implements BackendAdapter {
 
     if (findErr || !inv) throw new Error('Invitation not found.');
 
+    const respondedAt = new Date().toISOString();
+
     await (this.supabase.from('contact_invitations') as any)
       .update({
         status: 'accepted',
         delivery_status: 'accepted',
-        responded_at: new Date().toISOString(),
+        responded_at: respondedAt,
+        responder_user_id: acceptingUserId || null,
       })
       .eq('id', invitationId);
 
-    await (this.supabase.from('trusted_contacts') as any)
-      .update({
-        status: 'accepted',
-        can_view_location: true,
-        contact_user_id: acceptingUserId || null,
-        updated_at: new Date().toISOString(),
-      })
-      .eq('user_id', (inv as any).inviter_id)
-      .eq('email', (inv as any).invitee_email);
+    // Update trusted_contacts by user_id and email
+    if ((inv as any).invitee_email) {
+      await (this.supabase.from('trusted_contacts') as any)
+        .update({
+          status: 'accepted',
+          can_view_location: true,
+          contact_user_id: acceptingUserId || null,
+          updated_at: respondedAt,
+        })
+        .eq('user_id', (inv as any).inviter_id)
+        .ilike('email', (inv as any).invitee_email);
+    }
+
+    // Also update by phone_number if available
+    if ((inv as any).invitee_phone) {
+      await (this.supabase.from('trusted_contacts') as any)
+        .update({
+          status: 'accepted',
+          can_view_location: true,
+          contact_user_id: acceptingUserId || null,
+          updated_at: respondedAt,
+        })
+        .eq('user_id', (inv as any).inviter_id)
+        .eq('phone_number', (inv as any).invitee_phone);
+    }
   }
 
   async declineInvitation(invitationId: string): Promise<void> {

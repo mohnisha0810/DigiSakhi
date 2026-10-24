@@ -179,6 +179,7 @@ interface SafeSphereContextType {
   resendInvitation: (invitationId: string) => Promise<{ success: boolean; error?: string }>;
   reorderContacts: (reorderedContacts: TrustedContact[]) => Promise<void>;
   removeContact: (contactId: string) => Promise<void>;
+  syncPendingInvitations: () => Promise<boolean>;
 
   // Discreet Exit (Feature 5)
   isQuickExitActive: boolean;
@@ -1022,6 +1023,30 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       avatar_color: 'bg-teal-600',
     });
 
+    // Notify serverless endpoint to register invitation for cross-device tracking
+    try {
+      fetch('/api/invitation', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'create',
+          token,
+          invitation: {
+            id: createdInv.id,
+            token,
+            inviter_id: currentUser.id,
+            inviter_name: currentUser.full_name,
+            invitee_email: data.email,
+            invitee_name: data.fullName,
+            invitee_phone: data.phoneNumber,
+            relationship: data.relationship,
+            escalation_order: data.escalationOrder,
+            expires_at: expires,
+          },
+        }),
+      }).catch(() => {});
+    } catch {}
+
     await loadUserData(currentUser);
     setSuccessMessage(`Contact ${data.fullName} saved! Choose WhatsApp or SMS to send their invitation.`);
 
@@ -1032,6 +1057,117 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       inviteUrl,
     };
   };
+
+  const syncPendingInvitations = useCallback(async (): Promise<boolean> => {
+    if (!currentUser?.id) return false;
+
+    try {
+      const currentContacts = await backendService.getContacts(currentUser.id);
+      const currentInvs = await backendService.getInvitations(currentUser.id);
+
+      const pendingContacts = currentContacts.filter((c) => c.status !== 'accepted');
+      const pendingInvs = currentInvs.filter((i) => i.status !== 'accepted');
+
+      if (pendingContacts.length === 0 && pendingInvs.length === 0) {
+        return false;
+      }
+
+      // Collect unique tokens for pending contacts and invitations
+      const tokenSet = new Set<string>();
+      for (const inv of currentInvs) {
+        if (inv.invitation_token) tokenSet.add(inv.invitation_token);
+      }
+      for (const contact of pendingContacts) {
+        const matchingInv = currentInvs.find(
+          (i) =>
+            i.id === contact.invitation_id ||
+            (contact.email && i.invitee_email && i.invitee_email.toLowerCase() === contact.email.toLowerCase()) ||
+            (contact.phone_number && i.invitee_phone && i.invitee_phone === contact.phone_number)
+        );
+        if (matchingInv?.invitation_token) {
+          tokenSet.add(matchingInv.invitation_token);
+        }
+      }
+
+      const tokens = Array.from(tokenSet);
+      if (tokens.length === 0) return false;
+
+      const res = await fetch(`/api/invitation?tokens=${encodeURIComponent(tokens.join(','))}`);
+      if (!res.ok) return false;
+      const data = await res.json();
+      if (!data.valid || !data.statuses) return false;
+
+      let hasUpdates = false;
+      for (const [token, info] of Object.entries<any>(data.statuses)) {
+        if (info.status === 'accepted') {
+          // Check if invitation needs update
+          const matchedInv = currentInvs.find((i) => i.invitation_token === token);
+          if (matchedInv && matchedInv.status !== 'accepted') {
+            await backendService.acceptInvitation(matchedInv.id, info.responder_user_id);
+            hasUpdates = true;
+          }
+
+          // Check if contact needs update
+          const matchedContacts = currentContacts.filter(
+            (c) =>
+              (matchedInv && c.invitation_id === matchedInv.id) ||
+              (matchedInv && matchedInv.invitee_email && c.email && matchedInv.invitee_email.toLowerCase() === c.email.toLowerCase()) ||
+              (matchedInv && matchedInv.invitee_phone && c.phone_number && matchedInv.invitee_phone === c.phone_number)
+          );
+
+          for (const c of matchedContacts) {
+            if (c.status !== 'accepted') {
+              await backendService.updateContact(c.id, {
+                status: 'accepted',
+                invitation_status: 'accepted',
+                can_view_location: true,
+                contact_user_id: info.responder_user_id || c.contact_user_id,
+              });
+              hasUpdates = true;
+            }
+          }
+        }
+      }
+
+      if (hasUpdates) {
+        await loadUserData(currentUser);
+        toast.success('Trusted contact verified! Connected in your safety circle.');
+        return true;
+      }
+    } catch (err) {
+      console.warn('Sync pending invitations error:', err);
+    }
+    return false;
+  }, [currentUser, loadUserData]);
+
+  // Polling for pending contact acceptance across devices
+  useEffect(() => {
+    const hasPending = contacts.some((c) => c.status !== 'accepted');
+    if (!hasPending) return;
+
+    const interval = setInterval(() => {
+      syncPendingInvitations();
+    }, 3500);
+
+    return () => clearInterval(interval);
+  }, [contacts, syncPendingInvitations]);
+
+  // Window focus & tab visibility change listener
+  useEffect(() => {
+    const handleSyncOnVisible = () => {
+      if (document.visibilityState === 'visible') {
+        syncPendingInvitations();
+      }
+    };
+
+    window.addEventListener('focus', handleSyncOnVisible);
+    document.addEventListener('visibilitychange', handleSyncOnVisible);
+
+    return () => {
+      window.removeEventListener('focus', handleSyncOnVisible);
+      document.removeEventListener('visibilitychange', handleSyncOnVisible);
+    };
+  }, [syncPendingInvitations]);
 
   const acceptInvitation = async (invitationId: string, acceptingUserId?: string) => {
     await backendService.acceptInvitation(invitationId, acceptingUserId);
@@ -1175,6 +1311,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         resendInvitation,
         reorderContacts,
         removeContact,
+        syncPendingInvitations,
         isQuickExitActive,
         triggerQuickExit,
         unlockQuickExit,

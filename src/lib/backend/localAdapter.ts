@@ -194,6 +194,31 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
   // --- Contacts (Scoped to owner user_id) ---
   async getContacts(userId: string): Promise<TrustedContact[]> {
     const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', INITIAL_CONTACTS);
+    const invitations = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
+    const acceptedInvs = invitations.filter((i) => i.inviter_id === userId && i.status === 'accepted');
+
+    let modified = false;
+    for (const c of contacts) {
+      if (c.user_id === userId && c.status !== 'accepted') {
+        const matchingAcceptedInv = acceptedInvs.find(
+          (inv) =>
+            inv.id === c.invitation_id ||
+            (inv.invitee_email && c.email && inv.invitee_email.toLowerCase() === c.email.toLowerCase()) ||
+            (inv.invitee_phone && c.phone_number && inv.invitee_phone === c.phone_number)
+        );
+        if (matchingAcceptedInv) {
+          c.status = 'accepted';
+          c.invitation_status = 'accepted';
+          c.can_view_location = true;
+          modified = true;
+        }
+      }
+    }
+
+    if (modified) {
+      LocalStorageDB.setItem('trusted_contacts', contacts);
+    }
+
     return contacts.filter((c) => c.user_id === userId);
   }
 
@@ -272,11 +297,11 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
   async acceptInvitation(invitationId: string, acceptingUserId?: string): Promise<void> {
     const invs = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
-    const target = invs.find((i) => i.id === invitationId);
-    if (!target) throw new Error('Invitation not found.');
+    const target = invs.find((i) => i.id === invitationId || i.invitation_token === invitationId);
+    if (!target) return;
 
     const updatedInvs = invs.map((i) =>
-      i.id === invitationId
+      i.id === target.id
         ? {
             ...i,
             status: 'accepted' as const,
@@ -291,6 +316,7 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
     const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
     const updatedContacts = contacts.map((c) => {
       const isMatch =
+        c.invitation_id === target.id ||
         (c.user_id === target.inviter_id && c.email.toLowerCase() === target.invitee_email.toLowerCase()) ||
         (target.invitee_phone && c.phone_number && c.phone_number === target.invitee_phone);
 

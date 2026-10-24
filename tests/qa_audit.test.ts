@@ -1193,4 +1193,93 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.ok(sms.url.includes(encodeURIComponent(inviteUrl)), 'SMS URL must encode the invitation link');
     });
   });
+
+  // =========================================================================
+  // 13. TRUSTED CONTACT INVITATION STATUS SYNCHRONIZATION & AUTO-RECONCILIATION
+  // =========================================================================
+  describe('13. Trusted Contact Invitation Status Synchronization & Auto-Reconciliation', () => {
+    it('automatically reconciles pending contacts to accepted when their invitation is accepted', async () => {
+      const invToken = 'inv_sync_test_999';
+      const expires = new Date(Date.now() + 7 * 86400000).toISOString();
+
+      // 1. Inviter creates invitation
+      const inv = await backend.createInvitation({
+        inviter_id: 'usr_elena_01',
+        inviter_name: 'Elena Rostova',
+        invitee_name: 'Aarti Sharma',
+        invitee_email: 'aarti.sync@example.com',
+        invitee_phone: '+919876543210',
+        relationship: 'Sister',
+        escalation_order: 2,
+        invitation_token: invToken,
+        status: 'pending',
+        delivery_status: 'pending',
+        expires_at: expires,
+      });
+
+      // 2. Inviter creates pending contact record
+      const contact = await backend.createContact({
+        user_id: 'usr_elena_01',
+        full_name: 'Aarti Sharma',
+        email: 'aarti.sync@example.com',
+        phone_number: '+919876543210',
+        relationship: 'Sister',
+        escalation_order: 2,
+        status: 'pending',
+        invitation_id: inv.id,
+        invitation_status: 'pending',
+        can_view_location: false,
+      });
+
+      // Verify contact is pending initially
+      let contacts = await backend.getContacts('usr_elena_01');
+      let foundContact = contacts.find((c) => c.id === contact.id);
+      assert.equal(foundContact?.status, 'pending');
+      assert.equal(foundContact?.can_view_location, false);
+
+      // 3. Recipient accepts the invitation (e.g. from external device/flow)
+      await backend.acceptInvitation(inv.id, 'usr_aarti_accepted');
+
+      // 4. Inviter's getContacts call must auto-reconcile and heal the status
+      contacts = await backend.getContacts('usr_elena_01');
+      foundContact = contacts.find((c) => c.id === contact.id);
+
+      assert.equal(foundContact?.status, 'accepted', 'Contact status must be reconciled to accepted');
+      assert.equal(foundContact?.can_view_location, true, 'can_view_location must be true for accepted contact');
+      assert.equal(foundContact?.invitation_status, 'accepted');
+
+      // 5. Verify unaccepted contacts remain pending and are not falsely promoted
+      const unacceptedInv = await backend.createInvitation({
+        inviter_id: 'usr_elena_01',
+        inviter_name: 'Elena Rostova',
+        invitee_name: 'Pending Friend',
+        invitee_email: 'pending.friend@example.com',
+        invitee_phone: '+919811122233',
+        relationship: 'Colleague',
+        escalation_order: 3,
+        invitation_token: 'inv_still_pending_token',
+        status: 'pending',
+        delivery_status: 'pending',
+        expires_at: expires,
+      });
+
+      const unacceptedContact = await backend.createContact({
+        user_id: 'usr_elena_01',
+        full_name: 'Pending Friend',
+        email: 'pending.friend@example.com',
+        phone_number: '+919811122233',
+        relationship: 'Colleague',
+        escalation_order: 3,
+        status: 'pending',
+        invitation_id: unacceptedInv.id,
+        invitation_status: 'pending',
+        can_view_location: false,
+      });
+
+      contacts = await backend.getContacts('usr_elena_01');
+      const foundPending = contacts.find((c) => c.id === unacceptedContact.id);
+      assert.equal(foundPending?.status, 'pending', 'Unaccepted contact must remain strictly pending');
+      assert.equal(foundPending?.can_view_location, false);
+    });
+  });
 });
