@@ -193,7 +193,7 @@ export const JourneySetupModal: React.FC<{ isOpen: boolean; onClose: () => void 
                   <option value={500}>500 meters (Transit Hub)</option>
                 </select>
                 <p className="text-[10px] text-brand-muted mt-1">
-                  When inside this boundary, SafeSphere will prompt safe arrival verification.
+                  When inside this boundary, DigiSakhi will prompt safe arrival verification.
                 </p>
               </div>
 
@@ -417,7 +417,7 @@ export const JourneySetupModal: React.FC<{ isOpen: boolean; onClose: () => void 
               <div className="p-3 bg-brand-aqua/40 border border-brand-teal/20 rounded-xl text-[11px] text-brand-deepTeal flex items-center gap-2">
                 <ShieldCheck className="w-4 h-4 text-brand-teal shrink-0" />
                 <span>
-                  SafeSphere will track transit distance and prompt safe arrival when you reach the safe radius.
+                  DigiSakhi will track transit distance and prompt safe arrival when you reach the safe radius.
                 </span>
               </div>
             </div>

@@ -46,7 +46,7 @@ export const AccountDataSettings: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `safesphere_data_export_${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `digisakhi_data_export_${new Date().toISOString().split('T')[0]}.json`;
     a.click();
     URL.revokeObjectURL(url);
   };

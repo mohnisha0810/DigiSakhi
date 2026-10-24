@@ -93,14 +93,14 @@ export const JourneyScreen: React.FC = () => {
           <div className="p-4 rounded-xl bg-slate-50 border border-brand-border space-y-1.5">
             <span className="font-bold text-brand-deepTeal">1. Geofenced Radius Detection</span>
             <p className="text-[11px] text-brand-muted leading-relaxed">
-              When device GPS crosses within your chosen destination radius (e.g. 200m), SafeSphere triggers an arrival prompt.
+              When device GPS crosses within your chosen destination radius (e.g. 200m), DigiSakhi triggers an arrival prompt.
             </p>
           </div>
 
           <div className="p-4 rounded-xl bg-slate-50 border border-brand-border space-y-1.5">
             <span className="font-bold text-brand-violet">2. Explicit Human Confirmation</span>
             <p className="text-[11px] text-brand-muted leading-relaxed">
-              Crucial safety rule: SafeSphere never presumes safety automatically upon entering the geofence. The user must explicitly confirm safety.
+              Crucial safety rule: DigiSakhi never presumes safety automatically upon entering the geofence. The user must explicitly confirm safety.
             </p>
           </div>
 

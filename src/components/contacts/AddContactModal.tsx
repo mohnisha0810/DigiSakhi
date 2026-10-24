@@ -67,7 +67,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://safesphere.demo/invite?token=${generatedToken}`);
+    navigator.clipboard.writeText(`https://digisakhi.app/invite?token=${generatedToken}`);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
@@ -336,7 +336,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
                 Generated Invitation Link
               </p>
               <p className="font-mono text-xs text-brand-teal truncate mt-1">
-                https://safesphere.demo/invite?token={generatedToken}
+                https://digisakhi.app/invite?token={generatedToken}
               </p>
             </div>
 

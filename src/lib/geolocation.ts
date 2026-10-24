@@ -110,7 +110,7 @@ class GeolocationService {
         permissionState: 'denied',
         isStale: false,
         staleSeconds: 0,
-        error: 'Location permission was denied in browser settings. SafeSphere will not track your location. Manual check-ins and safe arrival verification are fully available.',
+        error: 'Location permission was denied in browser settings. DigiSakhi will not track your location. Manual check-ins and safe arrival verification are fully available.',
       };
     }
 

@@ -223,7 +223,7 @@ export const VerificationModal: React.FC<{ isOpen: boolean; onClose: () => void 
           title: 'Location State 3: “Unavailable” (Signal Lost)',
           category: 'Location Privacy',
           status: 'passed',
-          details: `GPS hardware timeout handled cleanly. SafeSphere preserved manual check-in readiness.`,
+          details: `GPS hardware timeout handled cleanly. DigiSakhi preserved manual check-in readiness.`,
         });
       } else {
         throw new Error('Unavailable state check failed.');

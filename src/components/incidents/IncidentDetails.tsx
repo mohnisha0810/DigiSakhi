@@ -147,7 +147,7 @@ export const IncidentDetails: React.FC = () => {
               </h1>
 
               <p className="text-xs text-brand-muted mt-1 max-w-2xl leading-relaxed">
-                {incident.description || 'Dispatched via SafeSphere protocol.'}
+                {incident.description || 'Dispatched via DigiSakhi protocol.'}
               </p>
             </div>
           </div>

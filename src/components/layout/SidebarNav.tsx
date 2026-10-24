@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { DigiSakhiLogo } from '@/components/common/DigiSakhiLogo';
 import {
   Shield,
   ShieldCheck,
@@ -127,22 +128,12 @@ export const SidebarNav: React.FC = () => {
         {/* Brand Logo */}
         <div
           onClick={() => setCurrentScreen('home')}
-          className="flex items-center gap-3 cursor-pointer group"
+          className="cursor-pointer group"
         >
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-brand-teal to-brand-violet flex items-center justify-center shadow-teal group-hover:scale-105 transition-transform shrink-0">
-            <Shield className="w-6 h-6 text-white stroke-[2.5]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-extrabold text-xl tracking-tight text-brand-text">
-                SafeSphere
-              </span>
-              <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
-            </div>
-            <p className="text-[11px] font-semibold text-brand-muted tracking-wide">
-              {currentRole === 'user' ? 'Personal Safety Circle' : 'Trusted Responder'}
-            </p>
-          </div>
+          <DigiSakhiLogo
+            size="md"
+            subtitle={currentRole === 'user' ? 'Personal Safety Circle' : 'Trusted Responder'}
+          />
         </div>
 
         {/* Perimeter Status Indicator Pill */}

@@ -383,7 +383,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const session = await backendService.signUp(params);
       setCurrentUser(session.profile);
       await loadUserData(session.profile);
-      setSuccessMessage(`Account created successfully! Welcome to SafeSphere.`);
+      setSuccessMessage(`Account created successfully! Welcome to DigiSakhi.`);
       setCurrentScreen('dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed.');
@@ -541,7 +541,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         recipientName: c.full_name,
         recipientEmail: c.email,
         incidentId: result.incident.id,
-        subject: `SafeSphere Alert: ${title} from ${currentUser.full_name}`,
+        subject: `DigiSakhi Alert: ${title} from ${currentUser.full_name}`,
         message: description,
         isDiscreetMasked: currentUser.discreet_mode_enabled,
       }).then((notif) => {

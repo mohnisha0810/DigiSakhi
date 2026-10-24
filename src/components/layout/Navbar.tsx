@@ -56,7 +56,7 @@ export const Navbar: React.FC = () => {
             </div>
             <div>
               <span className="font-bold text-lg tracking-tight text-white flex items-center gap-1.5">
-                SafeSphere
+                DigiSakhi
                 <span className="inline-block w-2 h-2 rounded-full bg-teal-400 animate-pulse" />
               </span>
               <p className="text-[10px] text-slate-400 font-medium tracking-wide uppercase">

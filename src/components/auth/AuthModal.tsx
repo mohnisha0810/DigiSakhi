@@ -81,7 +81,7 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
           </div>
           <div>
             <h3 className="text-base font-bold text-brand-text">
-              {mode === 'signin' ? 'Sign In to SafeSphere' : 'Create Protected Account'}
+              {mode === 'signin' ? 'Sign In to DigiSakhi' : 'Create Protected Account'}
             </h3>
             <p className="text-xs text-brand-muted">
               {backendMode === 'supabase_cloud'
@@ -156,7 +156,7 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
               <input
                 type="email"
                 required
-                placeholder="name@safesphere.demo"
+                placeholder="name@digisakhi.app"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="w-full bg-brand-bg border border-brand-border rounded-lg pl-9 pr-3 py-2 text-xs text-brand-text focus:outline-none focus:border-brand-teal"
@@ -220,7 +220,7 @@ export const AuthModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
             ) : mode === 'signin' ? (
               <>
                 <LogIn className="w-4 h-4" />
-                Sign In to SafeSphere
+                Sign In to DigiSakhi
               </>
             ) : (
               <>

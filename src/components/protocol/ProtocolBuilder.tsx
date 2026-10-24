@@ -529,7 +529,7 @@ export const ProtocolBuilder: React.FC = () => {
                   Plain-English Protocol Preview:
                 </p>
                 <p className="leading-relaxed text-xs text-brand-text/90 pt-1">
-                  “When my check-in deadline arrives, SafeSphere sends a reminder {reminderLeadMinutes} min ahead and grants a {gracePeriodMinutes} min grace period. If unconfirmed, an alert is sent to {getContactName(tier1ContactId)}. If unacknowledged within {contactWaitMinutes} min, it escalates to {getContactName(tier2ContactId)}. Location sharing is {allowLocationSharing ? `enabled (expires after ${autoExpireMinutes}m)` : 'disabled'}. {resolutionBehavior === 'require_safe_confirmation' ? 'Requires explicit safe confirmation from you to resolve.' : 'Responders may mark resolved after confirming safety.'}”
+                  “When my check-in deadline arrives, DigiSakhi sends a reminder {reminderLeadMinutes} min ahead and grants a {gracePeriodMinutes} min grace period. If unconfirmed, an alert is sent to {getContactName(tier1ContactId)}. If unacknowledged within {contactWaitMinutes} min, it escalates to {getContactName(tier2ContactId)}. Location sharing is {allowLocationSharing ? `enabled (expires after ${autoExpireMinutes}m)` : 'disabled'}. {resolutionBehavior === 'require_safe_confirmation' ? 'Requires explicit safe confirmation from you to resolve.' : 'Responders may mark resolved after confirming safety.'}”
                 </p>
               </div>
 

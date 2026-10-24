@@ -208,7 +208,7 @@ export const CheckInSetupModal: React.FC<{ isOpen: boolean; onClose: () => void 
                 </span>
                 <p className="text-[11px] text-amber-800 leading-relaxed">
                   If the deadline passes without confirmation, the session enters a{' '}
-                  <strong>{gracePeriodMinutes}-minute Grace Period</strong>. SafeSphere treats this as an{' '}
+                  <strong>{gracePeriodMinutes}-minute Grace Period</strong>. DigiSakhi treats this as an{' '}
                   <strong>Overdue Status</strong>—NOT an assumed emergency. You receive an urgent device reminder to confirm safe before your contacts are alerted.
                 </p>
               </div>

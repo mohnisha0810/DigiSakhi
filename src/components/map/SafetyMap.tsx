@@ -411,7 +411,7 @@ export const SafetyMap: React.FC = () => {
             <strong className="text-brand-text text-sm font-bold">Location Permission Denied</strong>
           </div>
           <p className="text-brand-muted text-xs leading-relaxed">
-            SafeSphere respects your privacy and will never silently track or fabricate coordinates. Manual check-ins and safe arrival verification remain 100% operational.
+            DigiSakhi respects your privacy and will never silently track or fabricate coordinates. Manual check-ins and safe arrival verification remain 100% operational.
           </p>
         </div>
       )}

@@ -175,7 +175,7 @@ export const ContactList: React.FC = () => {
               <span>Pending Contact Invitations (Unverified)</span>
             </h3>
             <p className="text-xs text-brand-muted mt-0.5">
-              These contacts have been invited but have not yet accepted. By SafeSphere security rules, unverified contacts will not receive alerts.
+              These contacts have been invited but have not yet accepted. By DigiSakhi security rules, unverified contacts will not receive alerts.
             </p>
           </div>
           <span className="text-xs text-amber-600 font-mono font-bold">

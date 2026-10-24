@@ -50,7 +50,7 @@ export const ProtocolSummaryCard: React.FC = () => {
       <div className="bg-brand-bg border border-brand-border rounded-xl p-4 text-xs text-brand-text space-y-3">
         <p className="leading-relaxed">
           <strong className="text-brand-text font-bold">Rule Execution: </strong>
-          When a scheduled check-in or journey deadline is reached, SafeSphere waits a{' '}
+          When a scheduled check-in or journey deadline is reached, DigiSakhi waits a{' '}
           <strong className="text-brand-teal font-bold">{Math.round(defaultProtocol.grace_period_seconds / 60)} minute</strong> grace period. If unconfirmed, Tier 1 alert dispatches to{' '}
           <strong className="text-brand-teal font-bold">{contact1?.full_name || 'Primary Contact'}</strong>. If unacknowledged within{' '}
           <strong className="text-brand-teal font-bold">{Math.round(defaultProtocol.contact_wait_seconds / 60)} minutes</strong>, escalates to Tier 2 ({contact2?.full_name || 'Secondary Contact'}).

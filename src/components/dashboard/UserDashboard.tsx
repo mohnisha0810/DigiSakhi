@@ -128,7 +128,7 @@ export const UserDashboard: React.FC = () => {
                 No Verified Trusted Responders in Circle
               </strong>
               <span className="text-amber-800">
-                SafeSphere escalation requires at least one verified contact to alert during overdue check-ins or distress.
+                DigiSakhi escalation requires at least one verified contact to alert during overdue check-ins or distress.
               </span>
             </div>
           </div>

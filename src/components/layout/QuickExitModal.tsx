@@ -61,7 +61,7 @@ export const QuickExitModal: React.FC = () => {
           <div
             onClick={() => setShowPinInput(true)}
             className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center cursor-pointer hover:bg-amber-500/30 transition-colors"
-            title="Double-click to unlock SafeSphere"
+            title="Double-click to unlock DigiSakhi"
           >
             <CloudSun className="w-6 h-6" />
           </div>
@@ -210,7 +210,7 @@ export const QuickExitModal: React.FC = () => {
 
       {/* Disguise Footer */}
       <footer className="p-4 border-t border-slate-800 text-center text-xs text-slate-500">
-        Metro Weather Service • Offline Sync Enabled • Tap lock icon or press Escape to resume SafeSphere
+        Metro Weather Service • Offline Sync Enabled • Tap lock icon or press Escape to resume DigiSakhi
       </footer>
     </div>
   );

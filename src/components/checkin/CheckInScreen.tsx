@@ -27,7 +27,7 @@ export const CheckInScreen: React.FC = () => {
             Persistent Check-ins & Automatic Escalation
           </h1>
           <p className="text-xs text-brand-muted mt-1 max-w-2xl leading-relaxed">
-            Check-ins persist across browser tabs and device reboots. If you don't confirm safety before deadline + grace period, SafeSphere initiates sequential contact alerts.
+            Check-ins persist across browser tabs and device reboots. If you don't confirm safety before deadline + grace period, DigiSakhi initiates sequential contact alerts.
           </p>
         </div>
 

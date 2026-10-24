@@ -111,7 +111,7 @@ export const PrivacyDiscreetSettings: React.FC = () => {
             Camouflage Unlock PIN
           </h3>
           <p className="text-xs text-brand-muted mb-3">
-            To resume your SafeSphere session from the disguise screen, you must enter this secure PIN. (Default is 1234).
+            To resume your DigiSakhi session from the disguise screen, you must enter this secure PIN. (Default is 1234).
           </p>
 
           <div className="max-w-xs">
@@ -156,7 +156,7 @@ export const PrivacyDiscreetSettings: React.FC = () => {
             Security Transparency & Limitations:
           </p>
           <p className="leading-relaxed">
-            SafeSphere does not claim to erase browser history, hide from device operating system process managers, or guarantee undetectability. Location data is stored only during an active safety session and automatically expires afterwards.
+            DigiSakhi does not claim to erase browser history, hide from device operating system process managers, or guarantee undetectability. Location data is stored only during an active safety session and automatically expires afterwards.
           </p>
         </div>
 

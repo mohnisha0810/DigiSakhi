@@ -432,7 +432,7 @@ export const TrustedDashboard: React.FC = () => {
                         <a
                           href={`tel:${incident.owner_phone}`}
                           className="px-3 py-2 bg-brand-bg hover:bg-brand-border/40 text-brand-text rounded-xl text-xs font-medium border border-brand-border transition-colors flex items-center gap-1.5"
-                          title="Open device telephone dialer. SafeSphere does not falsely claim the call connected."
+                          title="Open device telephone dialer. DigiSakhi does not falsely claim the call connected."
                         >
                           <PhoneCall className="w-3.5 h-3.5 text-brand-violet" />
                           <span>Call {incident.owner_name} ({incident.owner_phone})</span>

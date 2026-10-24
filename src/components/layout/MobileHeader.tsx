@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { DigiSakhiLogo } from '@/components/common/DigiSakhiLogo';
 import {
   Shield,
   EyeOff,
@@ -31,14 +32,9 @@ export const MobileHeader: React.FC = () => {
       {/* Brand */}
       <div
         onClick={() => setCurrentScreen('home')}
-        className="flex items-center gap-2.5 cursor-pointer"
+        className="cursor-pointer"
       >
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-teal to-brand-violet flex items-center justify-center text-white shadow-teal">
-          <Shield className="w-5 h-5 stroke-[2.5]" />
-        </div>
-        <span className="font-extrabold text-lg text-brand-text tracking-tight">
-          SafeSphere
-        </span>
+        <DigiSakhiLogo size="sm" subtitle="" />
       </div>
 
       {/* Right Actions */}

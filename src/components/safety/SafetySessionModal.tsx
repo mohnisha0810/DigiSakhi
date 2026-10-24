@@ -430,7 +430,7 @@ export const SafetySessionModal: React.FC<SafetySessionModalProps> = ({
                   <p className="text-xs text-brand-muted mt-1 max-w-sm mx-auto leading-relaxed">
                     {isUrgent
                       ? 'This is a high-priority emergency broadcast. Alerts and live coordinates will be dispatched immediately to your circle.'
-                      : 'SafeSphere will log the incident and alert your circle according to your protocol rules.'}
+                      : 'DigiSakhi will log the incident and alert your circle according to your protocol rules.'}
                   </p>
                 </div>
 

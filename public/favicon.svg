@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <linearGradient id="ds-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F9D8A" />
+      <stop offset="60%" stop-color="#087F73" />
+      <stop offset="100%" stop-color="#7457F5" />
+    </linearGradient>
+  </defs>
+  <rect width="32" height="32" rx="9" fill="url(#ds-grad)"/>
+  <!-- Protective Shield -->
+  <path d="M16 26s7-3.5 7-9V9l-7-3-7 3v8c0 5.5 7 9 7 9z" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Empowering Companion Heart -->
+  <path d="M16 12.2c-.7-1-1.7-1.4-2.6-1-1.1.5-1.4 1.7-.7 2.7.8 1 2.5 2.7 3.3 3.3.8-.6 2.5-2.3 3.3-3.3.7-1 .4-2.2-.7-2.7-.9-.4-1.9 0-2.6 1z" fill="#DDF8F1"/>
+</svg>

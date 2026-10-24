@@ -121,7 +121,7 @@ export const ActiveJourneyCard: React.FC = () => {
           <div className="flex-1">
             <strong className="text-brand-text block font-bold">Manual Arrival Verification Active</strong>
             <p className="text-brand-muted text-[11px] mt-0.5 leading-relaxed">
-              Device GPS tracking is disabled or unavailable. SafeSphere will not fabricate fake coordinates. Confirm your arrival manually below when you arrive safely.
+              Device GPS tracking is disabled or unavailable. DigiSakhi will not fabricate fake coordinates. Confirm your arrival manually below when you arrive safely.
             </p>
           </div>
         </div>
@@ -137,7 +137,7 @@ export const ActiveJourneyCard: React.FC = () => {
                 Approaching Destination ({distanceMeters !== null ? `${distanceMeters}m away` : 'Safe Radius Reached'})
               </p>
               <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-                SafeSphere detected you have entered the designated safe arrival radius ({activeJourney.safe_radius_meters}m). Please confirm you have arrived safely. Safety is never automatically assumed.
+                DigiSakhi detected you have entered the designated safe arrival radius ({activeJourney.safe_radius_meters}m). Please confirm you have arrived safely. Safety is never automatically assumed.
               </p>
               <div className="mt-3 flex items-center gap-2">
                 <button

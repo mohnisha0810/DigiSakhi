@@ -1,14 +1,14 @@
-# SafeSphere — Women's Personal Safety Platform
+# DigiSakhi — Women's Personal Safety & Empowerment Platform
 
-> **“Your safety. Your rules. Your trusted circle.”**
+> **“Your digital companion. Your safety. Your rules. Your trusted circle.”**
 
-SafeSphere is a privacy-first personal safety web platform built for high-stakes, real-world personal security. Unlike blunt, single-button SOS apps that trigger panic or summon emergency dispatch inappropriately, SafeSphere supports nuanced distress scenarios, customizable safety protocols, persistent check-in timers with idempotent multi-tier escalations, privacy-controlled geofencing, and discreet emergency camouflage.
+DigiSakhi is a privacy-first personal safety web platform built for high-stakes, real-world personal security. Unlike blunt, single-button SOS apps that trigger panic or summon emergency dispatch inappropriately, DigiSakhi supports nuanced distress scenarios, customizable safety protocols, persistent check-in timers with idempotent multi-tier escalations, privacy-controlled geofencing, and discreet emergency camouflage.
 
 ---
 
-## 🌟 Hackathon Demonstration Guide
+## 🌟 Demonstration Guide
 
-SafeSphere features an integrated **Hackathon Judge Control Bar** at the top of the interface that allows judges to fast-forward time, trigger overdue check-ins, simulate safe arrival within geofence boundaries, and switch instantly between the protected user (**Elena Rostova**) and authorized circle responders (**Maya Patel** and **David Chen**).
+DigiSakhi features an integrated **Judge & Evaluator Control Bar** at the top of the interface that allows users to fast-forward time, trigger overdue check-ins, simulate safe arrival within geofence boundaries, and switch instantly between the protected user (**Elena Rostova**) and authorized circle responders (**Maya Patel** and **David Chen**).
 
 ### Quick Demo Walkthrough (10-Step Scenario):
 
@@ -17,7 +17,7 @@ SafeSphere features an integrated **Hackathon Judge Control Bar** at the top of 
 2. **Start a Monitored Journey**:
    - Click **Start Journey** from the dashboard or navigate to **Journeys**.
    - Select destination preset *“Montgomery St Station”* (ETA: 20 minutes, Safe Radius: 200m).
-   - SafeSphere launches the journey and creates a linked check-in deadline.
+   - DigiSakhi launches the journey and creates a linked check-in deadline.
 3. **Trigger Distress Code**:
    - Click **“Distress Codes”** or the center red quick-action button on mobile.
    - Test **“Check on Me”** (discreet request for non-urgent text check-in) or **“Call Me”** (pretext exit phone call).
@@ -37,7 +37,7 @@ SafeSphere features an integrated **Hackathon Judge Control Bar** at the top of 
    - Click **“+3m (Overdue)”** again without acknowledging: the scheduler automatically escalates to Tier 2 (David Chen).
 8. **Geofenced Safe Arrival Verification**:
    - With an active journey running, click **“Trigger Arrival Prompt”** in the Judge Bar.
-   - SafeSphere detects user has entered the 200m radius and prompts: *“You've arrived near your destination. Confirm safe?”* (Note: Safety is never automatically presumed).
+   - DigiSakhi detects user has entered the 200m radius and prompts: *“You've arrived near your destination. Confirm safe?”* (Note: Safety is never automatically presumed).
 9. **Safe Arrival Confirmation**:
    - Click **“Yes, I Have Safely Arrived”**.
    - Journey completes, linked check-in resolves, and active location sharing terminates.
@@ -45,10 +45,10 @@ SafeSphere features an integrated **Hackathon Judge Control Bar** at the top of 
     - Press **ESC** or click the **Quick Exit** button in the navbar.
     - The screen instantly transforms into an innocuous *“Metro Weather & Daily Planner”*.
     - Active background safety check-ins continue uninterrupted.
-    - Enter default PIN `1234` to resume SafeSphere.
+    - Enter default PIN `1234` to resume DigiSakhi.
 11. **Automated 11-Step Self-Test Suite**:
     - In the Judge Bar, click **“Run Self-Test Suite”** (with the `FileCheck2` icon).
-    - SafeSphere executes all 11 critical workflows end-to-end in real time: distress code dispatch, acknowledgement, responder notes, resolution, deadline escalation, geofence verification, and privacy revocation.
+    - DigiSakhi executes all 11 critical workflows end-to-end in real time: distress code dispatch, acknowledgement, responder notes, resolution, deadline escalation, geofence verification, and privacy revocation.
 
 ---
 
