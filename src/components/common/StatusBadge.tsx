@@ -13,6 +13,12 @@ import {
 export type BadgeStatus =
   | 'active'
   | 'pending'
+  | 'sending'
+  | 'sent'
+  | 'delivered'
+  | 'failed'
+  | 'accepted'
+  | 'declined'
   | 'acknowledged'
   | 'responding'
   | 'overdue'
@@ -62,6 +68,66 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
         >
           <Clock className="w-3 h-3 text-amber-700" />
           <span>Pending</span>
+        </span>
+      );
+
+    case 'sending':
+      return (
+        <span
+          className={`font-bold uppercase tracking-wider rounded-full bg-amber-50 text-amber-800 border border-amber-300 inline-flex items-center animate-pulse ${getSizeClasses()} ${className}`}
+        >
+          <Clock className="w-3 h-3 text-amber-600 animate-spin" />
+          <span>Sending SMS</span>
+        </span>
+      );
+
+    case 'sent':
+      return (
+        <span
+          className={`font-bold uppercase tracking-wider rounded-full bg-brand-lavender text-brand-violet border border-violet-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+        >
+          <Radio className="w-3 h-3 text-brand-violet" />
+          <span>SMS Sent</span>
+        </span>
+      );
+
+    case 'delivered':
+      return (
+        <span
+          className={`font-bold uppercase tracking-wider rounded-full bg-brand-aqua text-brand-deepTeal border border-teal-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+        >
+          <CheckCircle2 className="w-3 h-3 text-brand-teal" />
+          <span>Delivered</span>
+        </span>
+      );
+
+    case 'failed':
+      return (
+        <span
+          className={`font-bold uppercase tracking-wider rounded-full bg-brand-peach text-brand-coral border border-coral-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+        >
+          <AlertTriangle className="w-3 h-3 text-brand-coral" />
+          <span>Delivery Failed</span>
+        </span>
+      );
+
+    case 'accepted':
+      return (
+        <span
+          className={`font-bold uppercase tracking-wider rounded-full bg-brand-aqua text-brand-deepTeal border border-teal-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+        >
+          <CheckCircle2 className="w-3 h-3 text-brand-teal" />
+          <span>Accepted</span>
+        </span>
+      );
+
+    case 'declined':
+      return (
+        <span
+          className={`font-bold uppercase tracking-wider rounded-full bg-slate-100 text-brand-muted border border-brand-border inline-flex items-center ${getSizeClasses()} ${className}`}
+        >
+          <XCircle className="w-3 h-3 text-brand-muted" />
+          <span>Declined</span>
         </span>
       );
 

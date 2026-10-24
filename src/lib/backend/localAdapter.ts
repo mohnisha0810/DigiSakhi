@@ -265,23 +265,40 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
     return newInv;
   }
 
+  async getInvitationByToken(token: string): Promise<ContactInvitation | null> {
+    const invs = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
+    return invs.find((i) => i.invitation_token === token) || null;
+  }
+
   async acceptInvitation(invitationId: string, acceptingUserId?: string): Promise<void> {
     const invs = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
     const target = invs.find((i) => i.id === invitationId);
     if (!target) throw new Error('Invitation not found.');
 
     const updatedInvs = invs.map((i) =>
-      i.id === invitationId ? { ...i, status: 'accepted' as const } : i
+      i.id === invitationId
+        ? {
+            ...i,
+            status: 'accepted' as const,
+            delivery_status: 'accepted' as const,
+            responded_at: new Date().toISOString(),
+          }
+        : i
     );
     LocalStorageDB.setItem('contact_invitations', updatedInvs);
 
     // Update matching trusted_contacts record
     const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
     const updatedContacts = contacts.map((c) => {
-      if (c.user_id === target.inviter_id && c.email.toLowerCase() === target.invitee_email.toLowerCase()) {
+      const isMatch =
+        (c.user_id === target.inviter_id && c.email.toLowerCase() === target.invitee_email.toLowerCase()) ||
+        (target.invitee_phone && c.phone_number && c.phone_number === target.invitee_phone);
+
+      if (isMatch) {
         return {
           ...c,
           status: 'accepted' as const,
+          invitation_status: 'accepted' as const,
           contact_user_id: acceptingUserId || c.contact_user_id,
           can_view_location: true,
           updated_at: new Date().toISOString(),
@@ -290,6 +307,78 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       return c;
     });
     LocalStorageDB.setItem('trusted_contacts', updatedContacts);
+  }
+
+  async declineInvitation(invitationId: string): Promise<void> {
+    const invs = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
+    const target = invs.find((i) => i.id === invitationId);
+    if (!target) throw new Error('Invitation not found.');
+
+    const updatedInvs = invs.map((i) =>
+      i.id === invitationId
+        ? {
+            ...i,
+            status: 'declined' as const,
+            delivery_status: 'declined' as const,
+            responded_at: new Date().toISOString(),
+          }
+        : i
+    );
+    LocalStorageDB.setItem('contact_invitations', updatedInvs);
+
+    // Update matching trusted_contacts record
+    const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
+    const updatedContacts = contacts.map((c) => {
+      const isMatch =
+        (c.user_id === target.inviter_id && c.email.toLowerCase() === target.invitee_email.toLowerCase()) ||
+        (target.invitee_phone && c.phone_number && c.phone_number === target.invitee_phone);
+
+      if (isMatch) {
+        return {
+          ...c,
+          status: 'declined' as const,
+          invitation_status: 'declined' as const,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+    LocalStorageDB.setItem('trusted_contacts', updatedContacts);
+  }
+
+  async updateInvitationDelivery(
+    invitationId: string,
+    updates: Partial<ContactInvitation>
+  ): Promise<ContactInvitation> {
+    const invs = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
+    const target = invs.find((i) => i.id === invitationId);
+    if (!target) throw new Error('Invitation not found.');
+
+    const updated: ContactInvitation = { ...target, ...updates };
+    const updatedInvs = invs.map((i) => (i.id === invitationId ? updated : i));
+    LocalStorageDB.setItem('contact_invitations', updatedInvs);
+
+    // Keep trusted_contacts invitation_status in sync
+    if (updates.status || updates.delivery_status) {
+      const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
+      const newStatus = updates.status || updates.delivery_status;
+      const updatedContacts = contacts.map((c) => {
+        const isMatch =
+          (c.user_id === target.inviter_id && c.email.toLowerCase() === target.invitee_email.toLowerCase()) ||
+          (target.invitee_phone && c.phone_number && c.phone_number === target.invitee_phone);
+        if (isMatch) {
+          return {
+            ...c,
+            invitation_status: newStatus,
+            updated_at: new Date().toISOString(),
+          };
+        }
+        return c;
+      });
+      LocalStorageDB.setItem('trusted_contacts', updatedContacts);
+    }
+
+    return updated;
   }
 
   // --- Protocols ---

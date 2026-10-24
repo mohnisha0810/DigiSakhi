@@ -57,7 +57,13 @@ export interface BackendAdapter {
   // Invitations
   getInvitations(userId: string): Promise<ContactInvitation[]>;
   createInvitation(invitation: Omit<ContactInvitation, 'id' | 'created_at'>): Promise<ContactInvitation>;
+  getInvitationByToken(token: string): Promise<ContactInvitation | null>;
   acceptInvitation(invitationId: string, acceptingUserId?: string): Promise<void>;
+  declineInvitation(invitationId: string): Promise<void>;
+  updateInvitationDelivery(
+    invitationId: string,
+    updates: Partial<ContactInvitation>
+  ): Promise<ContactInvitation>;
 
   // Protocols
   getProtocols(userId: string): Promise<SafetyProtocol[]>;

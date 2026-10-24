@@ -218,6 +218,17 @@ export class SupabaseBackendAdapter implements BackendAdapter {
     return data as ContactInvitation;
   }
 
+  async getInvitationByToken(token: string): Promise<ContactInvitation | null> {
+    const { data, error } = await this.supabase
+      .from('contact_invitations')
+      .select('*')
+      .eq('invitation_token', token)
+      .single();
+
+    if (error || !data) return null;
+    return data as ContactInvitation;
+  }
+
   async acceptInvitation(invitationId: string, acceptingUserId?: string): Promise<void> {
     const { data: inv, error: findErr } = await this.supabase
       .from('contact_invitations')
@@ -228,7 +239,11 @@ export class SupabaseBackendAdapter implements BackendAdapter {
     if (findErr || !inv) throw new Error('Invitation not found.');
 
     await (this.supabase.from('contact_invitations') as any)
-      .update({ status: 'accepted' })
+      .update({
+        status: 'accepted',
+        delivery_status: 'accepted',
+        responded_at: new Date().toISOString(),
+      })
       .eq('id', invitationId);
 
     await (this.supabase.from('trusted_contacts') as any)
@@ -236,9 +251,51 @@ export class SupabaseBackendAdapter implements BackendAdapter {
         status: 'accepted',
         can_view_location: true,
         contact_user_id: acceptingUserId || null,
+        updated_at: new Date().toISOString(),
       })
       .eq('user_id', (inv as any).inviter_id)
       .eq('email', (inv as any).invitee_email);
+  }
+
+  async declineInvitation(invitationId: string): Promise<void> {
+    const { data: inv, error: findErr } = await this.supabase
+      .from('contact_invitations')
+      .select('*')
+      .eq('id', invitationId)
+      .single();
+
+    if (findErr || !inv) throw new Error('Invitation not found.');
+
+    await (this.supabase.from('contact_invitations') as any)
+      .update({
+        status: 'declined',
+        delivery_status: 'declined',
+        responded_at: new Date().toISOString(),
+      })
+      .eq('id', invitationId);
+
+    await (this.supabase.from('trusted_contacts') as any)
+      .update({
+        status: 'declined',
+        updated_at: new Date().toISOString(),
+      })
+      .eq('user_id', (inv as any).inviter_id)
+      .eq('email', (inv as any).invitee_email);
+  }
+
+  async updateInvitationDelivery(
+    invitationId: string,
+    updates: Partial<ContactInvitation>
+  ): Promise<ContactInvitation> {
+    const { data, error } = await (this.supabase
+      .from('contact_invitations') as any)
+      .update(updates)
+      .eq('id', invitationId)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data as ContactInvitation;
   }
 
   // --- Protocols ---

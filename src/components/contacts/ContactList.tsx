@@ -9,12 +9,15 @@ import {
   ArrowUp,
   ArrowDown,
   Trash2,
-  CheckCircle2,
   Clock,
-  Shield,
   MapPin,
-  ChevronRight,
-  Sparkles,
+  ExternalLink,
+  Copy,
+  Check,
+  RefreshCw,
+  Phone,
+  Mail,
+  AlertTriangle,
 } from 'lucide-react';
 
 export const ContactList: React.FC = () => {
@@ -22,17 +25,19 @@ export const ContactList: React.FC = () => {
     contacts,
     reorderContacts,
     removeContact,
-    acceptInvitation,
     invitations,
+    resendInvitation,
   } = useSafeSphere();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [resendingId, setResendingId] = useState<string | null>(null);
+  const [copiedToken, setCopiedToken] = useState<string | null>(null);
 
   const acceptedContacts = contacts
     .filter((c) => c.status === 'accepted')
     .sort((a, b) => a.escalation_order - b.escalation_order);
 
-  const pendingContacts = contacts.filter((c) => c.status === 'pending');
+  const pendingContacts = contacts.filter((c) => c.status !== 'accepted');
 
   const moveContact = (index: number, direction: 'up' | 'down') => {
     const newArr = [...acceptedContacts];
@@ -44,6 +49,27 @@ export const ContactList: React.FC = () => {
     newArr[targetIdx] = temp;
 
     reorderContacts(newArr);
+  };
+
+  const handleCopyInviteLink = (token: string) => {
+    const url = `${window.location.origin}/invite?token=${token}`;
+    navigator.clipboard.writeText(url);
+    setCopiedToken(token);
+    setTimeout(() => setCopiedToken(null), 2500);
+  };
+
+  const handleOpenRecipientPage = (token: string) => {
+    const url = `${window.location.origin}/invite?token=${token}`;
+    window.open(url, '_blank');
+  };
+
+  const handleResend = async (invitationId: string) => {
+    setResendingId(invitationId);
+    try {
+      await resendInvitation(invitationId);
+    } finally {
+      setResendingId(null);
+    }
   };
 
   return (
@@ -122,8 +148,16 @@ export const ContactList: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-brand-muted mt-0.5">
-                      {contact.email} • {contact.phone_number}
+                    <p className="text-xs text-brand-muted mt-0.5 flex items-center gap-2 flex-wrap">
+                      <span className="flex items-center gap-1 font-mono">
+                        <Mail className="w-3 h-3" />
+                        {contact.email}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 font-mono">
+                        <Phone className="w-3 h-3" />
+                        {contact.phone_number}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -166,16 +200,16 @@ export const ContactList: React.FC = () => {
         )}
       </div>
 
-      {/* Pending Invitations Section */}
+      {/* Pending Invitations Section (Unverified) */}
       <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-4">
         <div className="flex items-center justify-between pb-3 border-b border-brand-border">
           <div>
             <h3 className="font-extrabold text-brand-text text-base flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
-              <span>Pending Contact Invitations (Unverified)</span>
+              <span>Pending Contact Invitations (Awaiting Recipient Acceptance)</span>
             </h3>
             <p className="text-xs text-brand-muted mt-0.5">
-              These contacts have been invited but have not yet accepted. By DigiSakhi security rules, unverified contacts will not receive alerts.
+              These contacts have been invited but have not yet accepted on their phone. Under DigiSakhi safety protocols, only verified contacts receive active distress alerts.
             </p>
           </div>
           <span className="text-xs text-amber-600 font-mono font-bold">
@@ -184,36 +218,116 @@ export const ContactList: React.FC = () => {
         </div>
 
         {pendingContacts.length === 0 ? (
-          <p className="text-xs text-brand-muted py-4">No pending invitations.</p>
+          <p className="text-xs text-brand-muted py-4">No pending invitations. All circle members are active and verified.</p>
         ) : (
           <div className="space-y-3">
             {pendingContacts.map((contact) => {
-              const matchedInv = invitations.find((i) => i.invitee_email === contact.email);
+              const matchedInv = invitations.find(
+                (i) =>
+                  i.invitee_email.toLowerCase() === contact.email.toLowerCase() ||
+                  (contact.phone_number && i.invitee_phone === contact.phone_number)
+              );
+
+              const currentDeliveryStatus =
+                matchedInv?.delivery_status ||
+                contact.invitation_status ||
+                matchedInv?.status ||
+                'pending';
+
               return (
                 <div
                   key={contact.id}
-                  className="p-4 rounded-xl bg-amber-50/70 border border-amber-200 flex flex-wrap items-center justify-between gap-3 text-xs"
+                  className="p-4 rounded-xl bg-slate-50 border border-brand-border flex flex-wrap items-center justify-between gap-4 text-xs transition-colors hover:bg-slate-100/60"
                 >
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-brand-text">{contact.full_name}</span>
-                      <StatusBadge status="pending" />
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-extrabold text-brand-text text-sm">{contact.full_name}</span>
+                      <StatusBadge status={currentDeliveryStatus as any} />
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white text-brand-muted border border-brand-border">
+                        {contact.relationship}
+                      </span>
                     </div>
-                    <p className="text-brand-muted mt-0.5">
-                      {contact.email} • {contact.relationship}
-                    </p>
+
+                    <div className="flex items-center gap-3 text-brand-muted text-[11px] flex-wrap">
+                      <span className="flex items-center gap-1 font-mono">
+                        <Phone className="w-3 h-3" />
+                        {contact.phone_number}
+                      </span>
+                      <span>•</span>
+                      <span className="flex items-center gap-1 font-mono">
+                        <Mail className="w-3 h-3" />
+                        {contact.email}
+                      </span>
+                      {matchedInv?.provider_message_id && (
+                        <>
+                          <span>•</span>
+                          <span className="text-brand-teal font-mono text-[10px]" title="Twilio Message SID">
+                            SID: {matchedInv.provider_message_id.substring(0, 16)}...
+                          </span>
+                        </>
+                      )}
+                    </div>
+
+                    {matchedInv?.provider_error && (
+                      <div className="text-[11px] text-coral-700 bg-coral-50 px-2 py-1 rounded border border-coral-200 mt-1 max-w-lg">
+                        <strong>SMS Notice: </strong>{matchedInv.provider_error}
+                      </div>
+                    )}
                   </div>
 
-                  {matchedInv && (
+                  {/* Actions for Pending Contacts */}
+                  <div className="flex items-center gap-2 flex-wrap">
+                    {matchedInv?.invitation_token && (
+                      <>
+                        <button
+                          onClick={() => handleCopyInviteLink(matchedInv.invitation_token)}
+                          className="px-3 py-1.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs"
+                          title="Copy secure verification link to clipboard"
+                        >
+                          {copiedToken === matchedInv.invitation_token ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-brand-teal" />
+                              <span className="text-brand-teal">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5 text-brand-muted" />
+                              <span>Copy Link</span>
+                            </>
+                          )}
+                        </button>
+
+                        <button
+                          onClick={() => handleOpenRecipientPage(matchedInv.invitation_token)}
+                          className="px-3 py-1.5 bg-brand-aqua/70 hover:bg-brand-aqua text-brand-deepTeal border border-teal-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs"
+                          title="Open invitation acceptance page in new tab"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Review Screen</span>
+                        </button>
+                      </>
+                    )}
+
+                    {matchedInv && (
+                      <button
+                        onClick={() => handleResend(matchedInv.id)}
+                        disabled={resendingId === matchedInv.id}
+                        className="px-3 py-1.5 bg-white hover:bg-slate-50 text-brand-teal border border-teal-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs disabled:opacity-50"
+                        title="Resend SMS invitation to contact's phone"
+                      >
+                        <RefreshCw className={`w-3.5 h-3.5 ${resendingId === matchedInv.id ? 'animate-spin' : ''}`} />
+                        <span>{resendingId === matchedInv.id ? 'Sending...' : 'Resend SMS'}</span>
+                      </button>
+                    )}
+
                     <button
-                      onClick={() => acceptInvitation(matchedInv.id)}
-                      className="px-3.5 py-2 bg-white hover:bg-amber-100 text-amber-800 border border-amber-300 rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 shadow-xs"
-                      title="Test recipient acceptance directly in development mode"
+                      onClick={() => removeContact(contact.id)}
+                      className="p-1.5 text-brand-muted hover:text-brand-coral hover:bg-brand-peach rounded-lg transition-colors"
+                      title="Cancel invitation and remove"
                     >
-                      <CheckCircle2 className="w-4 h-4 text-amber-600" />
-                      Simulate Acceptance (Dev Test)
+                      <Trash2 className="w-4 h-4" />
                     </button>
-                  )}
+                  </div>
                 </div>
               );
             })}

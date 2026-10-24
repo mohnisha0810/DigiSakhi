@@ -19,6 +19,16 @@ export interface UserProfile {
 
 export type ContactStatus = 'pending' | 'accepted' | 'declined';
 
+export type InvitationDeliveryStatus =
+  | 'pending'
+  | 'sending'
+  | 'sent'
+  | 'delivered'
+  | 'failed'
+  | 'accepted'
+  | 'declined'
+  | 'expired';
+
 export interface TrustedContact {
   id: string;
   user_id: string; // The primary user who owns this contact relationship
@@ -29,6 +39,8 @@ export interface TrustedContact {
   relationship: string;
   escalation_order: number; // 1 = First responder, 2 = Secondary, etc.
   status: ContactStatus;
+  invitation_id?: string;
+  invitation_status?: InvitationDeliveryStatus;
   can_view_location: boolean;
   avatar_color?: string;
   created_at: string;
@@ -41,10 +53,18 @@ export interface ContactInvitation {
   inviter_name: string;
   invitee_email: string;
   invitee_name: string;
+  invitee_phone?: string;
   relationship: string;
   escalation_order: number;
   invitation_token: string;
-  status: 'pending' | 'accepted' | 'declined' | 'expired';
+  status: InvitationDeliveryStatus;
+  delivery_status?: InvitationDeliveryStatus;
+  provider?: 'twilio' | 'unconfigured' | 'manual';
+  provider_message_id?: string;
+  provider_error?: string;
+  sent_at?: string;
+  delivered_at?: string;
+  responded_at?: string;
   created_at: string;
   expires_at: string;
 }

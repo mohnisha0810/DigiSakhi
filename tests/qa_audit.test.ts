@@ -1018,4 +1018,104 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal(attemptCorrectPin, validPin);
     });
   });
+
+  // =========================================================================
+  // 11. TRUSTED CONTACT INVITATION & SMS DELIVERY LIFECYCLE
+  // =========================================================================
+  describe('11. Trusted Contact Invitation & SMS Delivery Lifecycle', () => {
+    it('creates invitation in pending state, enforces authorization, and transitions accurately on recipient accept/decline', async () => {
+      const token = 'inv_test_secure_token_999';
+      const expires = new Date(Date.now() + 7 * 86400000).toISOString();
+
+      // 1. Create invitation with real phone number
+      const createdInv = await backend.createInvitation({
+        inviter_id: 'usr_elena_01',
+        inviter_name: 'Elena Rostova',
+        invitee_name: 'Priya Sharma',
+        invitee_email: 'priya.sharma@example.com',
+        invitee_phone: '+919876543210',
+        relationship: 'Sister',
+        escalation_order: 1,
+        invitation_token: token,
+        status: 'pending',
+        delivery_status: 'pending',
+        provider: 'twilio',
+        expires_at: expires,
+      });
+
+      // 2. Create pending contact record linked to invitation
+      const createdContact = await backend.createContact({
+        user_id: 'usr_elena_01',
+        full_name: 'Priya Sharma',
+        email: 'priya.sharma@example.com',
+        phone_number: '+919876543210',
+        relationship: 'Sister',
+        escalation_order: 1,
+        status: 'pending',
+        invitation_id: createdInv.id,
+        invitation_status: 'pending',
+        can_view_location: false,
+        avatar_color: 'bg-teal-600',
+      });
+
+      // Verify contact is strictly pending and unauthorized for location
+      assert.equal(createdContact.status, 'pending', 'Contact must be pending prior to acceptance');
+      assert.equal(createdContact.can_view_location, false, 'Pending contact must not have location access');
+
+      // 3. Provider dispatch updates delivery status to 'sent'
+      await backend.updateInvitationDelivery(createdInv.id, {
+        status: 'sent',
+        delivery_status: 'sent',
+        provider_message_id: 'SM1234567890abcdef',
+        sent_at: new Date().toISOString(),
+      });
+
+      // 4. Token lookup by recipient
+      const lookedUpInv = await backend.getInvitationByToken(token);
+      assert.ok(lookedUpInv, 'Invitation should be retrievable by secure token');
+      assert.equal(lookedUpInv?.invitee_name, 'Priya Sharma');
+      assert.equal(lookedUpInv?.delivery_status, 'sent');
+      assert.equal(lookedUpInv?.provider_message_id, 'SM1234567890abcdef');
+
+      // 5. Carrier delivery receipt webhook updates status to 'delivered'
+      await backend.updateInvitationDelivery(createdInv.id, {
+        delivery_status: 'delivered',
+        delivered_at: new Date().toISOString(),
+      });
+
+      const deliveredInv = await backend.getInvitationByToken(token);
+      assert.equal(deliveredInv?.delivery_status, 'delivered', 'Carrier delivery receipt reflected accurately');
+
+      // 6. Recipient clicks "Accept Invitation"
+      await backend.acceptInvitation(createdInv.id, 'usr_priya_new');
+
+      const acceptedInv = await backend.getInvitationByToken(token);
+      assert.equal(acceptedInv?.status, 'accepted', 'Invitation marked accepted upon recipient confirmation');
+
+      const allContacts = await backend.getContacts('usr_elena_01');
+      const updatedContact = allContacts.find((c) => c.email === 'priya.sharma@example.com');
+      assert.equal(updatedContact?.status, 'accepted', 'Contact activated in circle upon acceptance');
+      assert.equal(updatedContact?.can_view_location, true, 'Location permission granted upon verified acceptance');
+
+      // 7. Verify declining workflow with a second contact
+      const declineToken = 'inv_decline_token_111';
+      const declineInv = await backend.createInvitation({
+        inviter_id: 'usr_elena_01',
+        inviter_name: 'Elena Rostova',
+        invitee_name: 'Declining Contact',
+        invitee_email: 'decline@example.com',
+        invitee_phone: '+919999988888',
+        relationship: 'Colleague',
+        escalation_order: 3,
+        invitation_token: declineToken,
+        status: 'pending',
+        delivery_status: 'sent',
+        expires_at: expires,
+      });
+
+      await backend.declineInvitation(declineInv.id);
+      const declinedInv = await backend.getInvitationByToken(declineToken);
+      assert.equal(declinedInv?.status, 'declined', 'Invitation status updated to declined');
+    });
+  });
 });

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { SafeSphereProvider, useSafeSphere } from '@/store/SafeSphereContext';
 import { DemoControlsBar } from '@/components/layout/DemoControlsBar';
 import { SidebarNav } from '@/components/layout/SidebarNav';
@@ -18,6 +18,7 @@ import { NotificationInbox } from '@/components/notifications/NotificationInbox'
 import { AccountDataSettings } from '@/components/settings/AccountDataSettings';
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton';
 import { ToastContainer } from '@/components/common/ToastContainer';
+import { InvitationResponseScreen } from '@/components/contacts/InvitationResponseScreen';
 import {
   AlertCircle,
   CheckCircle2,
@@ -129,6 +130,39 @@ const MainScreenRouter: React.FC = () => {
 };
 
 export const App: React.FC = () => {
+  const [isInvitePath, setIsInvitePath] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return false;
+    return (
+      window.location.pathname.startsWith('/invite') ||
+      new URLSearchParams(window.location.search).has('token')
+    );
+  });
+
+  useEffect(() => {
+    const handleLocationChange = () => {
+      const invite =
+        window.location.pathname.startsWith('/invite') ||
+        new URLSearchParams(window.location.search).has('token');
+      setIsInvitePath(invite);
+    };
+    window.addEventListener('popstate', handleLocationChange);
+    return () => window.removeEventListener('popstate', handleLocationChange);
+  }, []);
+
+  if (isInvitePath) {
+    return (
+      <SafeSphereProvider>
+        <InvitationResponseScreen
+          onContinueToApp={() => {
+            window.history.pushState({}, '', '/');
+            setIsInvitePath(false);
+          }}
+        />
+        <ToastContainer />
+      </SafeSphereProvider>
+    );
+  }
+
   return (
     <SafeSphereProvider>
       <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col font-sans">

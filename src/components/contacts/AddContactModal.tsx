@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
 import { StepProgress } from '@/components/common/StepProgress';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { InvitationDeliveryStatus } from '@/types';
 import {
   X,
   UserPlus,
@@ -12,13 +14,27 @@ import {
   MapPin,
   ChevronRight,
   CheckCircle2,
+  AlertTriangle,
+  ExternalLink,
+  MessageSquare,
+  Phone,
+  Info,
 } from 'lucide-react';
+
+interface InviteResultState {
+  token: string;
+  success: boolean;
+  deliveryStatus: InvitationDeliveryStatus;
+  messageId?: string;
+  error?: string;
+  inviteUrl: string;
+}
 
 export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }> = ({
   isOpen,
   onClose,
 }) => {
-  const { inviteContact, contacts, acceptInvitation, invitations } = useSafeSphere();
+  const { inviteContact, contacts } = useSafeSphere();
 
   const [step, setStep] = useState(1);
   const [fullName, setFullName] = useState('');
@@ -28,84 +44,143 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
   const [escalationTier, setEscalationTier] = useState<number>(contacts.length + 1);
   const [canViewLocation, setCanViewLocation] = useState(true);
   const [canReceiveDistress, setCanReceiveDistress] = useState(true);
-  const [generatedToken, setGeneratedToken] = useState<string | null>(null);
+  const [inviteResult, setInviteResult] = useState<InviteResultState | null>(null);
   const [copied, setCopied] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string | null>(null);
 
   if (!isOpen) return null;
+
+  const resetForm = () => {
+    setStep(1);
+    setFullName('');
+    setEmail('');
+    setPhoneNumber('');
+    setRelationship('Friend');
+    setEscalationTier(contacts.length + 1);
+    setCanViewLocation(true);
+    setCanReceiveDistress(true);
+    setInviteResult(null);
+    setCopied(false);
+    setValidationError(null);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
 
   const steps = [
     { id: 1, label: 'Details' },
     { id: 2, label: 'Permissions' },
-    { id: 3, label: 'Invite' },
+    { id: 3, label: 'Review & Send' },
   ];
 
   const handleNext = () => {
-    if (step === 1 && (!fullName.trim() || !email.trim())) return;
+    setValidationError(null);
+    if (step === 1) {
+      if (!fullName.trim()) {
+        setValidationError('Please enter the contact\'s full name.');
+        return;
+      }
+      if (!email.trim() || !email.includes('@')) {
+        setValidationError('Please enter a valid email address.');
+        return;
+      }
+      if (!phoneNumber.trim()) {
+        setValidationError('Please enter a mobile phone number for SMS delivery.');
+        return;
+      }
+      const digits = phoneNumber.replace(/\D/g, '');
+      if (digits.length < 10) {
+        setValidationError('Phone number must have at least 10 digits (including country code if outside India).');
+        return;
+      }
+    }
     setStep((prev) => Math.min(prev + 1, 3));
   };
-  const handleBack = () => setStep((prev) => Math.max(prev - 1, 1));
+
+  const handleBack = () => {
+    setValidationError(null);
+    setStep((prev) => Math.max(prev - 1, 1));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!fullName.trim() || !email.trim()) return;
+    setValidationError(null);
+    if (!fullName.trim() || !email.trim() || !phoneNumber.trim()) return;
 
     setIsSubmitting(true);
     try {
-      const token = await inviteContact({
+      const result = await inviteContact({
         fullName: fullName.trim(),
         email: email.trim(),
-        phoneNumber: phoneNumber.trim() || '+1 (555) 000-0000',
+        phoneNumber: phoneNumber.trim(),
         relationship,
         escalationOrder: escalationTier,
       });
 
-      setGeneratedToken(token);
+      setInviteResult(result);
+    } catch (err: any) {
+      setValidationError(err.message || 'An error occurred while creating the invitation.');
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(`https://digisakhi.app/invite?token=${generatedToken}`);
+    if (!inviteResult) return;
+    const url =
+      inviteResult.inviteUrl ||
+      `${window.location.origin}/invite?token=${inviteResult.token}`;
+    navigator.clipboard.writeText(url);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   };
 
-  const handleDevAcceptNow = () => {
-    const inv = invitations.find((i) => i.invitation_token === generatedToken);
-    if (inv) {
-      acceptInvitation(inv.id);
-    }
-    onClose();
+  const handleOpenRecipientView = () => {
+    if (!inviteResult) return;
+    const url =
+      inviteResult.inviteUrl ||
+      `${window.location.origin}/invite?token=${inviteResult.token}`;
+    window.open(url, '_blank');
   };
 
   return (
     <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
       <div className="bg-white border border-brand-border rounded-3xl max-w-md w-full p-6 shadow-elevated relative my-8 animate-fadeIn">
         <button
-          onClick={onClose}
+          onClick={handleClose}
           className="absolute top-5 right-5 text-brand-muted hover:text-brand-text p-1 transition-colors"
+          title="Close"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {!generatedToken ? (
+        {!inviteResult ? (
           <form onSubmit={handleSubmit}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-teal flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-teal flex items-center justify-center shrink-0">
                 <UserPlus className="w-5 h-5" />
               </div>
               <div>
                 <h3 className="text-base font-extrabold text-brand-text">Add Trusted Contact</h3>
                 <p className="text-xs text-brand-muted">
-                  Add a verified responder to your safety escalation chain.
+                  Add a verified responder and dispatch an SMS invitation.
                 </p>
               </div>
             </div>
 
             {/* Step Indicator */}
             <StepProgress steps={steps} currentStep={step} accentColor="teal" />
+
+            {/* Validation Error Banner */}
+            {validationError && (
+              <div className="mt-3 p-3 bg-brand-peach border border-coral-200 rounded-xl text-brand-coral text-xs flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 shrink-0" />
+                <span className="font-semibold">{validationError}</span>
+              </div>
+            )}
 
             {/* STEP 1: Enter Details */}
             {step === 1 && (
@@ -138,39 +213,44 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text mb-1">
-                      Relationship
-                    </label>
-                    <select
-                      value={relationship}
-                      onChange={(e) => setRelationship(e.target.value)}
-                      className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2 text-xs text-brand-text font-medium"
-                    >
-                      <option value="Friend">Friend</option>
-                      <option value="Roommate">Roommate</option>
-                      <option value="Sister">Sister</option>
-                      <option value="Brother">Brother</option>
-                      <option value="Mother">Mother</option>
-                      <option value="Father">Father</option>
-                      <option value="Partner">Partner / Spouse</option>
-                      <option value="Colleague">Colleague</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-bold text-brand-text mb-1">
-                      Phone Number
-                    </label>
+                <div>
+                  <label className="block text-xs font-bold text-brand-text mb-1">
+                    Mobile Phone Number (for SMS delivery) *
+                  </label>
+                  <div className="relative">
+                    <Phone className="w-3.5 h-3.5 text-brand-muted absolute left-3 top-3" />
                     <input
                       type="tel"
-                      placeholder="+1 (555) 000-0000"
+                      required
+                      placeholder="+91 98765 43210 or +1 555 123 4567"
                       value={phoneNumber}
                       onChange={(e) => setPhoneNumber(e.target.value)}
-                      className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2 text-xs text-brand-text font-medium"
+                      className="w-full bg-slate-50 border border-brand-border rounded-xl pl-9 pr-3.5 py-2.5 text-xs text-brand-text focus:outline-none focus:border-brand-teal font-medium"
                     />
                   </div>
+                  <p className="text-[11px] text-brand-muted mt-1 leading-relaxed">
+                    Enter with country code (e.g. <span className="font-mono text-brand-teal">+91</span> for India, <span className="font-mono text-brand-teal">+1</span> for US). 10-digit Indian numbers auto-default to +91.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold text-brand-text mb-1">
+                    Relationship
+                  </label>
+                  <select
+                    value={relationship}
+                    onChange={(e) => setRelationship(e.target.value)}
+                    className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2 text-xs text-brand-text font-medium"
+                  >
+                    <option value="Friend">Friend</option>
+                    <option value="Roommate">Roommate</option>
+                    <option value="Sister">Sister</option>
+                    <option value="Brother">Brother</option>
+                    <option value="Mother">Mother</option>
+                    <option value="Father">Father</option>
+                    <option value="Partner">Partner / Spouse</option>
+                    <option value="Colleague">Colleague</option>
+                  </select>
                 </div>
               </div>
             )}
@@ -249,7 +329,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
 
                   <p>
                     <strong>Name: </strong>
-                    <span className="text-brand-text">{fullName}</span> ({relationship})
+                    <span className="text-brand-text font-semibold">{fullName}</span> ({relationship})
                   </p>
                   <p>
                     <strong>Email: </strong>
@@ -257,13 +337,17 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
                   </p>
                   <p>
                     <strong>Phone: </strong>
-                    <span className="text-brand-text">{phoneNumber || 'On file'}</span>
+                    <span className="text-brand-text font-mono font-semibold">{phoneNumber}</span>
                   </p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 leading-relaxed">
-                  <strong className="font-bold">Privacy rule: </strong>
-                  The contact will be saved in an actual <strong className="font-bold text-amber-700">Pending</strong> state and will not receive any safety alerts until they explicitly accept your invitation token.
+                <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200 text-[11px] text-teal-900 leading-relaxed flex items-start gap-2">
+                  <MessageSquare className="w-4 h-4 text-brand-teal shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="font-bold">Real SMS Dispatch: </strong>
+                    Clicking "Send Invitation SMS" sends an SMS to{' '}
+                    <span className="font-mono font-bold text-brand-deepTeal">{phoneNumber}</span> via Twilio with a verification link. The contact remains in <strong className="font-bold text-amber-700">Pending</strong> state until they explicitly accept on their device.
+                  </div>
                 </div>
               </div>
             )}
@@ -282,7 +366,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
               ) : (
                 <button
                   type="button"
-                  onClick={onClose}
+                  onClick={handleClose}
                   className="px-4 py-2.5 rounded-xl border border-brand-border text-brand-muted hover:text-brand-text text-xs font-bold transition-colors"
                 >
                   Cancel
@@ -292,7 +376,7 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
               {step < 3 ? (
                 <button
                   type="button"
-                  disabled={step === 1 && (!fullName.trim() || !email.trim())}
+                  disabled={step === 1 && (!fullName.trim() || !email.trim() || !phoneNumber.trim())}
                   onClick={handleNext}
                   className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-deepTeal disabled:opacity-50 text-white text-xs font-bold shadow-teal flex items-center gap-1.5 transition-all active:scale-[0.98]"
                 >
@@ -303,48 +387,99 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-deepTeal text-white text-xs font-bold shadow-teal transition-all active:scale-[0.98]"
+                  className="px-5 py-2.5 rounded-xl bg-brand-teal hover:bg-brand-deepTeal text-white text-xs font-bold shadow-teal transition-all active:scale-[0.98] flex items-center gap-2"
                 >
-                  {isSubmitting ? 'Creating Invitation...' : 'Send Invitation Token'}
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Dispatching SMS...</span>
+                    </>
+                  ) : (
+                    <span>Send Invitation SMS</span>
+                  )}
                 </button>
               )}
             </div>
           </form>
         ) : (
-          /* Actual Invitation Status Screen */
+          /* Real Post-Invitation Status View */
           <div className="space-y-4 py-2 animate-fadeIn">
-            <div className="w-12 h-12 rounded-2xl bg-brand-aqua text-brand-teal flex items-center justify-center">
-              <CheckCircle2 className="w-7 h-7 stroke-[2.2]" />
-            </div>
+            {inviteResult.success ? (
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-brand-aqua text-brand-teal flex items-center justify-center">
+                  <CheckCircle2 className="w-7 h-7 stroke-[2.2]" />
+                </div>
 
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
-                  Status: Pending Acceptance
-                </span>
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <StatusBadge status="sent" />
+                    <span className="text-[10px] uppercase font-bold text-brand-muted">
+                      Twilio REST API
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-extrabold text-brand-text">
+                    SMS Dispatched to {fullName}
+                  </h3>
+                  <p className="text-xs text-brand-muted leading-relaxed mt-1">
+                    An SMS invitation has been queued with carrier delivery to{' '}
+                    <strong className="text-brand-text">{phoneNumber}</strong>.
+                    {inviteResult.messageId && (
+                      <span className="block font-mono text-[11px] text-brand-teal mt-0.5">
+                        Message SID: {inviteResult.messageId}
+                      </span>
+                    )}
+                  </p>
+                </div>
               </div>
-              <h3 className="text-lg font-extrabold text-brand-text">
-                Invitation Created for {fullName}
-              </h3>
-              <p className="text-xs text-brand-muted leading-relaxed mt-1">
-                Your contact has been saved with a unique verification token. Until accepted, they cannot view your active sessions or receive distress alerts.
-              </p>
-            </div>
+            ) : (
+              <div className="space-y-3">
+                <div className="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                  <AlertTriangle className="w-7 h-7 stroke-[2.2]" />
+                </div>
 
+                <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <StatusBadge status="failed" />
+                    <span className="text-[10px] uppercase font-bold text-amber-700">
+                      SMS Notice
+                    </span>
+                  </div>
+                  <h3 className="text-lg font-extrabold text-brand-text">
+                    Contact Saved • SMS Gateway Notice
+                  </h3>
+                  <div className="text-xs text-amber-900 bg-amber-50 border border-amber-200 rounded-xl p-3 mt-2 leading-relaxed">
+                    <p className="font-semibold">{inviteResult.error || 'Carrier delivery not completed.'}</p>
+                    {inviteResult.error && inviteResult.error.includes('TWILIO_') && (
+                      <p className="text-[11px] text-amber-800 mt-1.5">
+                        To enable automated SMS delivery, configure <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">TWILIO_ACCOUNT_SID</code>, <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">TWILIO_AUTH_TOKEN</code>, and <code className="bg-amber-100 px-1 py-0.5 rounded font-mono">TWILIO_PHONE_NUMBER</code> in Vercel project settings.
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Generated Invitation Link */}
             <div className="p-3.5 bg-slate-50 border border-brand-border rounded-xl">
               <p className="text-[10px] text-brand-muted uppercase font-bold tracking-wider">
-                Generated Invitation Link
+                Direct Verification Link (for {fullName})
               </p>
-              <p className="font-mono text-xs text-brand-teal truncate mt-1">
-                https://digisakhi.app/invite?token={generatedToken}
+              <p className="font-mono text-xs text-brand-teal break-all mt-1 select-all bg-white p-2 rounded-lg border border-brand-border">
+                {inviteResult.inviteUrl || `${window.location.origin}/invite?token=${inviteResult.token}`}
               </p>
             </div>
 
+            <div className="p-3 rounded-xl bg-slate-50 border border-brand-border text-[11px] text-brand-muted leading-relaxed">
+              <strong className="text-brand-text">DigiSakhi Trust Protocol: </strong>
+              {fullName} will remain in <strong className="text-amber-700">Pending</strong> status and cannot view your location or receive alerts until they click this link and tap <strong>"Accept Invitation"</strong>.
+            </div>
+
+            {/* Action Buttons */}
             <div className="flex flex-col gap-2 pt-2">
               <button
                 type="button"
                 onClick={handleCopyLink}
-                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors"
+                className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-brand-text border border-brand-border rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
               >
                 {copied ? <Check className="w-4 h-4 text-brand-teal" /> : <Copy className="w-4 h-4" />}
                 {copied ? 'Link Copied to Clipboard!' : 'Copy Invitation Link'}
@@ -352,10 +487,19 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
 
               <button
                 type="button"
-                onClick={handleDevAcceptNow}
-                className="w-full py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal transition-all active:scale-[0.98]"
+                onClick={handleOpenRecipientView}
+                className="w-full py-2.5 bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal border border-teal-200 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-colors active:scale-[0.99]"
               >
-                Simulate Recipient Acceptance (Dev Mode)
+                <ExternalLink className="w-4 h-4" />
+                <span>Open Recipient Screen (Test in New Tab)</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleClose}
+                className="w-full py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal transition-all active:scale-[0.98] mt-1"
+              >
+                Done
               </button>
             </div>
           </div>

@@ -13,6 +13,7 @@ import {
   NotificationRecord,
   DistressType,
   UserRole,
+  InvitationDeliveryStatus,
 } from '@/types';
 import { backendService, backendMode } from '@/lib/backend';
 import { INITIAL_USER_PROFILE, INITIAL_CONTACT_PROFILES, LocalStorageDB } from '@/lib/supabase';
@@ -165,8 +166,17 @@ interface SafeSphereContextType {
     phoneNumber: string;
     relationship: string;
     escalationOrder: number;
-  }) => Promise<string>;
+  }) => Promise<{
+    token: string;
+    success: boolean;
+    deliveryStatus: InvitationDeliveryStatus;
+    messageId?: string;
+    error?: string;
+    inviteUrl: string;
+  }>;
   acceptInvitation: (invitationId: string) => Promise<void>;
+  declineInvitation: (invitationId: string) => Promise<void>;
+  resendInvitation: (invitationId: string) => Promise<{ success: boolean; error?: string }>;
   reorderContacts: (reorderedContacts: TrustedContact[]) => Promise<void>;
   removeContact: (contactId: string) => Promise<void>;
 
@@ -961,19 +971,66 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     phoneNumber: string;
     relationship: string;
     escalationOrder: number;
-  }): Promise<string> => {
-    const token = 'inv_' + Math.random().toString(36).substring(2, 12);
-    const expires = new Date(Date.now() + 7 * 86400000).toISOString();
+  }): Promise<{
+    token: string;
+    success: boolean;
+    deliveryStatus: InvitationDeliveryStatus;
+    messageId?: string;
+    error?: string;
+    inviteUrl: string;
+  }> => {
+    let apiResult: any = { success: false, delivery_status: 'pending' };
+    const origin =
+      typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost:5173')
+        ? window.location.origin
+        : 'https://safesphere-liart.vercel.app';
 
-    await backendService.createInvitation({
+    try {
+      const res = await fetch('/api/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inviterId: currentUser.id,
+          inviterName: currentUser.full_name,
+          inviteeName: data.fullName,
+          inviteePhone: data.phoneNumber,
+          inviteeEmail: data.email,
+          relationship: data.relationship,
+          escalationOrder: data.escalationOrder,
+          origin,
+        }),
+      });
+      apiResult = await res.json();
+    } catch (err: any) {
+      console.warn('Network call to /api/send-invite failed, falling back:', err);
+      apiResult = {
+        success: false,
+        error: `Could not reach SMS gateway: ${err.message}`,
+        delivery_status: 'failed',
+      };
+    }
+
+    const token =
+      apiResult.invitation_token || ('inv_' + Math.random().toString(36).substring(2, 12));
+    const expires = new Date(Date.now() + 7 * 86400000).toISOString();
+    const finalDeliveryStatus: InvitationDeliveryStatus =
+      apiResult.delivery_status || (apiResult.success ? 'sent' : 'failed');
+
+    const createdInv = await backendService.createInvitation({
       inviter_id: currentUser.id,
       inviter_name: currentUser.full_name,
       invitee_email: data.email,
       invitee_name: data.fullName,
+      invitee_phone: data.phoneNumber,
       relationship: data.relationship,
       escalation_order: data.escalationOrder,
       invitation_token: token,
-      status: 'pending',
+      status: finalDeliveryStatus,
+      delivery_status: finalDeliveryStatus,
+      provider: apiResult.provider || (apiResult.success ? 'twilio' : 'unconfigured'),
+      provider_message_id: apiResult.provider_message_id,
+      provider_error: apiResult.error,
+      sent_at: apiResult.success ? new Date().toISOString() : undefined,
       expires_at: expires,
     });
 
@@ -984,20 +1041,92 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       phone_number: data.phoneNumber,
       relationship: data.relationship,
       escalation_order: data.escalationOrder,
-      status: 'pending', // Unverified requirement!
+      status: 'pending', // Strictly pending until accepted!
+      invitation_id: createdInv.id,
+      invitation_status: finalDeliveryStatus,
       can_view_location: false,
       avatar_color: 'bg-teal-600',
     });
 
     await loadUserData(currentUser);
-    setSuccessMessage(`Invitation created for ${data.fullName}.`);
-    return token;
+
+    const inviteUrl = apiResult.invite_url || `${origin}/invite?token=${token}`;
+
+    if (apiResult.success) {
+      setSuccessMessage(`SMS invitation dispatched via Twilio to ${data.phoneNumber}.`);
+    } else if (apiResult.error) {
+      setError(apiResult.error);
+    }
+
+    return {
+      token,
+      success: !!apiResult.success,
+      deliveryStatus: finalDeliveryStatus,
+      messageId: apiResult.provider_message_id,
+      error: apiResult.error,
+      inviteUrl,
+    };
   };
 
-  const acceptInvitation = async (invitationId: string) => {
-    await backendService.acceptInvitation(invitationId);
+  const acceptInvitation = async (invitationId: string, acceptingUserId?: string) => {
+    await backendService.acceptInvitation(invitationId, acceptingUserId);
     await loadUserData(currentUser);
-    setSuccessMessage('Contact invitation accepted and verified.');
+    setSuccessMessage('Contact invitation accepted and verified in safety circle.');
+  };
+
+  const declineInvitation = async (invitationId: string) => {
+    await backendService.declineInvitation(invitationId);
+    await loadUserData(currentUser);
+    setSuccessMessage('Invitation marked as declined.');
+  };
+
+  const resendInvitation = async (invitationId: string): Promise<{ success: boolean; error?: string }> => {
+    const inv = invitations.find((i) => i.id === invitationId);
+    if (!inv) return { success: false, error: 'Invitation not found.' };
+
+    const origin =
+      typeof window !== 'undefined' && window.location.origin && !window.location.origin.includes('localhost:5173')
+        ? window.location.origin
+        : 'https://safesphere-liart.vercel.app';
+
+    try {
+      const res = await fetch('/api/send-invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          inviterId: currentUser.id,
+          inviterName: currentUser.full_name,
+          inviteeName: inv.invitee_name,
+          inviteePhone: inv.invitee_phone,
+          inviteeEmail: inv.invitee_email,
+          relationship: inv.relationship,
+          token: inv.invitation_token,
+          origin,
+        }),
+      });
+      const result = await res.json();
+
+      const newStatus = result.delivery_status || (result.success ? 'sent' : 'failed');
+      await backendService.updateInvitationDelivery(invitationId, {
+        status: newStatus,
+        delivery_status: newStatus,
+        provider_message_id: result.provider_message_id,
+        provider_error: result.error,
+        sent_at: result.success ? new Date().toISOString() : undefined,
+      });
+
+      await loadUserData(currentUser);
+      if (result.success) {
+        setSuccessMessage(`SMS re-dispatched via Twilio to ${inv.invitee_phone}`);
+        return { success: true };
+      } else {
+        setError(result.error || 'Failed to resend SMS.');
+        return { success: false, error: result.error };
+      }
+    } catch (err: any) {
+      setError(err.message || 'Network error resending SMS.');
+      return { success: false, error: err.message };
+    }
   };
 
   const reorderContacts = async (reordered: TrustedContact[]) => {
@@ -1111,6 +1240,8 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         deleteProtocol,
         inviteContact,
         acceptInvitation,
+        declineInvitation,
+        resendInvitation,
         reorderContacts,
         removeContact,
         isQuickExitActive,
