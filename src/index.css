@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --color-brand-teal: #0F9D8A;
+    --color-brand-deep-teal: #087F73;
+    --color-brand-violet: #7457F5;
+    --color-brand-lavender: #EEE9FF;
+    --color-brand-aqua: #DDF8F1;
+    --color-brand-coral: #FF6B6B;
+    --color-brand-peach: #FFF0E8;
+    --color-brand-bg: #F8FAFC;
+    --color-brand-card: #FFFFFF;
+    --color-brand-text: #20243A;
+    --color-brand-muted: #697386;
+    --color-brand-border: #E7EAF1;
+  }
+
+  body {
+    background-color: #F8FAFC;
+    color: #20243A;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Accessible focus indicators with brand teal */
+  *:focus-visible {
+    outline: 2px solid #0F9D8A;
+    outline-offset: 2px;
+  }
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #0F9D8A;
+}
+
+/* Skeleton Shimmer Effect for Light Theme */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(241, 245, 249, 0.8) 25%,
+    rgba(226, 232, 240, 0.9) 50%,
+    rgba(241, 245, 249, 0.8) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s infinite;
+}
+
+/* Smooth fade in animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Leaflet map styles - Light theme crisp tiles */
+.leaflet-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 1rem;
+  z-index: 10;
+  background-color: #F8FAFC !important;
+  border: 1px solid #E7EAF1;
+}
+
+.leaflet-tile {
+  filter: contrast(1.05) saturate(1.1);
+}
+
+.leaflet-popup-content-wrapper {
+  background-color: #FFFFFF !important;
+  color: #20243A !important;
+  border-radius: 0.875rem !important;
+  border: 1px solid #E7EAF1 !important;
+  box-shadow: 0 10px 25px -3px rgba(32, 36, 58, 0.12) !important;
+}
+
+.leaflet-popup-tip {
+  background-color: #FFFFFF !important;
+}
