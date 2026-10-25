@@ -41,17 +41,28 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
     deleteProtocol,
     activeCheckIn,
     setCurrentScreen,
+    updateUserProfile,
   } = useSafeSphere();
 
   const [activeTab, setActiveTab] = useState<'checkins' | 'protocols' | 'emergency'>(defaultTab);
 
   // Check-in configuration state
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
-  const [checkInsEnabled, setCheckInsEnabled] = useState(true);
-  const [checkInInterval, setCheckInInterval] = useState(30); // minutes
-  const [responseDeadline, setResponseDeadline] = useState(15); // minutes
+  const [checkInsEnabled, setCheckInsEnabled] = useState(
+    currentUser.check_in_preferences?.enabled ?? true
+  );
+  const [checkInInterval, setCheckInInterval] = useState(
+    currentUser.check_in_preferences?.interval_minutes ?? 30
+  );
+  const [responseDeadline, setResponseDeadline] = useState(
+    currentUser.check_in_preferences?.countdown_seconds
+      ? Math.round(currentUser.check_in_preferences.countdown_seconds / 60)
+      : 15
+  );
   const [reminderLeadMinutes, setReminderLeadMinutes] = useState(2); // minutes
-  const [gracePeriodSeconds, setGracePeriodSeconds] = useState(180); // 3 minutes
+  const [gracePeriodSeconds, setGracePeriodSeconds] = useState(
+    defaultProtocol?.grace_period_seconds ?? 180
+  );
   const [savedCheckInNotice, setSavedCheckInNotice] = useState(false);
 
   // Protocol creation/editing state
@@ -66,24 +77,51 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
   const [protocolSelectedContacts, setProtocolSelectedContacts] = useState<string[]>([]);
 
   // Emergency preferences state
-  const [emergencyHelpline, setEmergencyHelpline] = useState('112');
-  const [autoShareLocationOnSOS, setAutoShareLocationOnSOS] = useState(true);
+  const [emergencyHelpline, setEmergencyHelpline] = useState(
+    currentUser.emergency_preferences?.emergency_number || '112'
+  );
+  const [autoShareLocationOnSOS, setAutoShareLocationOnSOS] = useState(
+    currentUser.emergency_preferences?.share_location ?? true
+  );
   const [emergencySosModalOpen, setEmergencySosModalOpen] = useState(false);
   const [emergencyCallModalOpen, setEmergencyCallModalOpen] = useState(false);
   const [savedEmergencyNotice, setSavedEmergencyNotice] = useState(false);
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
 
-  const handleSaveCheckInPreferences = () => {
-    setSavedCheckInNotice(true);
-    toast.success('Check-in preferences saved successfully.');
-    setTimeout(() => setSavedCheckInNotice(false), 3000);
+  const handleSaveCheckInPreferences = async () => {
+    try {
+      await updateUserProfile({
+        check_in_preferences: {
+          ...currentUser.check_in_preferences,
+          enabled: checkInsEnabled,
+          interval_minutes: checkInInterval,
+          countdown_seconds: responseDeadline * 60,
+        },
+      });
+      setSavedCheckInNotice(true);
+      toast.success('Check-in preferences saved successfully.');
+      setTimeout(() => setSavedCheckInNotice(false), 3000);
+    } catch (err: any) {
+      toast.error('Could not save check-in preferences.');
+    }
   };
 
-  const handleSaveEmergencyPreferences = () => {
-    setSavedEmergencyNotice(true);
-    toast.success('Emergency preferences updated.');
-    setTimeout(() => setSavedEmergencyNotice(false), 3000);
+  const handleSaveEmergencyPreferences = async () => {
+    try {
+      await updateUserProfile({
+        emergency_preferences: {
+          ...currentUser.emergency_preferences,
+          emergency_number: emergencyHelpline,
+          share_location: autoShareLocationOnSOS,
+        },
+      });
+      setSavedEmergencyNotice(true);
+      toast.success('Emergency preferences updated.');
+      setTimeout(() => setSavedEmergencyNotice(false), 3000);
+    } catch (err: any) {
+      toast.error('Could not save emergency preferences.');
+    }
   };
 
   const handleCreateProtocolSubmit = async (e: React.FormEvent) => {

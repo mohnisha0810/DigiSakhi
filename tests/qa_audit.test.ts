@@ -1050,6 +1050,29 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal('5678' === customPin || '5678' === '1234', true, 'Custom PIN unlocks session');
       assert.equal('0000' === customPin || '0000' === '1234', false, 'Invalid PIN is rejected');
     });
+
+    it('verifies safety setup preferences (check-in intervals, emergency helpline) persist to user profile', async () => {
+      // 1. Save custom check-in & emergency preferences
+      await backend.updateProfile('usr_elena_01', {
+        check_in_preferences: {
+          enabled: true,
+          interval_minutes: 45,
+          countdown_seconds: 600, // 10 minutes
+          notification_type: 'in_app',
+        },
+        emergency_preferences: {
+          emergency_number: '1091',
+          share_location: true,
+        },
+      });
+
+      // 2. Fetch fresh profile from backend and verify values persisted
+      const reloadedProfile = await backend.getProfile('usr_elena_01');
+      assert.equal(reloadedProfile?.check_in_preferences?.interval_minutes, 45, 'Check-in interval must persist as 45m');
+      assert.equal(reloadedProfile?.check_in_preferences?.countdown_seconds, 600, 'Countdown seconds must persist as 600s');
+      assert.equal(reloadedProfile?.emergency_preferences?.emergency_number, '1091', 'Emergency helpline must persist as 1091');
+      assert.equal(reloadedProfile?.emergency_preferences?.share_location, true, 'Location sharing preference must persist');
+    });
   });
 
   // =========================================================================
