@@ -52,9 +52,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'active':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-aqua text-brand-deepTeal border border-teal-300 inline-flex items-center shadow-2xs ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/30 inline-flex items-center shadow-2xs ${getSizeClasses()} ${className}`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-brand-teal animate-pulse" />
+          <span className="w-1.5 h-1.5 rounded-full bg-[#5517C8] animate-pulse" />
           <span>Active</span>
         </span>
       );
@@ -64,9 +64,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'notification_pending':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-amber-100 text-amber-900 border border-amber-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-amber-50 text-[#C87912] border border-amber-300 inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <Clock className="w-3 h-3 text-amber-700" />
+          <Clock className="w-3 h-3 text-[#C87912]" />
           <span>Pending</span>
         </span>
       );
@@ -84,9 +84,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'sent':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-lavender text-brand-violet border border-violet-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-[#F2EDFF] text-[#365BFF] border border-[#365BFF]/30 inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <Radio className="w-3 h-3 text-brand-violet" />
+          <Radio className="w-3 h-3 text-[#365BFF]" />
           <span>SMS Sent</span>
         </span>
       );
@@ -94,9 +94,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'delivered':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-aqua text-brand-deepTeal border border-teal-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-[#16865C]/10 text-[#16865C] border border-[#16865C]/30 inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <CheckCircle2 className="w-3 h-3 text-brand-teal" />
+          <CheckCircle2 className="w-3 h-3 text-[#16865C]" />
           <span>Delivered</span>
         </span>
       );
@@ -104,9 +104,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'failed':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-peach text-brand-coral border border-coral-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-red-50 text-[#D92D45] border border-red-200 inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <AlertTriangle className="w-3 h-3 text-brand-coral" />
+          <AlertTriangle className="w-3 h-3 text-[#D92D45]" />
           <span>Delivery Failed</span>
         </span>
       );
@@ -114,9 +114,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'accepted':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-aqua text-brand-deepTeal border border-teal-300 inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-[#16865C]/10 text-[#16865C] border border-[#16865C]/30 inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <CheckCircle2 className="w-3 h-3 text-brand-teal" />
+          <CheckCircle2 className="w-3 h-3 text-[#16865C]" />
           <span>Accepted</span>
         </span>
       );
@@ -156,9 +156,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'escalated':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-peach text-brand-coral border border-coral-300 inline-flex items-center shadow-xs animate-pulse-subtle ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-red-50 text-[#D92D45] border border-red-300 inline-flex items-center shadow-xs animate-pulse-subtle ${getSizeClasses()} ${className}`}
         >
-          <AlertTriangle className="w-3 h-3 text-brand-coral" />
+          <AlertTriangle className="w-3 h-3 text-[#D92D45]" />
           <span>{normStatus === 'in_grace_period' ? 'In Grace Period' : 'Overdue'}</span>
         </span>
       );
@@ -167,9 +167,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'completed':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-slate-100 text-brand-text border border-brand-border inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-slate-100 text-[#211638] border border-[#E8E1F3] inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <CheckCircle2 className="w-3 h-3 text-brand-teal" />
+          <CheckCircle2 className="w-3 h-3 text-[#16865C]" />
           <span>{normStatus === 'completed' ? 'Completed' : 'Resolved'}</span>
         </span>
       );
@@ -177,9 +177,9 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'cancelled':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-slate-100 text-brand-muted border border-brand-border inline-flex items-center ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-slate-100 text-[#716B80] border border-[#E8E1F3] inline-flex items-center ${getSizeClasses()} ${className}`}
         >
-          <XCircle className="w-3 h-3 text-brand-muted" />
+          <XCircle className="w-3 h-3 text-[#716B80]" />
           <span>Cancelled</span>
         </span>
       );
@@ -187,7 +187,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = ({
     case 'urgent':
       return (
         <span
-          className={`font-bold uppercase tracking-wider rounded-full bg-brand-coral text-white border border-transparent shadow-xs inline-flex items-center animate-pulse ${getSizeClasses()} ${className}`}
+          className={`font-bold uppercase tracking-wider rounded-full bg-[#D92D45] text-white border border-transparent shadow-xs inline-flex items-center animate-pulse ${getSizeClasses()} ${className}`}
         >
           <ShieldAlert className="w-3 h-3 text-white" />
           <span>Urgent Priority</span>

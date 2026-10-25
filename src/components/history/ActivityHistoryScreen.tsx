@@ -34,32 +34,32 @@ export const ActivityHistoryScreen: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Top Header */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-violet bg-brand-lavender px-3 py-1 rounded-full border border-violet-200">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Audit & Session Logs
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text mt-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#211638] mt-2 tracking-tight">
             Activity History
           </h1>
-          <p className="text-sm text-brand-muted mt-1 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#716B80] mt-1 max-w-2xl leading-relaxed">
             Transparent, chronological audit trails for every check-in, distress signal, acknowledgement, and notification dispatch.
           </p>
         </div>
 
         {/* View Switcher Tabs */}
-        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-brand-border">
+        <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-xl border border-[#E8E1F3]">
           <button
             onClick={() => setActiveTab('timeline')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTab === 'timeline'
-                ? 'bg-white text-brand-teal shadow-sm'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#5517C8] shadow-sm'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Clock className="w-3.5 h-3.5" />
             <span>Event Timeline</span>
-            <span className="text-[10px] bg-slate-100 text-brand-muted px-1.5 py-0.2 rounded-full font-mono">
+            <span className="text-[10px] bg-slate-100 text-[#716B80] px-1.5 py-0.2 rounded-full font-mono">
               {sortedEvents.length}
             </span>
           </button>
@@ -68,13 +68,13 @@ export const ActivityHistoryScreen: React.FC = () => {
             onClick={() => setActiveTab('incidents')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTab === 'incidents'
-                ? 'bg-white text-brand-teal shadow-sm'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#5517C8] shadow-sm'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <ShieldAlert className="w-3.5 h-3.5" />
             <span>Incidents</span>
-            <span className="text-[10px] bg-slate-100 text-brand-muted px-1.5 py-0.2 rounded-full font-mono">
+            <span className="text-[10px] bg-slate-100 text-[#716B80] px-1.5 py-0.2 rounded-full font-mono">
               {incidents.length}
             </span>
           </button>
@@ -83,13 +83,13 @@ export const ActivityHistoryScreen: React.FC = () => {
             onClick={() => setActiveTab('notifications')}
             className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
               activeTab === 'notifications'
-                ? 'bg-white text-brand-teal shadow-sm'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#5517C8] shadow-sm'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Bell className="w-3.5 h-3.5" />
             <span>Notifications</span>
-            <span className="text-[10px] bg-slate-100 text-brand-muted px-1.5 py-0.2 rounded-full font-mono">
+            <span className="text-[10px] bg-slate-100 text-[#716B80] px-1.5 py-0.2 rounded-full font-mono">
               {notifications.length}
             </span>
           </button>

@@ -106,17 +106,17 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
       className={`rounded-3xl p-6 sm:p-7 border shadow-elevated space-y-5 animate-fadeIn ${
         isMissed
           ? 'bg-gradient-to-br from-amber-50 via-white to-red-50 border-amber-300'
-          : 'bg-gradient-to-br from-brand-aqua/30 via-white to-brand-lavender/30 border-teal-300'
+          : 'bg-gradient-to-br from-[#F2EDFF]/60 via-white to-[#EAF7FF]/60 border-[#5517C8]/25'
       }`}
     >
       {/* Top Banner & Title */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-brand-border">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E8E1F3]">
         <div className="flex items-center gap-3">
           <div
             className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${
               isMissed
                 ? 'bg-amber-100 text-amber-700 animate-pulse'
-                : 'bg-brand-aqua text-brand-deepTeal'
+                : 'bg-[#F2EDFF] text-[#5517C8]'
             }`}
           >
             {isMissed ? (
@@ -131,31 +131,29 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
                 className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
                   isMissed
                     ? 'bg-amber-200 text-amber-900 border border-amber-300'
-                    : 'bg-brand-aqua text-brand-deepTeal border border-teal-200'
+                    : 'bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20'
                 }`}
               >
                 {isMissed ? 'Check-in Missed' : 'Check-in Due Now'}
               </span>
-              <span className="text-xs text-brand-muted">
+              <span className="text-xs text-[#716B80]">
                 {journey.journey_name || journey.destination_name}
               </span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black text-brand-text tracking-tight mt-0.5">
-              {isMissed
-                ? 'Are you okay? Please confirm your safety.'
-                : 'Are you okay? Please confirm your safety.'}
+            <h2 className="text-xl sm:text-2xl font-black text-[#211638] tracking-tight mt-0.5">
+              Are you okay? Please confirm your safety.
             </h2>
           </div>
         </div>
 
         {/* Visible Countdown Timer */}
         <div className="text-right">
-          <span className="text-[10px] uppercase font-bold text-brand-muted tracking-wider block">
+          <span className="text-[10px] uppercase font-bold text-[#716B80] tracking-wider block">
             {isMissed ? 'Overdue By' : 'Response Window'}
           </span>
           <span
             className={`text-xl font-mono font-black ${
-              isMissed ? 'text-amber-700' : 'text-brand-deepTeal'
+              isMissed ? 'text-amber-700' : 'text-[#351078]'
             }`}
           >
             {isMissed ? 'Window Closed' : formatTimer(secondsRemaining)}
@@ -170,13 +168,13 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
             <div
               className={`h-full transition-all duration-1000 rounded-full ${
                 secondsRemaining <= 30
-                  ? 'bg-brand-coral animate-pulse'
-                  : 'bg-gradient-to-r from-brand-teal to-brand-violet'
+                  ? 'bg-[#D92D45] animate-pulse'
+                  : 'bg-gradient-to-r from-[#5517C8] to-[#365BFF]'
               }`}
               style={{ width: `${progressPercent}%` }}
             />
           </div>
-          <div className="flex justify-between text-[11px] text-brand-muted font-mono">
+          <div className="flex justify-between text-[11px] text-[#716B80] font-mono">
             <span>{secondsRemaining}s remaining to confirm</span>
             <span>Interval: {journey.check_in_interval_minutes || 10}m</span>
           </div>
@@ -210,7 +208,7 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
           {calledTier1 && tier2Contact && (
             <button
               onClick={handleCallTier2}
-              className="px-3.5 py-2 bg-brand-violet hover:bg-violet-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shrink-0 transition-colors"
+              className="px-3.5 py-2 bg-[#5517C8] hover:bg-[#4510AB] text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shrink-0 transition-colors"
             >
               <Phone className="w-3.5 h-3.5" />
               <span>Call Tier 2: {tier2Contact.full_name}</span>
@@ -224,7 +222,7 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
         {/* BUTTON 1: "I'M OKAY 💚" */}
         <button
           onClick={handleImOkay}
-          className="py-4 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-sm shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center gap-1 active:scale-98 group cursor-pointer"
+          className="py-4 px-5 rounded-2xl bg-[#16865C] hover:bg-[#126b4a] text-white font-black text-sm shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center gap-1 active:scale-98 group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <CheckCircle2 className="w-5 h-5 text-emerald-200 group-hover:scale-110 transition-transform" />
@@ -238,7 +236,7 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
         {/* BUTTON 2: "I NEED HELP 🟠" */}
         <button
           onClick={handleNeedHelp}
-          className="py-4 px-5 rounded-2xl bg-amber-500 hover:bg-amber-600 text-white font-black text-sm shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center gap-1 active:scale-98 group cursor-pointer"
+          className="py-4 px-5 rounded-2xl bg-[#C87912] hover:bg-[#a6630e] text-white font-black text-sm shadow-md hover:shadow-lg transition-all flex flex-col items-center justify-center gap-1 active:scale-98 group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <PhoneCall className="w-5 h-5 text-amber-200 group-hover:scale-110 transition-transform" />
@@ -252,7 +250,7 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
         {/* BUTTON 3: "URGENT HELP 🚨" */}
         <button
           onClick={handleUrgentHelp}
-          className="py-4 px-5 rounded-2xl bg-brand-coral hover:bg-red-700 text-white font-black text-sm shadow-coral hover:shadow-lg transition-all flex flex-col items-center justify-center gap-1 active:scale-98 group cursor-pointer"
+          className="py-4 px-5 rounded-2xl bg-[#D92D45] hover:bg-[#b82236] text-white font-black text-sm shadow-coral hover:shadow-lg transition-all flex flex-col items-center justify-center gap-1 active:scale-98 group cursor-pointer"
         >
           <div className="flex items-center gap-2">
             <ShieldAlert className="w-5 h-5 text-red-200 group-hover:scale-110 transition-transform animate-pulse" />
@@ -280,7 +278,7 @@ export const CustomJourneyCheckInPrompt: React.FC<CustomJourneyCheckInPromptProp
           </div>
           <button
             onClick={handleCallTier2}
-            className="px-4 py-2 bg-brand-violet hover:bg-violet-700 text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5"
+            className="px-4 py-2 bg-[#5517C8] hover:bg-[#4510AB] text-white font-bold rounded-xl text-xs transition-colors flex items-center gap-1.5"
           >
             <Phone className="w-3.5 h-3.5" />
             <span>Call Tier 2: {tier2Contact.full_name}</span>

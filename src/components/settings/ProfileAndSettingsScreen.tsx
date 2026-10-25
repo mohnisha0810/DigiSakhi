@@ -116,27 +116,27 @@ export const ProfileAndSettingsScreen: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal bg-brand-aqua px-3 py-1 rounded-full border border-teal-200">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Account Management
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text mt-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#211638] mt-2 tracking-tight">
             Profile & Settings
           </h1>
-          <p className="text-sm text-brand-muted mt-1 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#716B80] mt-1 max-w-2xl leading-relaxed">
             Manage your personal profile, discreet camouflage settings, device permissions, and security preferences.
           </p>
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-brand-border text-xs font-bold flex-wrap">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-[#E8E1F3] text-xs font-bold flex-wrap">
           <button
             onClick={() => setActiveTab('profile')}
             className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'profile'
-                ? 'bg-white text-brand-teal shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#5517C8] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <User className="w-4 h-4" />
@@ -147,8 +147,8 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             onClick={() => setActiveTab('privacy')}
             className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'privacy'
-                ? 'bg-white text-brand-violet shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#365BFF] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <EyeOff className="w-4 h-4" />
@@ -159,8 +159,8 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             onClick={() => setActiveTab('permissions')}
             className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'permissions'
-                ? 'bg-white text-brand-teal shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#5517C8] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Bell className="w-4 h-4" />
@@ -171,8 +171,8 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             onClick={() => setActiveTab('account')}
             className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'account'
-                ? 'bg-white text-brand-coral shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#D92D45] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Lock className="w-4 h-4" />
@@ -194,7 +194,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="px-4 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal flex items-center gap-2 transition-all disabled:opacity-50"
+              className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
             >
               <Save className="w-4 h-4" />
               <span>{isSavingProfile ? 'Saving...' : 'Save Profile'}</span>
@@ -408,7 +408,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleRequestPush}
-                  className="w-full py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold transition-colors"
+                  className="w-full py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md transition-all"
                 >
                   Enable Push Notifications
                 </button>

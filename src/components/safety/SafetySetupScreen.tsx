@@ -123,27 +123,27 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal bg-brand-aqua px-3 py-1 rounded-full border border-teal-200">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Safety Setup & Rules
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text mt-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#211638] mt-2 tracking-tight">
             Safety Setup
           </h1>
-          <p className="text-sm text-brand-muted mt-1 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#716B80] mt-1 max-w-2xl leading-relaxed">
             Centralized safety controls. Configure timed check-ins, automated escalation protocols, and emergency broadcast preferences in one unified place.
           </p>
         </div>
 
         {/* Tab Switcher Pills */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-brand-border text-xs font-bold">
+        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-[#E8E1F3] text-xs font-bold">
           <button
             onClick={() => setActiveTab('checkins')}
             className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'checkins'
-                ? 'bg-white text-brand-teal shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#5517C8] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Clock className="w-4 h-4" />
@@ -154,8 +154,8 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
             onClick={() => setActiveTab('protocols')}
             className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'protocols'
-                ? 'bg-white text-brand-violet shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#365BFF] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Sliders className="w-4 h-4" />
@@ -166,8 +166,8 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
             onClick={() => setActiveTab('emergency')}
             className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 ${
               activeTab === 'emergency'
-                ? 'bg-white text-brand-coral shadow-xs'
-                : 'text-brand-muted hover:text-brand-text'
+                ? 'bg-white text-[#D92D45] shadow-xs'
+                : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
             <Shield className="w-4 h-4" />

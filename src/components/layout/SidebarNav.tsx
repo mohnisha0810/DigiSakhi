@@ -1,28 +1,28 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useSafeSphere } from '@/store/SafeSphereContext';
+import { useSafeSphere, NavigationScreen } from '@/store/SafeSphereContext';
+import { DigiSakhiLogo } from '@/components/common/DigiSakhiLogo';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { EmergencyMessageModal } from '@/components/safety/EmergencyMessageModal';
 import { EmergencyCallModal } from '@/components/safety/EmergencyCallModal';
-import { DigiSakhiLogo } from '@/components/common/DigiSakhiLogo';
 import {
-  Shield,
-  ShieldCheck,
-  ShieldAlert,
+  LayoutDashboard,
   Compass,
   Users,
   Sliders,
   Clock,
-  LayoutDashboard,
-  EyeOff,
-  Bell,
-  Lock,
   Settings,
+  Shield,
+  ShieldAlert,
+  PhoneCall,
+  EyeOff,
   LogOut,
   Radio,
   ChevronRight,
-  UserCheck,
   ChevronUp,
-  PhoneCall,
+  UserCheck,
+  Lock,
+  Bell,
+  HelpCircle,
 } from 'lucide-react';
 
 export const SidebarNav: React.FC = () => {
@@ -32,11 +32,11 @@ export const SidebarNav: React.FC = () => {
     currentUser,
     currentRole,
     contacts,
-    activeIncident,
+    notifications,
     activeCheckIn,
     activeJourney,
+    activeIncident,
     triggerQuickExit,
-    notifications,
     signOut,
   } = useSafeSphere();
 
@@ -59,60 +59,46 @@ export const SidebarNav: React.FC = () => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  // 6 Core Navigation Sections (Consistent, Simple, Uncluttered)
   const navItems = [
     {
       id: 'home',
-      screen: 'home',
+      screen: 'home' as NavigationScreen,
       label: 'Home',
       icon: LayoutDashboard,
-      activeColor: 'bg-brand-aqua text-brand-deepTeal border-teal-200',
-      iconColor: 'text-brand-teal',
     },
     {
       id: 'journeys',
-      screen: 'journeys',
+      screen: 'journeys' as NavigationScreen,
       label: 'My Journeys',
       icon: Compass,
-      activeColor: 'bg-brand-lavender text-brand-violet border-violet-200',
-      iconColor: 'text-brand-violet',
       badge: activeJourney ? 'Active' : undefined,
-      badgeColor: 'bg-brand-lavender text-brand-violet',
     },
     {
       id: 'circle',
-      screen: 'circle',
+      screen: 'circle' as NavigationScreen,
       label: 'Trusted Circle',
       icon: Users,
-      activeColor: 'bg-brand-aqua text-brand-deepTeal border-teal-200',
-      iconColor: 'text-brand-teal',
-      badge: `${acceptedContacts.length}`,
-      badgeColor: 'bg-slate-100 text-brand-muted',
+      badge: acceptedContacts.length > 0 ? `${acceptedContacts.length}` : undefined,
     },
     {
       id: 'safety_setup',
-      screen: 'safety_setup',
+      screen: 'safety_setup' as NavigationScreen,
       label: 'Safety Setup',
       icon: Sliders,
-      activeColor: 'bg-brand-lavender text-brand-violet border-violet-200',
-      iconColor: 'text-brand-violet',
       badge: activeCheckIn ? 'Active' : undefined,
-      badgeColor: 'bg-brand-aqua text-brand-teal',
     },
     {
       id: 'history',
-      screen: 'history',
+      screen: 'history' as NavigationScreen,
       label: 'Activity History',
       icon: Clock,
-      activeColor: 'bg-slate-100 text-brand-text border-slate-200',
-      iconColor: 'text-slate-600',
     },
     {
       id: 'settings',
-      screen: 'settings',
+      screen: 'settings' as NavigationScreen,
       label: 'Profile & Settings',
       icon: Settings,
-      activeColor: 'bg-slate-100 text-brand-text border-slate-200',
-      iconColor: 'text-slate-600',
     },
   ];
 
@@ -127,63 +113,64 @@ export const SidebarNav: React.FC = () => {
   };
 
   return (
-    <aside className="hidden lg:flex flex-col w-64 xl:w-72 bg-white border-r border-brand-border h-screen sticky top-0 shrink-0 z-30 justify-between p-5 select-none shadow-subtle">
+    <aside className="hidden lg:flex flex-col w-64 xl:w-72 bg-white border-r border-[#E8E1F3] h-screen sticky top-0 shrink-0 z-30 justify-between p-5 select-none shadow-subtle">
       {/* Top Header & Brand */}
       <div className="space-y-6">
-        {/* Brand Logo */}
+        {/* Brand Logo with Official Image & Tagline */}
         <div
           onClick={() => setCurrentScreen('home')}
           className="cursor-pointer group"
         >
           <DigiSakhiLogo
             size="md"
-            subtitle={currentRole === 'user' ? 'Personal Safety Circle' : 'Trusted Responder'}
+            subtitle={currentRole === 'user' ? 'For Her. With Her. Always.' : 'Trusted Responder'}
           />
         </div>
 
-        {/* Perimeter Status Indicator Pill */}
-        <div className="p-3 rounded-xl bg-gradient-to-r from-brand-aqua/40 to-brand-lavender/30 border border-teal-200/60 flex items-center justify-between text-xs">
+        {/* Protection Status Indicator Pill */}
+        <div className="p-3 rounded-2xl bg-[#F2EDFF]/60 border border-[#E8E1F3] flex items-center justify-between text-xs">
           <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-brand-teal animate-ping" />
-            <span className="font-extrabold text-brand-deepTeal">
+            <span className={`w-2 h-2 rounded-full ${activeIncident ? 'bg-[#D92D45] animate-ping' : 'bg-[#16865C]'}`} />
+            <span className="font-bold text-[#351078]">
               {activeIncident ? 'Alert Dispatched' : 'Active Protection'}
             </span>
           </div>
-          <span className="text-[11px] font-mono text-brand-muted">
-            {acceptedContacts.length} Contacts
+          <span className="text-[10px] font-bold text-[#5517C8] bg-white px-2 py-0.5 rounded-full border border-[#E8E1F3]">
+            {currentRole === 'user' ? 'User' : 'Contact'}
           </span>
         </div>
 
-        {/* Primary Navigation Stack */}
-        <nav className="space-y-1.5">
+        {/* 6 Core Navigation Links */}
+        <nav className="space-y-1">
           {navItems.map((item) => {
-            const active = isCurrentActive(item.screen);
             const Icon = item.icon;
+            const active = isCurrentActive(item.id);
+
             return (
               <button
                 key={item.id}
-                onClick={() => setCurrentScreen(item.screen as any)}
-                className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between border ${
+                onClick={() => setCurrentScreen(item.screen)}
+                className={`w-full px-3.5 py-2.5 rounded-xl text-xs transition-all flex items-center justify-between text-left cursor-pointer border ${
                   active
-                    ? `${item.activeColor} shadow-xs font-extrabold`
-                    : 'border-transparent text-brand-muted hover:text-brand-text hover:bg-slate-50'
+                    ? 'bg-[#F2EDFF] text-[#351078] font-bold border-[#E8E1F3] shadow-xs'
+                    : 'border-transparent text-[#716B80] hover:text-[#211638] hover:bg-[#F2EDFF]/40 font-medium'
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                      active ? 'bg-white shadow-xs' : 'bg-slate-100 text-brand-muted'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 ${active ? item.iconColor : 'text-slate-500'}`} />
-                  </div>
+                <div className="flex items-center gap-2.5">
+                  {/* Small purple indicator bar on active item */}
+                  {active && (
+                    <span className="w-1 h-4 rounded-full bg-[#5517C8] shrink-0" />
+                  )}
+                  <Icon className={`w-4 h-4 ${active ? 'text-[#5517C8]' : 'text-[#716B80]'}`} />
                   <span>{item.label}</span>
                 </div>
 
                 {item.badge && (
                   <span
-                    className={`text-[10px] font-extrabold px-2 py-0.5 rounded-full ${
-                      item.badgeColor || 'bg-slate-100 text-brand-muted'
+                    className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                      active
+                        ? 'bg-[#5517C8] text-white'
+                        : 'bg-[#F2EDFF] text-[#5517C8]'
                     }`}
                   >
                     {item.badge}
@@ -193,35 +180,33 @@ export const SidebarNav: React.FC = () => {
             );
           })}
 
-          {/* Responder Console Link for Trusted Contact perspective */}
-          <div className="pt-2 border-t border-brand-border/60">
+          {/* Responder Console Link for Trusted Contact role */}
+          <div className="pt-2 border-t border-[#E8E1F3]">
             <button
               onClick={() => setCurrentScreen('trusted_dashboard')}
-              className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between border ${
+              className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-between border cursor-pointer ${
                 currentScreen === 'trusted_dashboard'
-                  ? 'bg-brand-lavender text-brand-violet border-violet-200'
-                  : 'border-transparent text-brand-muted hover:text-brand-text hover:bg-slate-50'
+                  ? 'bg-[#F2EDFF] text-[#351078] border-[#E8E1F3]'
+                  : 'border-transparent text-[#716B80] hover:text-[#211638] hover:bg-[#FAF9FF]'
               }`}
             >
-              <div className="flex items-center gap-3">
-                <div className="w-7 h-7 rounded-lg bg-violet-100 text-brand-violet flex items-center justify-center">
-                  <Radio className="w-4 h-4" />
-                </div>
+              <div className="flex items-center gap-2.5">
+                <Radio className="w-4 h-4 text-[#365BFF]" />
                 <span>Responder Console</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-brand-muted" />
+              <ChevronRight className="w-3.5 h-3.5 text-[#716B80]" />
             </button>
           </div>
         </nav>
       </div>
 
       {/* Bottom Sidebar: Emergency Actions, Quick Exit & Profile Dropdown */}
-      <div className="space-y-2.5 pt-4 border-t border-brand-border relative" ref={menuRef}>
-        {/* Emergency SOS & Call Buttons */}
+      <div className="space-y-2.5 pt-4 border-t border-[#E8E1F3] relative" ref={menuRef}>
+        {/* Emergency SOS & Call 112 Buttons */}
         <div className="grid grid-cols-2 gap-2">
           <button
             onClick={() => setIsEmergencyMessageOpen(true)}
-            className="py-2.5 px-2 rounded-xl bg-brand-coral hover:bg-red-600 text-white text-xs font-black shadow-coral transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            className="py-2.5 px-2 rounded-xl bg-[#D92D45] hover:bg-[#B71C32] text-white text-xs font-black shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
             title="Send Emergency SOS message with live GPS location"
           >
             <ShieldAlert className="w-3.5 h-3.5 animate-pulse" />
@@ -230,10 +215,10 @@ export const SidebarNav: React.FC = () => {
 
           <button
             onClick={() => setIsEmergencyCallOpen(true)}
-            className="py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            className="py-2.5 px-2 rounded-xl bg-[#211638] hover:bg-black text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98] cursor-pointer"
             title="Dial 112 National Emergency Helpline or Primary Contact"
           >
-            <PhoneCall className="w-3.5 h-3.5 text-coral-400" />
+            <PhoneCall className="w-3.5 h-3.5 text-[#08C9E8]" />
             <span>Call 112</span>
           </button>
         </div>
@@ -241,10 +226,10 @@ export const SidebarNav: React.FC = () => {
         {/* Quick Exit Disguise Button */}
         <button
           onClick={triggerQuickExit}
-          className="w-full py-2.5 px-3.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-brand-text border border-brand-border text-xs font-bold transition-colors flex items-center justify-center gap-2 group shadow-xs"
+          className="w-full py-2.5 px-3.5 rounded-xl bg-[#FAF9FF] hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] text-xs font-bold transition-colors flex items-center justify-center gap-2 group cursor-pointer"
           title="Instant camouflage disguise (Esc) — Hides dashboard behind weather planner without cancelling active safety sessions"
         >
-          <EyeOff className="w-4 h-4 text-brand-coral group-hover:scale-110 transition-transform" />
+          <EyeOff className="w-4 h-4 text-[#D92D45] group-hover:scale-110 transition-transform" />
           <span>Quick Exit (Esc)</span>
         </button>
 
@@ -252,23 +237,23 @@ export const SidebarNav: React.FC = () => {
         <div className="relative">
           <button
             onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-            className="w-full p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-brand-border text-left transition-colors flex items-center justify-between"
+            className="w-full p-2.5 rounded-2xl bg-[#FAF9FF] hover:bg-[#F2EDFF] border border-[#E8E1F3] text-left transition-colors flex items-center justify-between cursor-pointer"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-teal to-brand-violet text-white font-extrabold text-xs flex items-center justify-center uppercase shadow-xs">
-                {currentUser.full_name.charAt(0)}
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-[#5517C8] to-[#365BFF] text-white font-extrabold text-xs flex items-center justify-center uppercase shadow-xs">
+                {currentUser.full_name?.charAt(0) || 'U'}
               </div>
               <div className="leading-tight">
-                <p className="font-extrabold text-brand-text text-xs truncate max-w-[120px]">
+                <p className="font-extrabold text-[#211638] text-xs truncate max-w-[120px]">
                   {currentUser.full_name}
                 </p>
-                <p className="text-[10px] text-brand-muted capitalize">
+                <p className="text-[10px] text-[#716B80] capitalize">
                   {currentRole === 'user' ? 'Protected User' : 'Trusted Contact'}
                 </p>
               </div>
             </div>
             <ChevronUp
-              className={`w-4 h-4 text-brand-muted transition-transform ${
+              className={`w-4 h-4 text-[#716B80] transition-transform ${
                 isProfileMenuOpen ? 'rotate-180' : ''
               }`}
             />
@@ -276,10 +261,10 @@ export const SidebarNav: React.FC = () => {
 
           {/* Profile Dropdown Popover */}
           {isProfileMenuOpen && (
-            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-2xl border border-brand-border shadow-elevated p-2 space-y-1 z-50 animate-fadeIn text-xs">
-              <div className="px-3 py-2 border-b border-brand-border">
-                <p className="font-bold text-brand-text">{currentUser.full_name}</p>
-                <p className="text-[11px] text-brand-muted truncate">{currentUser.email}</p>
+            <div className="absolute bottom-full left-0 right-0 mb-2 bg-white rounded-2xl border border-[#E8E1F3] shadow-elevated p-2 space-y-1 z-50 animate-fadeIn text-xs">
+              <div className="px-3 py-2 border-b border-[#E8E1F3]">
+                <p className="font-bold text-[#211638]">{currentUser.full_name}</p>
+                <p className="text-[11px] text-[#716B80] truncate">{currentUser.email}</p>
               </div>
 
               <button
@@ -287,9 +272,9 @@ export const SidebarNav: React.FC = () => {
                   setCurrentScreen('privacy_settings');
                   setIsProfileMenuOpen(false);
                 }}
-                className="w-full px-3 py-2 rounded-lg text-left text-brand-text hover:bg-slate-50 flex items-center gap-2 font-medium"
+                className="w-full px-3 py-2 rounded-lg text-left text-[#211638] hover:bg-[#F2EDFF] flex items-center gap-2 font-medium"
               >
-                <Lock className="w-4 h-4 text-brand-teal" />
+                <Lock className="w-4 h-4 text-[#5517C8]" />
                 <span>Privacy & Discreet Mode</span>
               </button>
 
@@ -298,9 +283,9 @@ export const SidebarNav: React.FC = () => {
                   setCurrentScreen('account_settings');
                   setIsProfileMenuOpen(false);
                 }}
-                className="w-full px-3 py-2 rounded-lg text-left text-brand-text hover:bg-slate-50 flex items-center gap-2 font-medium"
+                className="w-full px-3 py-2 rounded-lg text-left text-[#211638] hover:bg-[#F2EDFF] flex items-center gap-2 font-medium"
               >
-                <Settings className="w-4 h-4 text-brand-violet" />
+                <Settings className="w-4 h-4 text-[#365BFF]" />
                 <span>Account & Medical Data</span>
               </button>
 
@@ -309,14 +294,14 @@ export const SidebarNav: React.FC = () => {
                   setCurrentScreen('notifications_inbox');
                   setIsProfileMenuOpen(false);
                 }}
-                className="w-full px-3 py-2 rounded-lg text-left text-brand-text hover:bg-slate-50 flex items-center justify-between font-medium"
+                className="w-full px-3 py-2 rounded-lg text-left text-[#211638] hover:bg-[#F2EDFF] flex items-center justify-between font-medium"
               >
                 <div className="flex items-center gap-2">
-                  <Bell className="w-4 h-4 text-brand-teal" />
+                  <Bell className="w-4 h-4 text-[#08C9E8]" />
                   <span>Notifications</span>
                 </div>
                 {notifications.length > 0 && (
-                  <span className="px-1.5 py-0.2 rounded-full bg-brand-aqua text-brand-teal font-mono text-[10px]">
+                  <span className="px-1.5 py-0.2 rounded-full bg-[#F2EDFF] text-[#5517C8] font-mono text-[10px]">
                     {notifications.length}
                   </span>
                 )}
@@ -327,19 +312,19 @@ export const SidebarNav: React.FC = () => {
                   setIsAuthOpen(true);
                   setIsProfileMenuOpen(false);
                 }}
-                className="w-full px-3 py-2 rounded-lg text-left text-brand-text hover:bg-slate-50 flex items-center gap-2 font-medium"
+                className="w-full px-3 py-2 rounded-lg text-left text-[#211638] hover:bg-[#F2EDFF] flex items-center gap-2 font-medium"
               >
-                <UserCheck className="w-4 h-4 text-brand-deepTeal" />
+                <UserCheck className="w-4 h-4 text-[#5517C8]" />
                 <span>Switch / Auth Account</span>
               </button>
 
-              <div className="pt-1 border-t border-brand-border">
+              <div className="pt-1 border-t border-[#E8E1F3]">
                 <button
                   onClick={() => {
                     signOut();
                     setIsProfileMenuOpen(false);
                   }}
-                  className="w-full px-3 py-2 rounded-lg text-left text-brand-coral hover:bg-brand-peach flex items-center gap-2 font-bold"
+                  className="w-full px-3 py-2 rounded-lg text-left text-[#D92D45] hover:bg-[#FFF1F3] flex items-center gap-2 font-bold cursor-pointer"
                 >
                   <LogOut className="w-4 h-4" />
                   <span>Sign Out</span>

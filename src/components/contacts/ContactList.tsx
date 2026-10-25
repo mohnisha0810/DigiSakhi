@@ -139,22 +139,22 @@ export const ContactList: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-teal bg-brand-aqua px-3 py-1 rounded-full border border-teal-200">
+          <span className="text-[11px] font-bold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Trusted Safety Circle
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text mt-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-black text-[#211638] mt-2 tracking-tight">
             Trusted Circle & Escalation Order
           </h1>
-          <p className="text-sm text-brand-muted mt-1 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#716B80] mt-1 max-w-2xl leading-relaxed">
             Contacts in your escalation chain receive alerts sequentially when check-in deadlines are missed or urgent distress is signaled. Unverified contacts cannot receive alerts.
           </p>
         </div>
 
         <button
           onClick={() => setIsAddModalOpen(true)}
-          className="px-4 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal hover:shadow-hover transition-all flex items-center gap-2 active:scale-[0.98]"
+          className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-[0.98]"
         >
           <UserPlus className="w-4 h-4" />
           Add Trusted Contact
@@ -163,8 +163,8 @@ export const ContactList: React.FC = () => {
 
       {/* Floating Feedback Banner */}
       {feedbackNotice && (
-        <div className="p-3 bg-brand-aqua border border-teal-200 rounded-xl text-brand-deepTeal text-xs font-semibold flex items-center gap-2 shadow-xs animate-fadeIn">
-          <Check className="w-4 h-4 text-brand-teal shrink-0" />
+        <div className="p-3 bg-[#F2EDFF] border border-[#5517C8]/20 rounded-xl text-[#351078] text-xs font-semibold flex items-center gap-2 shadow-xs animate-fadeIn">
+          <Check className="w-4 h-4 text-[#5517C8] shrink-0" />
           <span>{feedbackNotice}</span>
         </div>
       )}
@@ -200,19 +200,19 @@ export const ContactList: React.FC = () => {
                 className="py-4 flex flex-wrap items-center justify-between gap-4 hover:bg-slate-50/80 px-3 rounded-xl transition-colors group"
               >
                 <div className="flex items-center gap-3.5">
-                  <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-deepTeal font-extrabold text-sm flex items-center justify-center border border-teal-200 shrink-0">
+                  <div className="w-10 h-10 rounded-xl bg-[#F2EDFF] text-[#351078] font-black text-sm flex items-center justify-center border border-[#5517C8]/20 shrink-0">
                     #{contact.escalation_order}
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <p className="font-extrabold text-brand-text text-sm">{contact.full_name}</p>
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-text border border-slate-200">
+                      <p className="font-extrabold text-[#211638] text-sm">{contact.full_name}</p>
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-[#211638] border border-slate-200">
                         {contact.relationship}
                       </span>
                       {contact.can_view_location && (
                         <span
-                          className="text-[10px] text-brand-teal font-bold flex items-center gap-0.5 bg-brand-aqua/80 px-2 py-0.5 rounded-full"
+                          className="text-[10px] text-[#5517C8] font-bold flex items-center gap-0.5 bg-[#F2EDFF] px-2 py-0.5 rounded-full border border-[#5517C8]/20"
                           title="Authorized to view location during active incidents"
                         >
                           <MapPin className="w-3 h-3" />
@@ -220,7 +220,7 @@ export const ContactList: React.FC = () => {
                         </span>
                       )}
                     </div>
-                    <p className="text-xs text-brand-muted mt-0.5 flex items-center gap-2 flex-wrap">
+                    <p className="text-xs text-[#716B80] mt-0.5 flex items-center gap-2 flex-wrap">
                       <span className="flex items-center gap-1 font-mono">
                         <Mail className="w-3 h-3" />
                         {contact.email}
@@ -290,7 +290,7 @@ export const ContactList: React.FC = () => {
                 type="button"
                 onClick={handleManualSync}
                 disabled={isSyncing}
-                className="px-3 py-1.5 rounded-lg border border-brand-teal/40 bg-brand-teal/5 hover:bg-brand-teal/10 text-brand-teal text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg border border-[#5517C8]/30 bg-[#F2EDFF] hover:bg-[#EAF7FF] text-[#5517C8] text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
                 title="Check server to see if any recipient has accepted"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
@@ -360,7 +360,7 @@ export const ContactList: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleSms(contact, token)}
-                          className="px-3 py-1.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
+                          className="px-3 py-1.5 bg-[#5517C8] hover:bg-[#4510AB] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
                           title="Open phone Messages app (or copy message on desktop)"
                         >
                           <MessageSquare className="w-3.5 h-3.5 fill-current" />
@@ -370,17 +370,17 @@ export const ContactList: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleCopyMessage(contact, token)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
                           title="Copy complete invitation text to clipboard"
                         >
                           {copiedMsgToken === token ? (
                             <>
-                              <Check className="w-3.5 h-3.5 text-brand-teal" />
-                              <span className="text-brand-teal">Copied!</span>
+                              <Check className="w-3.5 h-3.5 text-[#16865C]" />
+                              <span className="text-[#16865C]">Copied!</span>
                             </>
                           ) : (
                             <>
-                              <Copy className="w-3.5 h-3.5 text-brand-muted" />
+                              <Copy className="w-3.5 h-3.5 text-[#716B80]" />
                               <span>Copy Msg</span>
                             </>
                           )}
@@ -389,17 +389,17 @@ export const ContactList: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleCopyInviteLink(token, contact)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
                           title="Copy verification link only"
                         >
                           {copiedToken === token ? (
                             <>
-                              <Check className="w-3.5 h-3.5 text-brand-teal" />
-                              <span className="text-brand-teal">Link!</span>
+                              <Check className="w-3.5 h-3.5 text-[#16865C]" />
+                              <span className="text-[#16865C]">Link!</span>
                             </>
                           ) : (
                             <>
-                              <Copy className="w-3.5 h-3.5 text-brand-muted" />
+                              <Copy className="w-3.5 h-3.5 text-[#716B80]" />
                               <span>Link</span>
                             </>
                           )}
@@ -408,7 +408,7 @@ export const ContactList: React.FC = () => {
                         <button
                           type="button"
                           onClick={() => handleOpenRecipientPage(token, contact)}
-                          className="px-2.5 py-1.5 bg-brand-aqua/70 hover:bg-brand-aqua text-brand-deepTeal border border-teal-200 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          className="px-2.5 py-1.5 bg-[#F2EDFF] hover:bg-[#EAF7FF] text-[#351078] border border-[#5517C8]/20 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
                           title="Test recipient acceptance screen in new tab"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />

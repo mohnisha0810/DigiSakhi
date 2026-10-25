@@ -4,32 +4,42 @@
 
 @layer base {
   :root {
-    --color-brand-teal: #0F9D8A;
-    --color-brand-deep-teal: #087F73;
-    --color-brand-violet: #7457F5;
-    --color-brand-lavender: #EEE9FF;
-    --color-brand-aqua: #DDF8F1;
-    --color-brand-coral: #FF6B6B;
-    --color-brand-peach: #FFF0E8;
-    --color-brand-bg: #F8FAFC;
+    --color-brand-purple: #5517C8;
+    --color-brand-deep-purple: #351078;
+    --color-brand-electric-blue: #365BFF;
+    --color-brand-cyan: #08C9E8;
+    --color-brand-lavender: #F2EDFF;
+    --color-brand-pale-blue: #EAF7FF;
+    --color-brand-bg: #FAF9FF;
     --color-brand-card: #FFFFFF;
-    --color-brand-text: #20243A;
-    --color-brand-muted: #697386;
-    --color-brand-border: #E7EAF1;
+    --color-brand-text: #211638;
+    --color-brand-muted: #716B80;
+    --color-brand-border: #E8E1F3;
+    --color-brand-green: #16865C;
+    --color-brand-amber: #C87912;
+    --color-brand-red: #D92D45;
+
+    /* Legacy Variable Compatibility */
+    --color-brand-teal: #5517C8;
+    --color-brand-deep-teal: #351078;
+    --color-brand-violet: #365BFF;
+    --color-brand-aqua: #F2EDFF;
+    --color-brand-coral: #D92D45;
+    --color-brand-peach: #FFF1F3;
   }
 
   body {
-    background-color: #F8FAFC;
-    color: #20243A;
+    background-color: #FAF9FF;
+    color: #211638;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
   }
 
-  /* Accessible focus indicators with brand teal */
+  /* Accessible focus indicators with brand royal purple & cyan */
   *:focus-visible {
-    outline: 2px solid #0F9D8A;
+    outline: 2px solid #5517C8;
     outline-offset: 2px;
   }
 }
@@ -40,17 +50,17 @@
   height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #F1F5F9;
+  background: #FAF9FF;
 }
 ::-webkit-scrollbar-thumb {
-  background: #CBD5E1;
+  background: #E8E1F3;
   border-radius: 9999px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #0F9D8A;
+  background: #5517C8;
 }
 
-/* Skeleton Shimmer Effect for Light Theme */
+/* Skeleton Shimmer Effect for Light Lavender Theme */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -63,9 +73,9 @@
 .skeleton-shimmer {
   background: linear-gradient(
     90deg,
-    rgba(241, 245, 249, 0.8) 25%,
-    rgba(226, 232, 240, 0.9) 50%,
-    rgba(241, 245, 249, 0.8) 75%
+    rgba(242, 237, 255, 0.6) 25%,
+    rgba(232, 225, 243, 0.9) 50%,
+    rgba(242, 237, 255, 0.6) 75%
   );
   background-size: 200% 100%;
   animation: shimmer 1.6s infinite;
@@ -97,28 +107,16 @@
   }
 }
 
-/* Leaflet map styles - Light theme crisp tiles */
+/* Leaflet map styles */
 .leaflet-container {
-  width: 100%;
-  height: 100%;
+  font-family: inherit;
+  background-color: #FAF9FF;
   border-radius: 1rem;
-  z-index: 10;
-  background-color: #F8FAFC !important;
-  border: 1px solid #E7EAF1;
 }
 
-.leaflet-tile {
-  filter: contrast(1.05) saturate(1.1);
-}
-
-.leaflet-popup-content-wrapper {
-  background-color: #FFFFFF !important;
-  color: #20243A !important;
-  border-radius: 0.875rem !important;
-  border: 1px solid #E7EAF1 !important;
-  box-shadow: 0 10px 25px -3px rgba(32, 36, 58, 0.12) !important;
-}
-
-.leaflet-popup-tip {
-  background-color: #FFFFFF !important;
+.custom-user-marker,
+.custom-contact-marker,
+.custom-dest-marker {
+  background: transparent;
+  border: none;
 }

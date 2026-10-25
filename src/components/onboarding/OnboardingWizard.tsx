@@ -386,7 +386,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   onClick={handleStep1Continue}
                   disabled={saving}
-                  className="px-7 py-3 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-extrabold shadow-teal transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+                  className="px-7 py-3 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer active:scale-95"
                 >
                   <span>{saving ? 'Saving...' : 'Continue'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -507,7 +507,7 @@ export const OnboardingWizard: React.FC = () => {
                   <button
                     type="submit"
                     disabled={inviting}
-                    className="px-4 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
+                    className="px-4 py-2 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50 shadow-md"
                   >
                     <Send className="w-3.5 h-3.5" />
                     <span>{inviting ? 'Generating...' : 'Send Invitation'}</span>
@@ -659,7 +659,7 @@ export const OnboardingWizard: React.FC = () => {
                     type="button"
                     onClick={handleStep2Continue}
                     disabled={saving}
-                    className="px-6 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-extrabold shadow-teal transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                    className="px-6 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                   >
                     <span>{saving ? 'Saving...' : 'Save & Continue'}</span>
                     <ArrowRight className="w-4 h-4" />
@@ -703,7 +703,7 @@ export const OnboardingWizard: React.FC = () => {
                     onChange={(e) => setCheckInsEnabled(e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-teal"></div>
+                  <div className="w-11 h-6 bg-slate-300 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#5517C8]"></div>
                 </label>
               </div>
 
@@ -788,7 +788,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   onClick={handleStep3Continue}
                   disabled={saving}
-                  className="px-6 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-extrabold shadow-teal transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <span>{saving ? 'Saving...' : 'Save & Continue'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -931,7 +931,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   onClick={handleStep4Continue}
                   disabled={saving}
-                  className="px-6 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-extrabold shadow-teal transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
+                  className="px-6 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-extrabold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5 cursor-pointer active:scale-95"
                 >
                   <span>{saving ? 'Saving...' : 'Save & Continue'}</span>
                   <ArrowRight className="w-4 h-4" />
@@ -1015,7 +1015,7 @@ export const OnboardingWizard: React.FC = () => {
                   type="button"
                   onClick={handleFinish}
                   disabled={saving}
-                  className="w-full sm:w-auto px-10 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-2xl text-sm font-extrabold shadow-teal transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
+                  className="w-full sm:w-auto px-10 py-3.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-2xl text-sm font-black shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95"
                 >
                   <span>{saving ? 'Finalizing Setup...' : 'Go to My Dashboard'}</span>
                   <ArrowRight className="w-4 h-4" />

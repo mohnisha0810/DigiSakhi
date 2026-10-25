@@ -129,22 +129,22 @@ export const UserDashboard: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* 1. TOP HEADER: Greeting, Status & Direct Emergency Controls */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E8E1F3] shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
         {/* Soft background glow */}
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full bg-gradient-to-br from-teal-100/50 to-violet-100/40 blur-2xl pointer-events-none" />
+        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] blur-2xl pointer-events-none" />
 
         <div className="space-y-1.5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-aqua/50 border border-teal-200/80 shadow-2xs mb-1">
-            <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
-            <span className="text-xs font-extrabold text-brand-deepTeal">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F2EDFF] border border-[#5517C8]/20 shadow-2xs mb-1">
+            <span className="w-2 h-2 rounded-full bg-[#5517C8] animate-pulse" />
+            <span className="text-xs font-extrabold text-[#351078]">
               DigiSakhi Protection
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight">
-            {getGreeting()}, {currentUser.full_name.split(' ')[0]}
+          <h1 className="text-2xl sm:text-3xl font-black text-[#211638] tracking-tight">
+            Welcome back, {currentUser.full_name.split(' ')[0]}
           </h1>
-          <p className="text-xs sm:text-sm text-brand-muted max-w-xl leading-relaxed">
-            Your personal safety command center. Monitor journeys, manage automated check-ins, and alert your circle with instant discreet dispatches.
+          <p className="text-xs sm:text-sm text-[#716B80] max-w-xl leading-relaxed">
+            Your journey, your circle, your peace of mind.
           </p>
         </div>
 
@@ -152,7 +152,7 @@ export const UserDashboard: React.FC = () => {
         <div className="flex items-center gap-2.5 shrink-0 relative z-10">
           <button
             onClick={() => setIsEmergencyMessageOpen(true)}
-            className="px-4 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-black shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
+            className="px-4 py-2.5 bg-[#D92D45] hover:bg-red-700 text-white rounded-xl text-xs font-black shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
             title="Dispatch Emergency SOS message with live GPS location"
           >
             <ShieldAlert className="w-4 h-4 animate-pulse" />
@@ -161,19 +161,19 @@ export const UserDashboard: React.FC = () => {
 
           <button
             onClick={() => setIsEmergencyCallOpen(true)}
-            className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
+            className="px-4 py-2.5 bg-[#211638] hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
             title="Directly dial 112 National Emergency Helpline or Primary Contact"
           >
-            <PhoneCall className="w-4 h-4 text-coral-400" />
+            <PhoneCall className="w-4 h-4 text-red-400" />
             <span>Call 112</span>
           </button>
 
           <button
             onClick={() => setCurrentScreen('settings')}
-            className="p-2.5 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl transition-colors"
+            className="p-2.5 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl transition-colors"
             title="Profile & Settings"
           >
-            <Settings className="w-4 h-4 text-brand-muted hover:text-brand-text" />
+            <Settings className="w-4 h-4 text-[#716B80] hover:text-[#5517C8]" />
           </button>
         </div>
       </div>
@@ -299,21 +299,21 @@ export const UserDashboard: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="p-5 bg-gradient-to-r from-slate-50 to-brand-bg border border-brand-border rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs shadow-card">
+        <div className="p-5 bg-gradient-to-r from-white to-[#F2EDFF]/40 border border-[#E8E1F3] rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs shadow-card">
           <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-white border border-brand-border text-brand-teal flex items-center justify-center shrink-0 shadow-xs">
-              <Compass className="w-5 h-5 text-brand-teal" />
+            <div className="w-11 h-11 rounded-2xl bg-[#F2EDFF] border border-[#5517C8]/20 text-[#5517C8] flex items-center justify-center shrink-0 shadow-xs">
+              <Compass className="w-5 h-5 text-[#5517C8]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <strong className="text-brand-text font-black text-sm">
+                <strong className="text-[#211638] font-black text-sm">
                   You're not currently on a safety journey.
                 </strong>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200/80 text-brand-muted">
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-[#716B80] border border-[#E8E1F3]">
                   Standby Mode
                 </span>
               </div>
-              <p className="text-brand-muted text-xs mt-0.5">
+              <p className="text-[#716B80] text-xs mt-0.5">
                 Start a safety journey with customizable check-ins or automated presets before heading out.
               </p>
             </div>
@@ -321,7 +321,7 @@ export const UserDashboard: React.FC = () => {
           <div className="flex items-center gap-2.5">
             <button
               onClick={() => setCurrentScreen('journeys')}
-              className="px-5 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-extrabold text-xs shadow-teal transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+              className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
             >
               <Compass className="w-4 h-4" />
               <span>Start a Safety Journey</span>
@@ -407,21 +407,21 @@ export const UserDashboard: React.FC = () => {
 
       {/* 5. ONE LARGE PROMINENT PRIMARY CARD (Answers: "What should I do next?") */}
       {!activeJourney ? (
-        <div className="bg-gradient-to-br from-brand-aqua/20 via-white to-brand-lavender/25 rounded-3xl p-6 sm:p-8 border border-brand-border shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-gradient-to-br from-[#F2EDFF]/50 via-white to-[#EAF7FF]/50 rounded-3xl p-6 sm:p-8 border border-[#E8E1F3] shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
           <div className="max-w-xl space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20">
               Primary Protection Workflow
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#211638] tracking-tight mt-1">
               Start a Safety Journey
             </h2>
-            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#716B80] leading-relaxed">
               Going out, commuting, or walking home alone? Launch a monitored journey. DigiSakhi verifies your arrival upon entering your destination safe radius, and escalates to your trusted circle if overdue.
             </p>
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => setCurrentScreen('journeys')}
-                className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-sm font-bold shadow-teal hover:shadow-hover transition-all flex items-center gap-2 active:scale-95"
+                className="px-6 py-3.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-sm font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95"
               >
                 <Compass className="w-4 h-4" />
                 <span>Start a Safety Journey</span>
@@ -430,36 +430,36 @@ export const UserDashboard: React.FC = () => {
 
               <button
                 onClick={() => setIsCheckInModalOpen(true)}
-                className="px-4 py-3 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
+                className="px-4 py-3 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
               >
-                <Clock className="w-4 h-4 text-brand-teal" />
+                <Clock className="w-4 h-4 text-[#5517C8]" />
                 <span>Quick Check-in</span>
               </button>
             </div>
           </div>
 
           <div className="hidden lg:flex items-center justify-center p-6 shrink-0">
-            <div className="w-28 h-28 rounded-3xl bg-white border border-brand-border shadow-elevated flex items-center justify-center text-brand-teal">
+            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] border border-[#5517C8]/20 shadow-elevated flex items-center justify-center text-[#5517C8]">
               <Compass className="w-14 h-14 stroke-[2.2] animate-pulse-subtle" />
             </div>
           </div>
         </div>
       ) : (
-        <div className="bg-gradient-to-br from-violet-50 via-white to-brand-aqua/20 rounded-3xl p-6 sm:p-8 border border-violet-200 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="bg-gradient-to-br from-[#F2EDFF]/60 via-white to-[#EAF7FF]/60 rounded-3xl p-6 sm:p-8 border border-[#5517C8]/20 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="max-w-xl space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20">
               Active Transit
             </span>
-            <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight mt-1">
+            <h2 className="text-2xl sm:text-3xl font-black text-[#211638] tracking-tight mt-1">
               En Route to {activeJourney.destination_name}
             </h2>
-            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
-              Safe arrival geofencing is active. Expected arrival: <strong className="text-brand-text">{formatTimeOnly(activeJourney.expected_arrival_time)}</strong>. Confirm your safe arrival once you reach your destination.
+            <p className="text-xs sm:text-sm text-[#716B80] leading-relaxed">
+              Safe arrival geofencing is active. Expected arrival: <strong className="text-[#211638]">{formatTimeOnly(activeJourney.expected_arrival_time)}</strong>. Confirm your safe arrival once you reach your destination.
             </p>
             <div className="pt-2 flex flex-wrap items-center gap-3">
               <button
                 onClick={() => confirmSafeArrival(activeJourney.id)}
-                className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-sm font-bold shadow-teal transition-all flex items-center gap-2 active:scale-95"
+                className="px-6 py-3.5 bg-[#16865C] hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2 active:scale-95"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Confirm Safe Arrival</span>
@@ -467,9 +467,9 @@ export const UserDashboard: React.FC = () => {
 
               <button
                 onClick={() => setCurrentScreen('journeys')}
-                className="px-4 py-3 bg-white hover:bg-slate-50 text-brand-violet border border-violet-200 rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
+                className="px-4 py-3 bg-white hover:bg-slate-50 text-[#351078] border border-[#E8E1F3] rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
               >
-                <Compass className="w-4 h-4" />
+                <Compass className="w-4 h-4 text-[#5517C8]" />
                 <span>Open Journey Map</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
@@ -477,7 +477,7 @@ export const UserDashboard: React.FC = () => {
           </div>
 
           <div className="hidden lg:flex items-center justify-center p-6 shrink-0">
-            <div className="w-28 h-28 rounded-3xl bg-white border border-violet-200 shadow-elevated flex items-center justify-center text-brand-violet">
+            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] border border-[#5517C8]/20 shadow-elevated flex items-center justify-center text-[#5517C8]">
               <Compass className="w-14 h-14 stroke-[2.2] animate-spin-slow" />
             </div>
           </div>
@@ -487,31 +487,31 @@ export const UserDashboard: React.FC = () => {
       {/* 6. SECONDARY AREA: 3 Clean Compact Summaries (Check-in, Trusted Circle, Recent Activity) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Card A: Next Check-in Summary */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-brand-aqua text-brand-teal flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-muted">
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-[#716B80]">
                 {activeCheckIn ? 'Active' : 'Standby'}
               </span>
             </div>
-            <h3 className="font-extrabold text-brand-text text-sm">
+            <h3 className="font-extrabold text-[#211638] text-sm">
               Safety Check-in
             </h3>
-            <p className="text-xs text-brand-muted leading-relaxed">
+            <p className="text-xs text-[#716B80] leading-relaxed">
               {activeCheckIn
                 ? `Response scheduled for ${formatTimeOnly(activeCheckIn.deadline_at)}.`
                 : 'No check-in currently counting down. Set a timer before leaving.'}
             </p>
           </div>
 
-          <div className="pt-4 border-t border-brand-border/60 mt-4 flex items-center justify-between">
+          <div className="pt-4 border-t border-[#E8E1F3] mt-4 flex items-center justify-between">
             {activeCheckIn ? (
               <button
                 onClick={() => confirmCheckInSafe(activeCheckIn.id)}
-                className="w-full py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-bold text-xs shadow-teal transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2 bg-[#16865C] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>I'm Safe</span>
@@ -519,73 +519,73 @@ export const UserDashboard: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsCheckInModalOpen(true)}
-                className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+                className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
               >
                 <span>Schedule Check-in</span>
-                <ArrowRight className="w-3 h-3" />
+                <ArrowRight className="w-3 h-3 text-[#5517C8]" />
               </button>
             )}
           </div>
         </div>
 
         {/* Card B: Trusted Circle Status */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-brand-lavender text-brand-violet flex items-center justify-center">
+              <div className="w-9 h-9 rounded-xl bg-[#F2EDFF] text-[#365BFF] flex items-center justify-center">
                 <Users className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-muted font-mono">
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#16865C]/10 text-[#16865C] border border-[#16865C]/30 font-mono">
                 {acceptedContacts.length} Verified
               </span>
             </div>
-            <h3 className="font-extrabold text-brand-text text-sm">
+            <h3 className="font-extrabold text-[#211638] text-sm">
               Trusted Circle
             </h3>
-            <p className="text-xs text-brand-muted leading-relaxed">
+            <p className="text-xs text-[#716B80] leading-relaxed">
               {acceptedContacts.length > 0
                 ? `${acceptedContacts.length} responders authorized for check-ins and emergency alerts.`
                 : 'No verified contacts yet. Add your trusted friends or family members.'}
             </p>
           </div>
 
-          <div className="pt-4 border-t border-brand-border/60 mt-4">
+          <div className="pt-4 border-t border-[#E8E1F3] mt-4">
             <button
               onClick={() => setCurrentScreen('circle')}
-              className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+              className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
             >
               <span>Manage Circle</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3 h-3 text-[#5517C8]" />
             </button>
           </div>
         </div>
 
         {/* Card C: Recent Activity Preview */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-muted">
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-[#716B80]">
                 Audit Trail
               </span>
             </div>
-            <h3 className="font-extrabold text-brand-text text-sm">
+            <h3 className="font-extrabold text-[#211638] text-sm">
               Recent Activity
             </h3>
             {recentEvents.length === 0 ? (
-              <p className="text-xs text-brand-muted leading-relaxed">
+              <p className="text-xs text-[#716B80] leading-relaxed">
                 No safety events recorded yet. Recent events will appear here.
               </p>
             ) : (
               <div className="space-y-1.5 pt-1">
                 {recentEvents.slice(0, 2).map((ev) => (
                   <div key={ev.id} className="text-[11px] leading-tight">
-                    <span className="font-bold text-brand-text truncate block">
+                    <span className="font-bold text-[#211638] truncate block">
                       {ev.description}
                     </span>
-                    <span className="text-brand-muted font-mono text-[10px]">
+                    <span className="text-[#716B80] font-mono text-[10px]">
                       {formatRelativeTime(ev.created_at)}
                     </span>
                   </div>
@@ -594,13 +594,13 @@ export const UserDashboard: React.FC = () => {
             )}
           </div>
 
-          <div className="pt-4 border-t border-brand-border/60 mt-4">
+          <div className="pt-4 border-t border-[#E8E1F3] mt-4">
             <button
               onClick={() => setCurrentScreen('history')}
-              className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+              className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
             >
               <span>View Activity History</span>
-              <ArrowRight className="w-3 h-3" />
+              <ArrowRight className="w-3 h-3 text-[#5517C8]" />
             </button>
           </div>
         </div>

@@ -5,76 +5,66 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Specified SafeSphere Premium Color Palette
+        // DigiSakhi Official Final Brand Palette
         brand: {
-          teal: '#0F9D8A',       // Primary teal
-          deepTeal: '#087F73',   // Deep teal
-          violet: '#7457F5',     // Electric violet
-          lavender: '#EEE9FF',   // Soft lavender
-          aqua: '#DDF8F1',       // Light aqua
-          coral: '#FF6B6B',      // Warm coral
-          peach: '#FFF0E8',      // Soft peach
-          bg: '#F8FAFC',         // Main background
-          card: '#FFFFFF',       // White cards
-          text: '#20243A',       // Primary text
-          muted: '#697386',      // Secondary text
-          border: '#E7EAF1',     // Borders
+          purple: '#5517C8',         // Royal Purple (Primary Brand)
+          royalPurple: '#5517C8',
+          deepPurple: '#351078',     // Deep Purple (Headings, Depth)
+          electricBlue: '#365BFF',   // Electric Blue (Primary Gradient partner)
+          blue: '#365BFF',
+          brightCyan: '#08C9E8',     // Bright Cyan (Energetic Accents, Focus)
+          cyan: '#08C9E8',
+          lavender: '#F2EDFF',       // Soft Lavender (Nav active, Surface cards)
+          paleBlue: '#EAF7FF',       // Pale Blue (Neutral informative badges)
+          bg: '#FAF9FF',             // Main Canvas Background
+          card: '#FFFFFF',           // Clean White
+          text: '#211638',           // Primary Text (High contrast purple-charcoal)
+          muted: '#716B80',          // Secondary Text
+          border: '#E8E1F3',         // Borders
+          green: '#16865C',          // Success Green (Confirmations, Connected)
+          amber: '#C87912',          // Warning Amber (Pending, Caution)
+          red: '#D92D45',            // Emergency Red (SOS, Urgent 112)
+
+          // Compatibility Mappings ensuring 100% of existing components inherit the new palette:
+          teal: '#5517C8',           // Mapped to Royal Purple
+          deepTeal: '#351078',       // Mapped to Deep Purple
+          violet: '#365BFF',         // Mapped to Electric Blue
+          aqua: '#F2EDFF',           // Mapped to Soft Lavender
+          coral: '#D92D45',          // Mapped to Emergency Red
+          peach: '#FFF1F3',          // Mapped to Soft Pink/Lavender
         },
-        teal: {
-          50: '#F0FDF9',
-          100: '#DDF8F1', // Light aqua
-          200: '#B2EFE2',
-          300: '#7FE2CF',
-          400: '#2EC2AB',
-          500: '#0F9D8A', // Primary teal
-          600: '#087F73', // Deep teal
-          700: '#06635A',
-          800: '#064E47',
-          900: '#06413C',
+        purple: {
+          50: '#FAF9FF',
+          100: '#F2EDFF', // Soft lavender
+          200: '#E2D6FF',
+          300: '#C7B0FF',
+          400: '#9E77F7',
+          500: '#7B42EC',
+          600: '#5517C8', // Royal purple
+          700: '#4510AB',
+          800: '#351078', // Deep purple
+          900: '#260B57',
         },
-        violet: {
-          50: '#F8F6FF',
-          100: '#EEE9FF', // Soft lavender
-          200: '#DCD4FF',
-          300: '#BFB0FF',
-          400: '#9B84FB',
-          500: '#7457F5', // Electric violet
-          600: '#5E3DE8',
-          700: '#4D2ECC',
-          800: '#3E25A3',
-          900: '#331F83',
-        },
-        coral: {
-          50: '#FFF5F5',
-          100: '#FFF0E8', // Soft peach
-          200: '#FFD7D7',
-          300: '#FFB3B3',
-          400: '#FF8A8A',
-          500: '#FF6B6B', // Warm coral
-          600: '#EB4D4D',
-          700: '#C73636',
-          800: '#A42A2A',
-          900: '#872525',
+        cyan: {
+          50: '#F0FDFF',
+          100: '#E0FAFE',
+          200: '#BAF4FD',
+          300: '#7CE9FB',
+          400: '#34D6F5',
+          500: '#08C9E8', // Bright cyan
+          600: '#03A2C2',
+          700: '#08809B',
+          800: '#0E677C',
+          900: '#115568',
         },
         surface: {
-          50: '#F8FAFC',
-          100: '#F1F5F9',
-          200: '#E7EAF1',
-          300: '#D8DEE9',
-          muted: '#697386',
-          text: '#20243A',
+          50: '#FAF9FF',
+          100: '#F2EDFF',
+          200: '#E8E1F3',
+          300: '#D5CDE3',
+          muted: '#716B80',
+          text: '#211638',
           card: '#FFFFFF',
-        },
-        navy: {
-          950: '#0F172A',
-          900: '#1E293B',
-          850: '#26344E',
-          800: '#334155',
-          700: '#475569',
-          600: '#64748B',
-        },
-        slate: {
-          850: '#1E293B',
         },
       },
       fontFamily: {
@@ -93,13 +83,16 @@ export default {
         ],
       },
       boxShadow: {
-        subtle: '0 1px 3px 0 rgba(0, 0, 0, 0.04), 0 1px 2px 0 rgba(0, 0, 0, 0.02)',
-        card: '0 2px 8px -1px rgba(32, 36, 58, 0.06), 0 1px 4px -1px rgba(32, 36, 58, 0.04)',
-        elevated: '0 10px 25px -3px rgba(32, 36, 58, 0.08), 0 4px 10px -2px rgba(32, 36, 58, 0.04)',
-        hover: '0 14px 30px -4px rgba(32, 36, 58, 0.12), 0 6px 12px -3px rgba(32, 36, 58, 0.06)',
-        teal: '0 8px 20px -4px rgba(15, 157, 138, 0.35)',
-        violet: '0 8px 20px -4px rgba(116, 87, 245, 0.35)',
-        coral: '0 8px 20px -4px rgba(255, 107, 107, 0.35)',
+        subtle: '0 1px 3px 0 rgba(33, 22, 56, 0.03), 0 1px 2px 0 rgba(33, 22, 56, 0.02)',
+        card: '0 2px 10px -1px rgba(33, 22, 56, 0.05), 0 1px 4px -1px rgba(33, 22, 56, 0.03)',
+        elevated: '0 12px 32px -4px rgba(33, 22, 56, 0.08), 0 4px 12px -2px rgba(33, 22, 56, 0.04)',
+        hover: '0 16px 36px -4px rgba(85, 23, 200, 0.12), 0 6px 14px -3px rgba(33, 22, 56, 0.06)',
+        purple: '0 8px 24px -4px rgba(85, 23, 200, 0.35)',
+        blue: '0 8px 24px -4px rgba(54, 91, 255, 0.3)',
+        cyan: '0 8px 20px -4px rgba(8, 201, 232, 0.35)',
+        teal: '0 8px 24px -4px rgba(85, 23, 200, 0.35)', // mapped to purple shadow
+        violet: '0 8px 24px -4px rgba(54, 91, 255, 0.3)',
+        coral: '0 8px 24px -4px rgba(217, 45, 69, 0.35)',
       },
       animation: {
         'pulse-subtle': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',

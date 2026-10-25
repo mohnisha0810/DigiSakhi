@@ -563,7 +563,7 @@ export const EmergencyMessageModal: React.FC<EmergencyMessageModalProps> = ({
                     onClose();
                     openIncidentDetails(createdIncidentId);
                   }}
-                  className="w-full py-3 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal flex items-center justify-center gap-2 transition-all"
+                  className="w-full py-3 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center justify-center gap-2 transition-all"
                 >
                   <span>View Incident Console & Responses</span>
                   <ArrowRight className="w-4 h-4" />
