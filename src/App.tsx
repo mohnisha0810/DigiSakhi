@@ -25,10 +25,8 @@ import {
 } from 'lucide-react';
 
 const MainScreenRouter: React.FC = () => {
-  const { currentScreen, isLoading, error, successMessage, dismissError, dismissSuccess, isCloud } =
+  const { currentScreen, isLoading, error, successMessage, dismissError, dismissSuccess } =
     useSafeSphere();
-
-  const [showDisclaimer, setShowDisclaimer] = useState(true);
 
   const renderScreen = () => {
     switch (currentScreen) {
@@ -93,27 +91,6 @@ const MainScreenRouter: React.FC = () => {
           <button
             onClick={dismissSuccess}
             className="text-brand-deepTeal hover:text-teal-900 p-1"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {/* Local Adapter Security Transparency Banner */}
-      {!isCloud && showDisclaimer && (
-        <div className="p-3 bg-white border border-amber-200 rounded-xl text-xs text-brand-muted flex items-start justify-between gap-3 shadow-xs">
-          <div className="flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
-            <div className="leading-relaxed">
-              <span className="font-bold text-brand-text">Local Development Storage Active: </span>
-              All safety protocols, contacts, and check-ins persist across browser refreshes.
-              For production Supabase PostgreSQL and Row Level Security, supply <code className="text-brand-teal bg-brand-aqua px-1.5 py-0.2 rounded font-mono">VITE_SUPABASE_URL</code>.
-            </div>
-          </div>
-          <button
-            onClick={() => setShowDisclaimer(false)}
-            className="text-brand-muted hover:text-brand-text p-1"
-            title="Dismiss notice"
           >
             <X className="w-4 h-4" />
           </button>

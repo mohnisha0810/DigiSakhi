@@ -302,7 +302,7 @@ export const SafetyMap: React.FC = () => {
         </div>
       </div>
 
-      {/* Geolocation State Simulation & Inspection Bar (for Hackathon Testing) */}
+      {/* Geolocation State Testing & Inspection Bar */}
       <div className="bg-brand-bg border border-brand-border rounded-2xl p-4 shadow-card">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2">

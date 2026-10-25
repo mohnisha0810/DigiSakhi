@@ -82,7 +82,7 @@ export const UserDashboard: React.FC = () => {
     currentUser.full_name &&
     (currentUser.emergency_notes || currentUser.medical_info)
   );
-  const isContactComplete = acceptedContacts.length > 0;
+  const isContactComplete = contacts.length > 0;
   const isCheckInComplete = Boolean(protocols.length > 0 || defaultProtocol);
   const isEmergencyComplete = Boolean(
     currentUser.emergency_notes || currentUser.discreet_exit_pin || currentUser.medical_info
@@ -124,7 +124,7 @@ export const UserDashboard: React.FC = () => {
   ];
 
   const completedCount = checklistItems.filter((item) => item.completed).length;
-  const isSetupIncomplete = completedCount < checklistItems.length && !isChecklistDismissed;
+  const isSetupIncomplete = !currentUser.onboarding_completed && completedCount < checklistItems.length && !isChecklistDismissed;
 
   return (
     <div className="space-y-6 animate-fadeIn">
@@ -536,7 +536,11 @@ export const UserDashboard: React.FC = () => {
                 <Users className="w-4 h-4" />
               </div>
               <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#16865C]/10 text-[#16865C] border border-[#16865C]/30 font-mono">
-                {acceptedContacts.length} Verified
+                {acceptedContacts.length > 0
+                  ? `${acceptedContacts.length} Verified`
+                  : contacts.length > 0
+                  ? `${contacts.length} Added`
+                  : '0 Verified'}
               </span>
             </div>
             <h3 className="font-extrabold text-[#211638] text-sm">
@@ -544,8 +548,10 @@ export const UserDashboard: React.FC = () => {
             </h3>
             <p className="text-xs text-[#716B80] leading-relaxed">
               {acceptedContacts.length > 0
-                ? `${acceptedContacts.length} responders authorized for check-ins and emergency alerts.`
-                : 'No verified contacts yet. Add your trusted friends or family members.'}
+                ? `${acceptedContacts.length} responder(s) authorized for check-ins and emergency alerts.`
+                : contacts.length > 0
+                ? `${contacts.length} responder(s) in escalation circle (${contacts.length - acceptedContacts.length} pending recipient acceptance).`
+                : 'No contacts added yet. Add your trusted friends or family members.'}
             </p>
           </div>
 

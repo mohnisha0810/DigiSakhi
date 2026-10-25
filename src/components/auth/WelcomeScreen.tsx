@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 
 export const WelcomeScreen: React.FC = () => {
-  const { signIn, signUp, allProfiles, switchUserAccount } = useSafeSphere();
+  const { signIn, signUp } = useSafeSphere();
 
   const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
@@ -34,7 +34,6 @@ export const WelcomeScreen: React.FC = () => {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-  const [showDemoAccounts, setShowDemoAccounts] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,18 +80,6 @@ export const WelcomeScreen: React.FC = () => {
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Authentication error. Please check your credentials.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemoLogin = async (profId: string) => {
-    setErrorMsg(null);
-    setLoading(true);
-    try {
-      await switchUserAccount(profId);
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to switch demo account.');
     } finally {
       setLoading(false);
     }
@@ -396,38 +383,6 @@ export const WelcomeScreen: React.FC = () => {
               >
                 {mode === 'signin' ? 'Get Started' : 'Log In'}
               </button>
-            </div>
-
-            {/* Quick Demo Access for Judges */}
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => setShowDemoAccounts(!showDemoAccounts)}
-                className="text-[11px] font-semibold text-[#716B80] hover:text-[#5517C8] transition-colors"
-              >
-                {showDemoAccounts ? 'Hide Demo Logins' : 'Judging / Evaluation Demo Accounts ▾'}
-              </button>
-
-              {showDemoAccounts && (
-                <div className="mt-3 p-3 bg-[#FAF9FF] rounded-xl border border-[#E8E1F3] space-y-1.5 text-left animate-fadeIn">
-                  <p className="text-[10px] font-bold text-[#716B80] uppercase tracking-wider">
-                    Fast Evaluation Sign-In:
-                  </p>
-                  {allProfiles.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => handleQuickDemoLogin(p.id)}
-                      disabled={loading}
-                      className="w-full p-2 rounded-lg bg-white hover:bg-[#F2EDFF] border border-[#E8E1F3] text-xs flex items-center justify-between text-left transition-colors"
-                    >
-                      <span className="font-semibold text-[#211638]">
-                        {p.full_name} <span className="text-[10px] text-[#716B80]">({p.id === 'usr_elena_01' ? 'User' : 'Contact'})</span>
-                      </span>
-                      <ArrowRight className="w-3 h-3 text-[#5517C8]" />
-                    </button>
-                  ))}
-                </div>
-              )}
             </div>
           </div>
         </div>

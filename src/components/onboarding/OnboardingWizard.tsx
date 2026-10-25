@@ -427,7 +427,7 @@ export const OnboardingWizard: React.FC = () => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Maya Patel"
+                      placeholder="e.g. Priya Sharma"
                       value={contactName}
                       onChange={(e) => setContactName(e.target.value)}
                       className="w-full bg-white border border-brand-border rounded-lg px-3 py-2 text-xs text-brand-text focus:outline-none focus:border-brand-teal"

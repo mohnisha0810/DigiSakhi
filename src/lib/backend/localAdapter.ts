@@ -135,7 +135,6 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
     const protocols = LocalStorageDB.getItem<SafetyProtocol[]>('safety_protocols', []);
     LocalStorageDB.setItem('safety_protocols', [...protocols, defaultProtocol]);
-
     LocalStorageDB.setItem('profiles', [...profiles, newProfile]);
 
     const session: AuthSession = {
@@ -148,16 +147,183 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
     } catch {}
 
+    // Synchronize to serverless backend for multi-device recovery
+    try {
+      if (typeof window !== 'undefined' && 'fetch' in window) {
+        await fetch('/api/account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            action: 'signup',
+            email: newProfile.email,
+            password: params.password,
+            fullName: newProfile.full_name,
+            phoneNumber: newProfile.phone_number,
+            emergencyNotes: newProfile.emergency_notes,
+            medicalInfo: newProfile.medical_info,
+          }),
+        });
+      }
+    } catch (apiErr) {
+      console.warn('Backend sign-up sync note:', apiErr);
+    }
+
     return session;
   }
 
+  private syncToApi(action: string, payload: Record<string, any>): void {
+    if (typeof window !== 'undefined' && 'fetch' in window) {
+      try {
+        fetch('/api/account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, ...payload }),
+        }).catch((err) => {
+          console.warn(`[localAdapter] syncToApi error (${action}):`, err);
+        });
+      } catch {}
+    }
+  }
+
   async signIn(email: string, password?: string): Promise<AuthSession> {
+    const cleanEmail = email.trim().toLowerCase();
+
+    // 1. Try serverless backend persistence first for cross-device support
+    try {
+      if (typeof window !== 'undefined' && 'fetch' in window) {
+        const res = await fetch('/api/account', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'signin', email: cleanEmail, password }),
+        });
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.session?.profile) {
+            let serverProfile = result.session.profile;
+
+            // Merge into local profiles
+            const localProfiles = LocalStorageDB.getItem<UserProfile[]>('profiles', []);
+            const existingLocalProfile = localProfiles.find(
+              (p) => p.id === serverProfile.id || p.email.toLowerCase() === serverProfile.email.toLowerCase()
+            );
+
+            // If local profile has higher onboarding progress or saved details, preserve them
+            if (existingLocalProfile) {
+              const localCompleted = Boolean(existingLocalProfile.onboarding_completed);
+              const localStep = existingLocalProfile.onboarding_step || 1;
+              const serverCompleted = Boolean(serverProfile.onboarding_completed);
+              const serverStep = serverProfile.onboarding_step || 1;
+
+              serverProfile = {
+                ...existingLocalProfile,
+                ...serverProfile,
+                onboarding_completed: localCompleted || serverCompleted,
+                onboarding_step: Math.max(localStep, serverStep),
+                check_in_preferences: {
+                  ...existingLocalProfile.check_in_preferences,
+                  ...serverProfile.check_in_preferences,
+                },
+                emergency_preferences: {
+                  ...existingLocalProfile.emergency_preferences,
+                  ...serverProfile.emergency_preferences,
+                },
+              };
+            }
+
+            const updatedProfiles = localProfiles.filter((p) => p.id !== serverProfile.id && p.email !== serverProfile.email);
+            LocalStorageDB.setItem('profiles', [...updatedProfiles, serverProfile]);
+
+            // Sync contacts from backend with local fallback merge
+            const localContacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
+            const userLocalContacts = localContacts.filter((c) => c.user_id === serverProfile.id);
+            const serverContacts: TrustedContact[] = Array.isArray(result.data?.contacts) ? result.data.contacts : [];
+
+            // Combine unique contacts by ID
+            const contactMap = new Map<string, TrustedContact>();
+            userLocalContacts.forEach((c) => contactMap.set(c.id, c));
+            serverContacts.forEach((c) => contactMap.set(c.id, c));
+            const mergedUserContacts = Array.from(contactMap.values());
+
+            const otherContacts = localContacts.filter((c) => c.user_id !== serverProfile.id);
+            LocalStorageDB.setItem('trusted_contacts', [...otherContacts, ...mergedUserContacts]);
+
+            // If local had contacts not yet in backend, sync to backend
+            if (userLocalContacts.length > serverContacts.length) {
+              this.syncToApi('sync_user_data', {
+                userId: serverProfile.id,
+                data: { contacts: mergedUserContacts, profile: serverProfile },
+              });
+            }
+
+            // Sync protocols
+            const localProtocols = LocalStorageDB.getItem<SafetyProtocol[]>('safety_protocols', []);
+            const userLocalProtocols = localProtocols.filter((p) => p.user_id === serverProfile.id);
+            const serverProtocols: SafetyProtocol[] = Array.isArray(result.data?.protocols) ? result.data.protocols : [];
+            const protoMap = new Map<string, SafetyProtocol>();
+            userLocalProtocols.forEach((p) => protoMap.set(p.id, p));
+            serverProtocols.forEach((p) => protoMap.set(p.id, p));
+            const mergedProtocols = Array.from(protoMap.values());
+            const otherProtocols = localProtocols.filter((p) => p.user_id !== serverProfile.id);
+            LocalStorageDB.setItem('safety_protocols', [...otherProtocols, ...mergedProtocols]);
+
+            // Sync invitations
+            const localInvs = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
+            const userLocalInvs = localInvs.filter((i) => i.inviter_id === serverProfile.id);
+            const serverInvs: ContactInvitation[] = Array.isArray(result.data?.invitations) ? result.data.invitations : [];
+            const invMap = new Map<string, ContactInvitation>();
+            userLocalInvs.forEach((i) => invMap.set(i.id, i));
+            serverInvs.forEach((i) => invMap.set(i.id, i));
+            const mergedInvs = Array.from(invMap.values());
+            const otherInvs = localInvs.filter((i) => i.inviter_id !== serverProfile.id);
+            LocalStorageDB.setItem('contact_invitations', [...otherInvs, ...mergedInvs]);
+
+            // Sync journeys
+            if (Array.isArray(result.data?.journeys)) {
+              const localJourneys = LocalStorageDB.getItem<Journey[]>('journeys', []);
+              const userLocalJourneys = localJourneys.filter((j) => j.owner_user_id === serverProfile.id);
+              const journeyMap = new Map<string, Journey>();
+              userLocalJourneys.forEach((j) => journeyMap.set(j.id, j));
+              (result.data.journeys as Journey[]).forEach((j) => journeyMap.set(j.id, j));
+              const otherJourneys = localJourneys.filter((j) => j.owner_user_id !== serverProfile.id);
+              LocalStorageDB.setItem('journeys', [...otherJourneys, ...Array.from(journeyMap.values())]);
+            }
+
+            // Sync check-ins
+            if (Array.isArray(result.data?.checkIns)) {
+              const localCheckIns = LocalStorageDB.getItem<CheckIn[]>('check_ins', []);
+              const userLocalCheckIns = localCheckIns.filter((c) => c.owner_user_id === serverProfile.id);
+              const checkInMap = new Map<string, CheckIn>();
+              userLocalCheckIns.forEach((c) => checkInMap.set(c.id, c));
+              (result.data.checkIns as CheckIn[]).forEach((c) => checkInMap.set(c.id, c));
+              const otherCheckIns = localCheckIns.filter((c) => c.owner_user_id !== serverProfile.id);
+              LocalStorageDB.setItem('check_ins', [...otherCheckIns, ...Array.from(checkInMap.values())]);
+            }
+
+            const updatedSession: AuthSession = {
+              ...result.session,
+              profile: serverProfile,
+            };
+
+            // Persist session
+            try {
+              localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(updatedSession));
+            } catch {}
+
+            return updatedSession;
+          }
+        }
+      }
+    } catch (apiErr) {
+      console.warn('Backend sign-in fallback to local store:', apiErr);
+    }
+
+    // 2. Local fallback
     const profiles = LocalStorageDB.getItem<UserProfile[]>('profiles', [
       INITIAL_USER_PROFILE,
       ...INITIAL_CONTACT_PROFILES,
     ]);
 
-    const profile = profiles.find((p) => p.email.toLowerCase() === email.toLowerCase());
+    const profile = profiles.find((p) => p.email.toLowerCase() === cleanEmail);
     if (!profile) {
       throw new Error(`No account found with email "${email}". Please sign up first.`);
     }
@@ -166,7 +332,7 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       'safesphere_auth_credentials',
       {}
     );
-    const cred = credentials[email.toLowerCase()];
+    const cred = credentials[cleanEmail];
     if (cred && password) {
       const candidateHash = await hashPassword(password, cred.salt);
       if (candidateHash !== cred.hash) {
@@ -202,7 +368,22 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
           INITIAL_USER_PROFILE,
           ...INITIAL_CONTACT_PROFILES,
         ]);
-        const freshProfile = profiles.find((p) => p.id === session.user.id);
+        let freshProfile = profiles.find((p) => p.id === session.user.id || p.email === session.user.email);
+
+        // Attempt recovery from serverless backend if missing or outdated locally
+        if (!freshProfile && typeof window !== 'undefined' && 'fetch' in window) {
+          try {
+            const res = await fetch(`/api/account?action=get_account&userId=${encodeURIComponent(session.user.id)}`);
+            if (res.ok) {
+              const result = await res.json();
+              if (result.success && result.profile) {
+                freshProfile = result.profile;
+                LocalStorageDB.setItem('profiles', [...profiles, freshProfile]);
+              }
+            }
+          } catch {}
+        }
+
         if (freshProfile) {
           session.profile = freshProfile;
         }
@@ -238,6 +419,9 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
     LocalStorageDB.setItem('profiles', newProfiles);
 
+    // Sync to serverless backend
+    this.syncToApi('update_profile', { userId, updates });
+
     // Update active session if it matches
     const curSession = await this.getCurrentSession();
     if (curSession && curSession.user.id === userId) {
@@ -252,7 +436,7 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
   // --- Contacts (Scoped to owner user_id) ---
   async getContacts(userId: string): Promise<TrustedContact[]> {
-    const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', INITIAL_CONTACTS);
+    const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
     const invitations = LocalStorageDB.getItem<ContactInvitation[]>('contact_invitations', []);
     const acceptedInvs = invitations.filter((i) => i.inviter_id === userId && i.status === 'accepted');
 
@@ -289,6 +473,10 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       created_at: new Date().toISOString(),
     };
     LocalStorageDB.setItem('trusted_contacts', [...contacts, newContact]);
+
+    // Sync to backend
+    this.syncToApi('create_contact', { userId: contact.user_id, contact: newContact });
+
     return newContact;
   }
 
@@ -306,15 +494,24 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
     if (!updated) throw new Error('Contact not found.');
     LocalStorageDB.setItem('trusted_contacts', newContacts);
-    return updated;
+
+    // Sync to backend
+    const savedContact = updated as TrustedContact;
+    this.syncToApi('update_contact', { userId: savedContact.user_id, contact: savedContact });
+
+    return savedContact;
   }
 
   async deleteContact(contactId: string): Promise<void> {
     const contacts = LocalStorageDB.getItem<TrustedContact[]>('trusted_contacts', []);
+    const target = contacts.find((c) => c.id === contactId);
     LocalStorageDB.setItem(
       'trusted_contacts',
       contacts.filter((c) => c.id !== contactId)
     );
+    if (target) {
+      this.syncToApi('delete_contact', { userId: target.user_id, contactId });
+    }
   }
 
   async reorderContacts(userId: string, contactIdsInOrder: string[]): Promise<TrustedContact[]> {
@@ -346,6 +543,10 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       created_at: new Date().toISOString(),
     };
     LocalStorageDB.setItem('contact_invitations', [newInv, ...invs]);
+
+    // Sync to backend
+    this.syncToApi('create_invitation', { userId: invitation.inviter_id, invitation: newInv });
+
     return newInv;
   }
 
@@ -468,7 +669,7 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
   // --- Protocols ---
   async getProtocols(userId: string): Promise<SafetyProtocol[]> {
-    const protocols = LocalStorageDB.getItem<SafetyProtocol[]>('safety_protocols', INITIAL_PROTOCOLS);
+    const protocols = LocalStorageDB.getItem<SafetyProtocol[]>('safety_protocols', []);
     return protocols.filter((p) => p.user_id === userId);
   }
 
@@ -499,6 +700,9 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       await this.setDefaultProtocol(saved.user_id, saved.id);
     }
 
+    // Sync to backend
+    this.syncToApi('save_protocol', { userId: saved.user_id, protocol: saved });
+
     return saved;
   }
 
@@ -515,10 +719,14 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
   async deleteProtocol(protocolId: string): Promise<void> {
     const protocols = LocalStorageDB.getItem<SafetyProtocol[]>('safety_protocols', []);
+    const target = protocols.find((p) => p.id === protocolId);
     LocalStorageDB.setItem(
       'safety_protocols',
       protocols.filter((p) => p.id !== protocolId)
     );
+    if (target) {
+      this.syncToApi('delete_protocol', { userId: target.user_id, protocolId });
+    }
   }
 
   // --- Check-ins ---
@@ -535,6 +743,10 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       created_at: new Date().toISOString(),
     };
     LocalStorageDB.setItem('check_ins', [newCheckIn, ...checkIns]);
+
+    // Sync to backend
+    this.syncToApi('save_checkin', { userId: newCheckIn.owner_user_id, checkIn: newCheckIn });
+
     return newCheckIn;
   }
 
@@ -552,7 +764,12 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
     if (!updated) throw new Error('Check-in not found.');
     LocalStorageDB.setItem('check_ins', newCheckIns);
-    return updated;
+
+    // Sync to backend
+    const savedCheckIn = updated as CheckIn;
+    this.syncToApi('save_checkin', { userId: savedCheckIn.owner_user_id, checkIn: savedCheckIn });
+
+    return savedCheckIn;
   }
 
   // --- Journeys ---
@@ -570,6 +787,10 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
       created_at: new Date().toISOString(),
     };
     LocalStorageDB.setItem('journeys', [newJourney, ...journeys]);
+
+    // Sync to backend
+    this.syncToApi('save_journey', { userId: newJourney.owner_user_id, journey: newJourney });
+
     return newJourney;
   }
 
@@ -587,7 +808,12 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
 
     if (!updated) throw new Error('Journey not found.');
     LocalStorageDB.setItem('journeys', newJourneys);
-    return updated;
+
+    // Sync to backend
+    const savedJourney = updated as Journey;
+    this.syncToApi('save_journey', { userId: savedJourney.owner_user_id, journey: savedJourney });
+
+    return savedJourney;
   }
 
   // --- Incidents (Authorized access check) ---

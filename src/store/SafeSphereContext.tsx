@@ -226,15 +226,29 @@ interface SafeSphereContextType {
   virtualTime: Date;
 }
 
+export const EMPTY_USER_PROFILE: UserProfile = {
+  id: '',
+  email: '',
+  full_name: '',
+  phone_number: '',
+  emergency_notes: '',
+  medical_info: '',
+  discreet_exit_pin: '1234',
+  discreet_mode_enabled: false,
+  quick_exit_disguise: 'weather',
+  discreet_lockscreen_mask: true,
+  onboarding_completed: false,
+  onboarding_step: 1,
+  created_at: new Date().toISOString(),
+  updated_at: new Date().toISOString(),
+};
+
 const SafeSphereContext = createContext<SafeSphereContextType | undefined>(undefined);
 
 export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   // Profiles & Auth
-  const [allProfiles, setAllProfiles] = useState<UserProfile[]>([
-    INITIAL_USER_PROFILE,
-    ...INITIAL_CONTACT_PROFILES,
-  ]);
-  const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
+  const [allProfiles, setAllProfiles] = useState<UserProfile[]>([]);
+  const [currentUser, setCurrentUser] = useState<UserProfile>(EMPTY_USER_PROFILE);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Status & Feedback
@@ -278,8 +292,11 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [locationPermission, setLocationPermission] = useState<LocationPermissionState>('prompt');
   const [simulatedLocationMode, setSimulatedLocationModeState] = useState<SimulatedLocationMode>('real');
 
-  // Current Role: 'contact' if logged in as Maya or David, else 'user'
-  const isContact = currentUser.id === 'usr_maya_02' || currentUser.id === 'usr_david_03';
+  // Current Role: user is 'contact' if marked role is contact or in test scenarios
+  const isContact = Boolean(
+    currentUser.role === 'contact' ||
+    (currentUser.id && (currentUser.id === 'usr_maya_02' || currentUser.id === 'usr_david_03'))
+  );
   const currentRole: UserRole = isContact ? 'contact' : 'user';
 
   // Active items
@@ -304,7 +321,11 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const loadUserData = useCallback(async (user: UserProfile) => {
     setIsLoading(true);
     try {
-      const isContactRole = user.id === 'usr_maya_02' || user.id === 'usr_david_03';
+      const isContactRole = Boolean(
+        user.role === 'contact' ||
+        user.id === 'usr_maya_02' ||
+        user.id === 'usr_david_03'
+      );
 
       const [
         fetchedContacts,
@@ -363,12 +384,13 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setIsLoading(true);
       try {
         const session = await backendService.getCurrentSession();
-        if (session?.profile) {
+        if (session?.profile && session.user?.id) {
           setCurrentUser(session.profile);
           setIsAuthenticated(true);
           await loadUserData(session.profile);
         } else {
           setIsAuthenticated(false);
+          setCurrentUser(EMPTY_USER_PROFILE);
           // When no authenticated session exists, keep collections clean and unseeded
           setContacts([]);
           setInvitations([]);
@@ -418,7 +440,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setSuccessMessage(`Welcome back, ${session.profile.full_name}!`);
       if (session.profile.onboarding_completed) {
         setCurrentScreen(
-          session.profile.id === 'usr_maya_02' || session.profile.id === 'usr_david_03'
+          session.profile.role === 'contact' || session.profile.id === 'usr_maya_02' || session.profile.id === 'usr_david_03'
             ? 'trusted_dashboard'
             : 'dashboard'
         );
@@ -460,7 +482,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       await backendService.signOut();
       setIsAuthenticated(false);
-      setCurrentUser(INITIAL_USER_PROFILE);
+      setCurrentUser(EMPTY_USER_PROFILE);
       setContacts([]);
       setInvitations([]);
       setProtocols([]);
@@ -487,7 +509,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       setIsAuthenticated(true);
       await loadUserData(session.profile);
       setSuccessMessage(`Switched active profile to ${session.profile.full_name}`);
-      if (target.id === 'usr_maya_02' || target.id === 'usr_david_03') {
+      if (target.role === 'contact' || target.id === 'usr_maya_02' || target.id === 'usr_david_03') {
         setCurrentScreen('trusted_dashboard');
       } else {
         setCurrentScreen('dashboard');

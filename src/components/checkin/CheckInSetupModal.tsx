@@ -269,7 +269,7 @@ export const CheckInSetupModal: React.FC<{ isOpen: boolean; onClose: () => void 
                   </div>
                   <div>
                     <p className="font-bold text-brand-text">
-                      {contact1?.full_name || 'Primary Responder (Maya)'}
+                      {contact1?.full_name || 'Primary Responder (Tier 1)'}
                     </p>
                     <p className="text-[10px] text-brand-muted">
                       Notified immediately upon grace period expiration ({formatTimeOnly(graceExpiryTime.toISOString())})
@@ -283,7 +283,7 @@ export const CheckInSetupModal: React.FC<{ isOpen: boolean; onClose: () => void 
                   </div>
                   <div>
                     <p className="font-bold text-brand-text">
-                      {contact2?.full_name || 'Secondary Responder (David)'}
+                      {contact2?.full_name || 'Secondary Responder (Tier 2)'}
                     </p>
                     <p className="text-[10px] text-brand-muted">
                       Escalated if Tier 1 does not acknowledge within {contactWaitMinutes} minutes

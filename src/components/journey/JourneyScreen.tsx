@@ -69,21 +69,24 @@ export const JourneyScreen: React.FC = () => {
   const [customOrigin, setCustomOrigin] = useState('Current Location');
   const [customDestination, setCustomDestination] = useState('Home');
 
-  // Accepted Contacts from Circle
+  // Contacts from Circle: all configured contacts in user's circle
+  const availableContacts = contacts;
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
+  const preferredContacts = acceptedContacts.length > 0 ? acceptedContacts : availableContacts;
+
   const [tier1Ids, setTier1Ids] = useState<string[]>(() =>
-    acceptedContacts.length > 0 ? [acceptedContacts[0].id] : []
+    preferredContacts.length > 0 ? [preferredContacts[0].id] : []
   );
   const [tier2Ids, setTier2Ids] = useState<string[]>(() =>
-    acceptedContacts.length > 1 ? [acceptedContacts[1].id] : []
+    preferredContacts.length > 1 ? [preferredContacts[1].id] : []
   );
 
   // Synchronize default contact selection if contacts load after mount
   useEffect(() => {
-    if (acceptedContacts.length > 0 && tier1Ids.length === 0) {
-      setTier1Ids([acceptedContacts[0].id]);
-      if (acceptedContacts.length > 1) {
-        setTier2Ids([acceptedContacts[1].id]);
+    if (preferredContacts.length > 0 && tier1Ids.length === 0) {
+      setTier1Ids([preferredContacts[0].id]);
+      if (preferredContacts.length > 1) {
+        setTier2Ids([preferredContacts[1].id]);
       }
     }
   }, [contacts]);
@@ -664,12 +667,12 @@ export const JourneyScreen: React.FC = () => {
                     </p>
                   </div>
 
-                  {acceptedContacts.length === 0 ? (
+                  {availableContacts.length === 0 ? (
                     <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-2">
                         <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
                         <span className="text-amber-900 font-bold">
-                          No accepted contacts in your Trusted Circle.
+                          No contacts in your Trusted Circle yet.
                         </span>
                       </div>
                       <button
@@ -695,7 +698,7 @@ export const JourneyScreen: React.FC = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                          {acceptedContacts.map((contact) => (
+                          {availableContacts.map((contact) => (
                             <label
                               key={`t1_${contact.id}`}
                               className={`p-2.5 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-colors ${
@@ -716,6 +719,11 @@ export const JourneyScreen: React.FC = () => {
                                   <span className="text-[10px] text-brand-muted ml-1.5">
                                     ({contact.relationship})
                                   </span>
+                                  {contact.status !== 'accepted' && (
+                                    <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded ml-1.5">
+                                      Pending
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <span className="text-[11px] font-mono text-brand-muted">
@@ -739,7 +747,7 @@ export const JourneyScreen: React.FC = () => {
                         </div>
 
                         <div className="space-y-1.5">
-                          {acceptedContacts.map((contact) => (
+                          {availableContacts.map((contact) => (
                             <label
                               key={`t2_${contact.id}`}
                               className={`p-2.5 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-colors ${
@@ -760,6 +768,11 @@ export const JourneyScreen: React.FC = () => {
                                   <span className="text-[10px] text-brand-muted ml-1.5">
                                     ({contact.relationship})
                                   </span>
+                                  {contact.status !== 'accepted' && (
+                                    <span className="text-[9px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.2 rounded ml-1.5">
+                                      Pending
+                                    </span>
+                                  )}
                                 </div>
                               </div>
                               <span className="text-[11px] font-mono text-brand-muted">

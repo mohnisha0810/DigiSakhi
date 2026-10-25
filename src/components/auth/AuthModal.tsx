@@ -30,7 +30,7 @@ export const AuthModal: React.FC<AuthModalProps> = ({
   onClose,
   onSuccess,
 }) => {
-  const { signIn, signUp, allProfiles, switchUserAccount, currentUser } = useSafeSphere();
+  const { signIn, signUp } = useSafeSphere();
 
   const [mode, setMode] = useState<'signin' | 'signup'>(initialMode);
   const [email, setEmail] = useState('');
@@ -112,20 +112,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
       }
     } catch (err: any) {
       setErrorMsg(err.message || 'Authentication error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleQuickDemoLogin = async (profId: string) => {
-    setErrorMsg(null);
-    setLoading(true);
-    try {
-      await switchUserAccount(profId);
-      onClose();
-      onSuccess?.();
-    } catch (err: any) {
-      setErrorMsg(err.message || 'Failed to switch demo account.');
     } finally {
       setLoading(false);
     }
@@ -344,44 +330,6 @@ export const AuthModal: React.FC<AuthModalProps> = ({
             )}
           </button>
         </form>
-
-        {/* Quick Demo Profiles (Clearly Labeled for Evaluation Only) */}
-        <div className="mt-6 pt-4 border-t border-brand-border">
-          <p className="text-[11px] font-extrabold text-brand-muted uppercase tracking-wider mb-2">
-            Evaluation & Demo Accounts (Hackathon Judging)
-          </p>
-          <div className="space-y-1.5">
-            {allProfiles.map((p) => {
-              const isCurrent = p.id === currentUser?.id;
-              const isElena = p.id === 'usr_elena_01';
-              return (
-                <button
-                  key={p.id}
-                  onClick={() => handleQuickDemoLogin(p.id)}
-                  disabled={loading}
-                  className={`w-full p-2.5 rounded-xl text-left text-xs transition-colors flex items-center justify-between border cursor-pointer ${
-                    isCurrent
-                      ? 'bg-brand-aqua/50 border-brand-teal/40 text-brand-teal'
-                      : 'bg-brand-bg border-brand-border text-brand-text hover:bg-brand-lavender/30'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-6 h-6 rounded-full bg-brand-teal/15 text-brand-teal flex items-center justify-center font-black text-[10px]">
-                      {p.full_name.charAt(0)}
-                    </div>
-                    <div>
-                      <p className="font-extrabold text-brand-text">
-                        {p.full_name} <span className="text-[10px] font-normal text-brand-muted">({isElena ? 'Primary User' : 'Trusted Contact'})</span>
-                      </p>
-                      <p className="text-[10px] text-brand-muted">{p.email}</p>
-                    </div>
-                  </div>
-                  <ArrowRight className="w-3.5 h-3.5 text-brand-muted" />
-                </button>
-              );
-            })}
-          </div>
-        </div>
       </div>
     </div>
   );

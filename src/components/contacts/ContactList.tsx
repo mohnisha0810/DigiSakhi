@@ -183,7 +183,7 @@ export const ContactList: React.FC = () => {
           </span>
         </div>
 
-        {acceptedContacts.length === 0 ? (
+        {contacts.length === 0 ? (
           <EmptyState
             icon={Users}
             title="Establish Your Trusted Safety Circle"
@@ -192,6 +192,18 @@ export const ContactList: React.FC = () => {
             onAction={() => setIsAddModalOpen(true)}
             variant="teal"
           />
+        ) : acceptedContacts.length === 0 ? (
+          <div className="p-5 rounded-2xl bg-[#F2EDFF]/40 border border-[#5517C8]/20 space-y-2 text-center py-6">
+            <div className="w-10 h-10 rounded-full bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center mx-auto mb-2 border border-[#5517C8]/20">
+              <Clock className="w-5 h-5 text-[#5517C8]" />
+            </div>
+            <h4 className="font-extrabold text-[#211638] text-sm">
+              {pendingContacts.length} Contact(s) Saved — Awaiting Recipient Acceptance
+            </h4>
+            <p className="text-xs text-[#716B80] max-w-lg mx-auto leading-relaxed">
+              Your trusted contacts are listed below in the Pending Invitations section. Click the <strong>WhatsApp</strong> or <strong>SMS</strong> button next to each contact to send their invite link directly to their phone.
+            </p>
+          </div>
         ) : (
           <div className="divide-y divide-brand-border">
             {acceptedContacts.map((contact, index) => (

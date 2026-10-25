@@ -7,6 +7,7 @@ export interface UserProfile {
   email: string;
   full_name: string;
   phone_number: string;
+  role?: UserRole;
   emergency_notes?: string;
   medical_info?: string;
   discreet_exit_pin: string;
