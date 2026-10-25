@@ -76,7 +76,7 @@ export const NotificationInbox: React.FC = () => {
             </p>
             <p className="text-brand-muted text-[11px]">
               Status: <strong className="text-brand-teal uppercase font-bold">{permissionState}</strong>
-              {permissionState !== 'granted' && ' (Currently using in-app demo safety tray)'}
+              {permissionState !== 'granted' && ' (Currently delivering to in-app safety tray)'}
             </p>
           </div>
         </div>

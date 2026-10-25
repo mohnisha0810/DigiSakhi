@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { SafeSphereProvider, useSafeSphere } from '@/store/SafeSphereContext';
-import { DemoControlsBar } from '@/components/layout/DemoControlsBar';
 import { SidebarNav } from '@/components/layout/SidebarNav';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { MobileNav } from '@/components/layout/MobileNav';
@@ -166,9 +165,6 @@ export const App: React.FC = () => {
   return (
     <SafeSphereProvider>
       <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col font-sans">
-        {/* Judge Demo & Time Acceleration Toolbar */}
-        <DemoControlsBar />
-
         {/* Unified Layout: Sidebar on Desktop + Header/BottomNav on Mobile */}
         <div className="flex-1 flex flex-col lg:flex-row">
           {/* Desktop Sidebar Navigation */}

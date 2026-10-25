@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { EmergencyMessageModal } from '@/components/safety/EmergencyMessageModal';
 import { DigiSakhiLogo } from '@/components/common/DigiSakhiLogo';
 import {
   Shield,
+  ShieldAlert,
   EyeOff,
   Bell,
   Settings,
@@ -26,6 +28,7 @@ export const MobileHeader: React.FC = () => {
 
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
 
   return (
     <header className="lg:hidden bg-white/95 backdrop-blur border-b border-brand-border sticky top-0 z-30 px-4 h-16 flex items-center justify-between shadow-subtle">
@@ -39,6 +42,16 @@ export const MobileHeader: React.FC = () => {
 
       {/* Right Actions */}
       <div className="flex items-center gap-2">
+        {/* Emergency SOS Quick Button */}
+        <button
+          onClick={() => setIsEmergencyOpen(true)}
+          className="px-2.5 py-1.5 rounded-lg bg-brand-coral hover:bg-red-600 text-white text-xs font-black flex items-center gap-1 shadow-coral animate-pulse active:scale-95"
+          title="Instant Emergency SOS Broadcast"
+        >
+          <ShieldAlert className="w-3.5 h-3.5" />
+          <span>SOS</span>
+        </button>
+
         {/* Quick Exit */}
         <button
           onClick={triggerQuickExit}
@@ -148,6 +161,10 @@ export const MobileHeader: React.FC = () => {
       )}
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <EmergencyMessageModal
+        isOpen={isEmergencyOpen}
+        onClose={() => setIsEmergencyOpen(false)}
+      />
     </header>
   );
 };

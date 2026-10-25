@@ -1282,4 +1282,66 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal(foundPending?.can_view_location, false);
     });
   });
+
+  // =========================================================================
+  // 14. FUNCTIONAL EMERGENCY SOS ALERTS & EMERGENCY CALLING
+  // =========================================================================
+  describe('14. Functional Emergency Alerts, Emergency Calling, and Automatic Safety Check-ins', () => {
+    it('constructs complete Emergency SOS broadcast with live location and notes', async () => {
+      const { buildEmergencyAlertMessage } = await import('../src/lib/messaging');
+
+      const alert = buildEmergencyAlertMessage({
+        userName: 'Elena Rostova',
+        note: 'Someone is following me near Central Park',
+        locationUrl: 'https://maps.google.com/?q=28.6139,77.2090',
+        address: 'Connaught Place, New Delhi',
+        timestamp: '25 Oct 2026, 01:15 PM',
+      });
+
+      assert.ok(alert.includes('DIGISAKHI EMERGENCY ALERT'), 'Must include brand and alert header');
+      assert.ok(alert.includes('Elena Rostova'), 'Must include user name');
+      assert.ok(alert.includes('https://maps.google.com/?q=28.6139,77.2090'), 'Must include Google Maps location link');
+      assert.ok(alert.includes('Connaught Place, New Delhi'), 'Must include address');
+      assert.ok(alert.includes('Someone is following me near Central Park'), 'Must include user situation note');
+      assert.ok(alert.includes('25 Oct 2026, 01:15 PM'), 'Must include timestamp');
+    });
+
+    it('verifies automatic safety check-in timer triggers grace period and escalates without false alarm', async () => {
+      const now = new Date();
+      const deadline = new Date(now.getTime() + 60000); // 1 minute
+      const reminder = new Date(now.getTime() + 30000);
+
+      const checkIn = await backend.createCheckIn({
+        owner_user_id: 'usr_elena_01',
+        title: 'Late Night Transit Check-in',
+        deadline_at: deadline.toISOString(),
+        reminder_at: reminder.toISOString(),
+        grace_period_seconds: 60,
+        contact_wait_seconds: 60,
+        status: 'active',
+        current_escalation_tier: 0,
+      });
+
+      // 1. Advance past deadline -> enters grace period
+      schedulerService.advanceVirtualTimeSeconds(65);
+      schedulerService.executeSchedulerCycle();
+
+      let currentCheckIn = (await backend.getCheckIns('usr_elena_01')).find((c) => c.id === checkIn.id);
+      assert.equal(currentCheckIn?.status, 'in_grace_period', 'Check-in must enter grace period when deadline passes');
+
+      // 2. Advance past grace period buffer -> automatic Tier 1 escalation
+      schedulerService.advanceVirtualTimeSeconds(60);
+      schedulerService.executeSchedulerCycle();
+
+      currentCheckIn = (await backend.getCheckIns('usr_elena_01')).find((c) => c.id === checkIn.id);
+      assert.equal(currentCheckIn?.status, 'escalated', 'Check-in must automatically escalate upon grace expiry');
+      assert.equal(currentCheckIn?.current_escalation_tier, 1);
+
+      // Verify incident was created
+      const incidents = await backend.getIncidents('usr_elena_01');
+      const related = incidents.find((i) => i.related_checkin_id === checkIn.id);
+      assert.ok(related, 'Automatic escalation must create traceable incident in audit history');
+      assert.equal(related?.status, 'notification_sent');
+    });
+  });
 });

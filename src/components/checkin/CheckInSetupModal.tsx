@@ -168,7 +168,7 @@ export const CheckInSetupModal: React.FC<{ isOpen: boolean; onClose: () => void 
                   onChange={(e) => setDeadlineMinutes(Number(e.target.value))}
                   className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2 text-xs text-brand-text font-medium"
                 >
-                  <option value={5}>5 Minutes (Fast Demo Test)</option>
+                  <option value={5}>5 Minutes (Quick Check-in)</option>
                   <option value={15}>15 Minutes</option>
                   <option value={30}>30 Minutes (Recommended)</option>
                   <option value={45}>45 Minutes</option>

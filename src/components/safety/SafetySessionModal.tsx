@@ -3,6 +3,11 @@ import { useSafeSphere } from '@/store/SafeSphereContext';
 import { DistressType } from '@/types';
 import { StepProgress } from '@/components/common/StepProgress';
 import {
+  buildEmergencyAlertMessage,
+  triggerWhatsAppShare,
+  triggerSmsShare,
+} from '@/lib/messaging';
+import {
   ShieldAlert,
   PhoneCall,
   UserCheck,
@@ -18,6 +23,8 @@ import {
   Shield,
   Clock,
   Sparkles,
+  MessageSquare,
+  Phone,
 } from 'lucide-react';
 
 interface SafetySessionModalProps {
@@ -32,6 +39,7 @@ export const SafetySessionModal: React.FC<SafetySessionModalProps> = ({
   initialType = 'check_on_me',
 }) => {
   const {
+    currentUser,
     contacts,
     defaultProtocol,
     locationPermission,
@@ -283,7 +291,7 @@ export const SafetySessionModal: React.FC<SafetySessionModalProps> = ({
                       <span>No Verified Contacts Available</span>
                     </div>
                     <p className="text-brand-muted">
-                      You haven't verified any trusted contacts yet. In demo mode, your alert will be logged to your audit history.
+                      You haven't verified any trusted contacts yet. Your alert will be recorded to your security audit log. Add contacts to notify them directly.
                     </p>
                     <button
                       type="button"
@@ -519,7 +527,69 @@ export const SafetySessionModal: React.FC<SafetySessionModalProps> = ({
               </p>
             </div>
 
-            <div className="flex flex-col sm:flex-row gap-2 pt-2">
+            {/* Direct App Dispatch Buttons */}
+            {(() => {
+              const target = contacts.find((c) => selectedContactIds.includes(c.id)) || contacts[0];
+              const locationUrl =
+                shareLocation && currentLocation?.latitude && currentLocation?.longitude
+                  ? `https://maps.google.com/?q=${currentLocation.latitude},${currentLocation.longitude}`
+                  : undefined;
+              const alertMsg = buildEmergencyAlertMessage({
+                userName: currentUser.full_name,
+                note: customNote,
+                locationUrl,
+                address: shareLocation ? currentLocation?.addressApproximate : undefined,
+              });
+
+              return (
+                <div className="space-y-2 pt-1 text-left">
+                  {target && (
+                    <div className="p-3 bg-brand-aqua/40 border border-teal-200 rounded-xl flex items-center justify-between text-xs">
+                      <div>
+                        <span className="text-[10px] uppercase font-bold text-brand-muted">Target Contact:</span>
+                        <p className="font-bold text-brand-text">{target.full_name}</p>
+                      </div>
+                      <span className="font-mono text-brand-teal font-bold">{target.phone_number}</span>
+                    </div>
+                  )}
+
+                  {helpType === 'call_me' && target ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        window.location.href = `tel:${target.phone_number.replace(/[\s\-\(\)]/g, '')}`;
+                      }}
+                      className="w-full py-3 bg-brand-violet hover:bg-violet-700 text-white rounded-xl text-xs font-bold shadow-xs flex items-center justify-center gap-2 transition-all active:scale-[0.98]"
+                    >
+                      <PhoneCall className="w-4 h-4" />
+                      <span>Open Phone Dialer ({target.phone_number})</span>
+                    </button>
+                  ) : target ? (
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => triggerWhatsAppShare(target.phone_number, alertMsg)}
+                        className="py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition-all shadow-xs flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                      >
+                        <Phone className="w-3.5 h-3.5 fill-current" />
+                        <span>Open WhatsApp</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => triggerSmsShare(target.phone_number, alertMsg)}
+                        className="py-2.5 px-3 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-all shadow-coral flex items-center justify-center gap-1.5 active:scale-[0.98]"
+                      >
+                        <MessageSquare className="w-3.5 h-3.5 fill-current" />
+                        <span>Open SMS App</span>
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              );
+            })()}
+
+            <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-brand-border">
               <button
                 type="button"
                 onClick={() => {

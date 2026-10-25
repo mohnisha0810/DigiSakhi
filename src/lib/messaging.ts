@@ -110,6 +110,36 @@ export function buildInvitationMessage(params: {
 }
 
 /**
+ * Constructs a real, high-priority DigiSakhi Emergency SOS broadcast message.
+ * Formats time, GPS coordinates (Google Maps URL), user note, and urgency indicators.
+ */
+export function buildEmergencyAlertMessage(params: {
+  userName: string;
+  note?: string;
+  locationUrl?: string;
+  address?: string;
+  timestamp?: string;
+}): string {
+  const time = params.timestamp || new Date().toLocaleString('en-IN', {
+    dateStyle: 'medium',
+    timeStyle: 'short',
+  });
+  let msg = `🚨 DIGISAKHI EMERGENCY ALERT 🚨\nI need urgent help! This is an emergency broadcast from ${params.userName}.\n\n`;
+  msg += `🕒 Time: ${time}\n`;
+  if (params.locationUrl) {
+    msg += `📍 Live Location: ${params.locationUrl}\n`;
+  }
+  if (params.address) {
+    msg += `📌 Approx Area: ${params.address}\n`;
+  }
+  if (params.note && params.note.trim()) {
+    msg += `📝 Situation Note: ${params.note.trim()}\n`;
+  }
+  msg += `\nPlease call me immediately or dispatch emergency assistance.\n(Sent via DigiSakhi Women's Safety App)`;
+  return msg;
+}
+
+/**
  * Builds the official WhatsApp click-to-chat URL.
  * Adheres to WhatsApp API documentation: https://wa.me/<number>?text=<urlencoded_text>
  */

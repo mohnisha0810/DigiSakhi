@@ -471,7 +471,7 @@ export const SafetyMap: React.FC = () => {
           <div className="flex items-center gap-2">
             <Radio className="w-4 h-4 text-brand-violet shrink-0 animate-pulse" />
             <span>
-              <strong className="text-brand-text">DEMO COORDINATES: </strong> Showing preset San Francisco test coordinates for hackathon judging.
+              <strong className="text-brand-text">SIMULATED LOCATION: </strong> Showing preview coordinates. Live GPS active on mobile devices.
             </span>
           </div>
           <button

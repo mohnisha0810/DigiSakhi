@@ -7,6 +7,8 @@ import { SetupRoadmap } from './SetupRoadmap';
 import { CheckInSetupModal } from '../checkin/CheckInSetupModal';
 import { JourneySetupModal } from '../journey/JourneySetupModal';
 import { SafetySessionModal } from '../safety/SafetySessionModal';
+import { EmergencyMessageModal } from '../safety/EmergencyMessageModal';
+import { EmergencyCallModal } from '../safety/EmergencyCallModal';
 import {
   Shield,
   ShieldCheck,
@@ -20,6 +22,7 @@ import {
   ChevronRight,
   Radio,
   Sparkles,
+  PhoneCall,
 } from 'lucide-react';
 import { formatRelativeTime } from '@/lib/utils';
 import { DistressType } from '@/types';
@@ -41,6 +44,8 @@ export const UserDashboard: React.FC = () => {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
   const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
+  const [isEmergencyMessageOpen, setIsEmergencyMessageOpen] = useState(false);
+  const [isEmergencyCallOpen, setIsEmergencyCallOpen] = useState(false);
   const [safetyModalInitialType, setSafetyModalInitialType] = useState<DistressType>('check_on_me');
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
@@ -192,7 +197,7 @@ export const UserDashboard: React.FC = () => {
               Everything you need to feel more prepared, connected, and in control. Set personalized check-in deadlines, monitor commutes, and alert your circle with discreet codes.
             </p>
 
-            {/* Dominant Primary Action & Secondary Plan Journey */}
+            {/* Dominant Primary Action & Secondary Actions */}
             <div className="mt-5 flex flex-wrap items-center gap-3">
               {renderDominantAction()}
 
@@ -205,6 +210,26 @@ export const UserDashboard: React.FC = () => {
                   <span>Plan a Journey</span>
                 </button>
               )}
+
+              {/* Direct Emergency SOS Button */}
+              <button
+                onClick={() => setIsEmergencyMessageOpen(true)}
+                className="px-5 py-3.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-sm font-extrabold shadow-coral transition-all flex items-center gap-2 active:scale-[0.98]"
+                title="Send urgent emergency SOS broadcast to trusted circle with live GPS location"
+              >
+                <ShieldAlert className="w-4 h-4 animate-pulse" />
+                <span>Emergency SOS</span>
+              </button>
+
+              {/* Direct Emergency Call Button */}
+              <button
+                onClick={() => setIsEmergencyCallOpen(true)}
+                className="px-5 py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-bold shadow-xs transition-all flex items-center gap-2 active:scale-[0.98]"
+                title="Directly dial 112 National Emergency Helpline or your primary contact"
+              >
+                <PhoneCall className="w-4 h-4 text-coral-400" />
+                <span>Call 112</span>
+              </button>
             </div>
           </div>
 
@@ -310,27 +335,36 @@ export const UserDashboard: React.FC = () => {
           </button>
         </div>
 
-        {/* Card 3: Start a Safety Session / Urgent Help */}
+        {/* Card 3: Emergency Assistance */}
         <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card hover:shadow-hover transition-all flex flex-col justify-between group">
           <div>
             <div className="w-10 h-10 rounded-xl bg-brand-peach text-brand-coral flex items-center justify-center mb-3">
               <AlertTriangle className="w-5 h-5" />
             </div>
             <h3 className="font-extrabold text-brand-text text-base group-hover:text-brand-coral transition-colors">
-              Request Assistance
+              Emergency SOS & Call
             </h3>
             <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-              Choose from 4 distress codes: discreet check-in ping, pretext call, transit monitoring, or urgent emergency broadcast to all contacts.
+              Instant high-priority dispatch with live GPS location via WhatsApp/SMS, or direct 112 emergency phone dialer.
             </p>
           </div>
 
-          <button
-            onClick={() => handleOpenSafetyModal('urgent_assistance')}
-            className="mt-4 w-full py-2.5 rounded-xl bg-brand-coral hover:bg-red-600 text-white font-bold text-xs shadow-coral transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
-          >
-            <ShieldAlert className="w-4 h-4" />
-            <span>Urgent Assistance</span>
-          </button>
+          <div className="mt-4 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setIsEmergencyMessageOpen(true)}
+              className="py-2.5 rounded-xl bg-brand-coral hover:bg-red-600 text-white font-bold text-xs shadow-coral transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            >
+              <ShieldAlert className="w-3.5 h-3.5" />
+              <span>SOS Alert</span>
+            </button>
+            <button
+              onClick={() => setIsEmergencyCallOpen(true)}
+              className="py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            >
+              <PhoneCall className="w-3.5 h-3.5 text-coral-400" />
+              <span>Call 112</span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -418,6 +452,14 @@ export const UserDashboard: React.FC = () => {
         isOpen={isSafetyModalOpen}
         onClose={() => setIsSafetyModalOpen(false)}
         initialType={safetyModalInitialType}
+      />
+      <EmergencyMessageModal
+        isOpen={isEmergencyMessageOpen}
+        onClose={() => setIsEmergencyMessageOpen(false)}
+      />
+      <EmergencyCallModal
+        isOpen={isEmergencyCallOpen}
+        onClose={() => setIsEmergencyCallOpen(false)}
       />
     </div>
   );

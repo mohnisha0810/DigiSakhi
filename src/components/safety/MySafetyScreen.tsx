@@ -4,6 +4,8 @@ import { DistressActionPanel } from '../dashboard/DistressActionPanel';
 import { ActiveCheckInCard } from '../dashboard/ActiveCheckInCard';
 import { ActiveIncidentsBanner } from '../dashboard/ActiveIncidentsBanner';
 import { CheckInSetupModal } from '../checkin/CheckInSetupModal';
+import { EmergencyMessageModal } from './EmergencyMessageModal';
+import { EmergencyCallModal } from './EmergencyCallModal';
 import {
   ShieldCheck,
   ShieldAlert,
@@ -13,6 +15,7 @@ import {
   Sliders,
   CheckCircle2,
   Users,
+  PhoneCall,
 } from 'lucide-react';
 
 export const MySafetyScreen: React.FC = () => {
@@ -25,6 +28,8 @@ export const MySafetyScreen: React.FC = () => {
   } = useSafeSphere();
 
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
+  const [isEmergencyMessageOpen, setIsEmergencyMessageOpen] = useState(false);
+  const [isEmergencyCallOpen, setIsEmergencyCallOpen] = useState(false);
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
 
@@ -49,7 +54,27 @@ export const MySafetyScreen: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* Emergency SOS Button */}
+          <button
+            onClick={() => setIsEmergencyMessageOpen(true)}
+            className="px-4 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-black shadow-coral transition-all flex items-center gap-1.5 active:scale-[0.98]"
+            title="Dispatch urgent emergency SOS text with live GPS location"
+          >
+            <ShieldAlert className="w-4 h-4 animate-pulse" />
+            <span>Emergency SOS</span>
+          </button>
+
+          {/* Emergency Call Button */}
+          <button
+            onClick={() => setIsEmergencyCallOpen(true)}
+            className="px-3.5 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-[0.98]"
+            title="Dial 112 National Emergency Helpline or Primary Contact"
+          >
+            <PhoneCall className="w-4 h-4 text-coral-400" />
+            <span>Call 112</span>
+          </button>
+
           {!activeCheckIn && (
             <button
               onClick={() => setIsCheckInModalOpen(true)}
@@ -88,10 +113,18 @@ export const MySafetyScreen: React.FC = () => {
       {/* 4 Distress Codes Action Panel */}
       <DistressActionPanel />
 
-      {/* Modal for check-in setup */}
+      {/* Modals */}
       <CheckInSetupModal
         isOpen={isCheckInModalOpen}
         onClose={() => setIsCheckInModalOpen(false)}
+      />
+      <EmergencyMessageModal
+        isOpen={isEmergencyMessageOpen}
+        onClose={() => setIsEmergencyMessageOpen(false)}
+      />
+      <EmergencyCallModal
+        isOpen={isEmergencyCallOpen}
+        onClose={() => setIsEmergencyCallOpen(false)}
       />
     </div>
   );

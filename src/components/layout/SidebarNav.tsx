@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
 import { AuthModal } from '@/components/auth/AuthModal';
+import { EmergencyMessageModal } from '@/components/safety/EmergencyMessageModal';
+import { EmergencyCallModal } from '@/components/safety/EmergencyCallModal';
 import { DigiSakhiLogo } from '@/components/common/DigiSakhiLogo';
 import {
   Shield,
@@ -20,6 +22,7 @@ import {
   ChevronRight,
   UserCheck,
   ChevronUp,
+  PhoneCall,
 } from 'lucide-react';
 
 export const SidebarNav: React.FC = () => {
@@ -39,6 +42,8 @@ export const SidebarNav: React.FC = () => {
 
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [isEmergencyMessageOpen, setIsEmergencyMessageOpen] = useState(false);
+  const [isEmergencyCallOpen, setIsEmergencyCallOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
@@ -210,8 +215,29 @@ export const SidebarNav: React.FC = () => {
         </nav>
       </div>
 
-      {/* Bottom Sidebar: Quick Exit & Profile Dropdown */}
-      <div className="space-y-3 pt-4 border-t border-brand-border relative" ref={menuRef}>
+      {/* Bottom Sidebar: Emergency Actions, Quick Exit & Profile Dropdown */}
+      <div className="space-y-2.5 pt-4 border-t border-brand-border relative" ref={menuRef}>
+        {/* Emergency SOS & Call Buttons */}
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setIsEmergencyMessageOpen(true)}
+            className="py-2.5 px-2 rounded-xl bg-brand-coral hover:bg-red-600 text-white text-xs font-black shadow-coral transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            title="Send Emergency SOS message with live GPS location"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 animate-pulse" />
+            <span>SOS Alert</span>
+          </button>
+
+          <button
+            onClick={() => setIsEmergencyCallOpen(true)}
+            className="py-2.5 px-2 rounded-xl bg-slate-900 hover:bg-black text-white text-xs font-bold shadow-xs transition-all flex items-center justify-center gap-1.5 active:scale-[0.98]"
+            title="Dial 112 National Emergency Helpline or Primary Contact"
+          >
+            <PhoneCall className="w-3.5 h-3.5 text-coral-400" />
+            <span>Call 112</span>
+          </button>
+        </div>
+
         {/* Quick Exit Disguise Button */}
         <button
           onClick={triggerQuickExit}
@@ -325,6 +351,14 @@ export const SidebarNav: React.FC = () => {
       </div>
 
       <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+      <EmergencyMessageModal
+        isOpen={isEmergencyMessageOpen}
+        onClose={() => setIsEmergencyMessageOpen(false)}
+      />
+      <EmergencyCallModal
+        isOpen={isEmergencyCallOpen}
+        onClose={() => setIsEmergencyCallOpen(false)}
+      />
     </aside>
   );
 };

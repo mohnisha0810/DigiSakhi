@@ -81,12 +81,12 @@ export const SetupRoadmap: React.FC = () => {
     },
     {
       id: 'checkin',
-      title: 'Try a demo check-in',
-      description: 'Run your first timed safety session to verify escalation',
+      title: 'Start a safety check-in',
+      description: 'Run your first timed safety session with automatic escalation',
       completed: hasTriedCheckIn,
       icon: Clock,
       action: () => setCurrentScreen('my_safety'),
-      actionLabel: 'Try Check-in',
+      actionLabel: 'Schedule Check-in',
     },
   ];
 

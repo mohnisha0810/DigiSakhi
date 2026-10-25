@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
 import { DistressType } from '@/types';
 import { SafetySessionModal } from '@/components/safety/SafetySessionModal';
+import { EmergencyMessageModal } from '@/components/safety/EmergencyMessageModal';
+import { EmergencyCallModal } from '@/components/safety/EmergencyCallModal';
 import {
   PhoneCall,
   MessageCircleQuestion,
@@ -9,6 +11,7 @@ import {
   AlertTriangle,
   ArrowRight,
   Shield,
+  ShieldAlert,
 } from 'lucide-react';
 
 export const DistressActionPanel: React.FC = () => {
@@ -16,6 +19,8 @@ export const DistressActionPanel: React.FC = () => {
 
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedType, setSelectedType] = useState<DistressType>('check_on_me');
+  const [isEmergencyMessageOpen, setIsEmergencyMessageOpen] = useState(false);
+  const [isEmergencyCallOpen, setIsEmergencyCallOpen] = useState(false);
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
 
@@ -80,7 +85,7 @@ export const DistressActionPanel: React.FC = () => {
 
         {/* ACTION B: Call Me */}
         <button
-          onClick={() => handleOpenHelpModal('call_me')}
+          onClick={() => setIsEmergencyCallOpen(true)}
           className="group text-left p-5 rounded-2xl bg-slate-50/70 hover:bg-white border border-brand-border hover:border-violet-300 hover:shadow-card transition-all flex flex-col justify-between"
         >
           <div>
@@ -89,26 +94,26 @@ export const DistressActionPanel: React.FC = () => {
                 <PhoneCall className="w-5 h-5 stroke-[2.2]" />
               </div>
               <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
-                Pretext Exit • Med
+                Direct Call • Pretext
               </span>
             </div>
             <h3 className="font-extrabold text-brand-text text-base group-hover:text-brand-violet transition-colors">
-              “Call Me”
+              “Call Me / Helpline”
             </h3>
             <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-              Requests an immediate phone call from your contact, giving you a socially graceful excuse to leave an uncomfortable situation.
+              Instantly opens device telephone dialer for 112 emergency services, women helpline 1091, or your primary contact.
             </p>
           </div>
 
           <div className="mt-4 pt-3 border-t border-brand-border/60 flex items-center justify-between text-xs font-bold text-brand-violet group-hover:text-violet-700">
-            <span>Configure Pretext Call</span>
+            <span>Open Phone Dialer</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </button>
 
         {/* ACTION C: Urgent Assistance */}
         <button
-          onClick={() => handleOpenHelpModal('urgent_assistance')}
+          onClick={() => setIsEmergencyMessageOpen(true)}
           className="group text-left p-5 rounded-2xl bg-brand-peach/40 hover:bg-brand-peach/70 border border-coral-200/80 hover:border-brand-coral hover:shadow-card transition-all flex flex-col justify-between"
         >
           <div>
@@ -117,19 +122,19 @@ export const DistressActionPanel: React.FC = () => {
                 <AlertTriangle className="w-5 h-5 stroke-[2.2]" />
               </div>
               <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-brand-coral text-white shadow-xs">
-                Emergency • Urgent
+                Emergency SOS
               </span>
             </div>
             <h3 className="font-extrabold text-brand-text text-base group-hover:text-brand-coral transition-colors">
               “Urgent Assistance”
             </h3>
             <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-              Broadcasts high-priority alerts to all circle contacts at once with live GPS coordinates. Requires confirmation to prevent accidental triggers.
+              Broadcasts emergency alerts with live GPS coordinates via SMS / WhatsApp with instant message prefill.
             </p>
           </div>
 
           <div className="mt-4 pt-3 border-t border-coral-200/60 flex items-center justify-between text-xs font-bold text-brand-coral group-hover:text-red-700">
-            <span>Send Urgent Distress Alert</span>
+            <span>Send SOS Alert Now</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
           </div>
         </button>
@@ -168,6 +173,14 @@ export const DistressActionPanel: React.FC = () => {
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}
         initialType={selectedType}
+      />
+      <EmergencyMessageModal
+        isOpen={isEmergencyMessageOpen}
+        onClose={() => setIsEmergencyMessageOpen(false)}
+      />
+      <EmergencyCallModal
+        isOpen={isEmergencyCallOpen}
+        onClose={() => setIsEmergencyCallOpen(false)}
       />
     </div>
   );
