@@ -116,7 +116,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Account Management
@@ -130,53 +130,53 @@ export const ProfileAndSettingsScreen: React.FC = () => {
         </div>
 
         {/* Tab Pills */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-[#E8E1F3] text-xs font-bold flex-wrap">
+        <div className="w-full sm:w-auto grid grid-cols-2 sm:grid-cols-4 gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-[#E8E1F3] text-xs font-bold">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2.5 sm:px-3 py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${
               activeTab === 'profile'
                 ? 'bg-white text-[#5517C8] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <User className="w-4 h-4" />
-            <span>Profile</span>
+            <User className="w-4 h-4 shrink-0" />
+            <span className="truncate">Profile</span>
           </button>
 
           <button
             onClick={() => setActiveTab('privacy')}
-            className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2.5 sm:px-3 py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${
               activeTab === 'privacy'
                 ? 'bg-white text-[#365BFF] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <EyeOff className="w-4 h-4" />
-            <span>Privacy & PIN</span>
+            <EyeOff className="w-4 h-4 shrink-0" />
+            <span className="truncate">Privacy & PIN</span>
           </button>
 
           <button
             onClick={() => setActiveTab('permissions')}
-            className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2.5 sm:px-3 py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${
               activeTab === 'permissions'
                 ? 'bg-white text-[#5517C8] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <Bell className="w-4 h-4" />
-            <span>Permissions</span>
+            <Bell className="w-4 h-4 shrink-0" />
+            <span className="truncate">Permissions</span>
           </button>
 
           <button
             onClick={() => setActiveTab('account')}
-            className={`px-3 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2.5 sm:px-3 py-2 rounded-lg transition-all flex items-center justify-center gap-2 ${
               activeTab === 'account'
                 ? 'bg-white text-[#D92D45] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <Lock className="w-4 h-4" />
-            <span>Security</span>
+            <Lock className="w-4 h-4 shrink-0" />
+            <span className="truncate">Security</span>
           </button>
         </div>
       </div>
@@ -470,7 +470,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             </div>
 
             {/* Export Audit Data */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="font-extrabold text-brand-text text-sm block">Export Safety Audit Data</span>
                 <span className="text-brand-muted text-[11px]">
@@ -480,7 +480,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
               <button
                 type="button"
                 onClick={handleExportData}
-                className="px-4 py-2 border border-brand-border bg-white hover:bg-slate-50 text-brand-text rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-xs shrink-0"
+                className="px-4 py-2 border border-brand-border bg-white hover:bg-slate-50 text-brand-text rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs shrink-0 cursor-pointer"
               >
                 <Download className="w-4 h-4 text-brand-teal" />
                 <span>Export JSON</span>
@@ -488,7 +488,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             </div>
 
             {/* Sign Out Card */}
-            <div className="p-4 rounded-xl bg-brand-peach/40 border border-coral-200 flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-brand-peach/40 border border-coral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
                 <span className="font-extrabold text-brand-coral text-sm block">Sign Out of Session</span>
                 <span className="text-brand-muted text-[11px]">
@@ -501,7 +501,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                   signOut();
                   toast.success('Signed out successfully.');
                 }}
-                className="px-5 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center gap-2 shadow-coral shrink-0"
+                className="px-5 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-coral shrink-0 cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>

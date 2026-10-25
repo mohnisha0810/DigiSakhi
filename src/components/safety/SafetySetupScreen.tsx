@@ -123,7 +123,7 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl p-4 sm:p-6 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
           <span className="text-[11px] font-bold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Safety Setup & Rules
@@ -137,41 +137,41 @@ export const SafetySetupScreen: React.FC<SafetySetupScreenProps> = ({
         </div>
 
         {/* Tab Switcher Pills */}
-        <div className="flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-[#E8E1F3] text-xs font-bold">
+        <div className="w-full sm:w-auto grid grid-cols-3 sm:flex items-center gap-1.5 p-1.5 bg-slate-100 rounded-xl border border-[#E8E1F3] text-xs font-bold">
           <button
             onClick={() => setActiveTab('checkins')}
-            className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2 sm:px-3.5 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'checkins'
                 ? 'bg-white text-[#5517C8] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <Clock className="w-4 h-4" />
-            <span>A. Check-ins</span>
+            <Clock className="w-4 h-4 shrink-0" />
+            <span className="truncate">A. Check-ins</span>
           </button>
 
           <button
             onClick={() => setActiveTab('protocols')}
-            className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2 sm:px-3.5 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'protocols'
                 ? 'bg-white text-[#365BFF] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <Sliders className="w-4 h-4" />
-            <span>B. Protocols</span>
+            <Sliders className="w-4 h-4 shrink-0" />
+            <span className="truncate">B. Protocols</span>
           </button>
 
           <button
             onClick={() => setActiveTab('emergency')}
-            className={`px-3.5 py-2 rounded-lg transition-all flex items-center gap-2 ${
+            className={`px-2 sm:px-3.5 py-2 rounded-lg transition-all flex items-center justify-center gap-1.5 ${
               activeTab === 'emergency'
                 ? 'bg-white text-[#D92D45] shadow-xs'
                 : 'text-[#716B80] hover:text-[#211638]'
             }`}
           >
-            <Shield className="w-4 h-4" />
-            <span>C. Emergency</span>
+            <Shield className="w-4 h-4 shrink-0" />
+            <span className="truncate">C. Emergency</span>
           </button>
         </div>
       </div>

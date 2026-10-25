@@ -6,26 +6,19 @@ import { EmergencyCallModal } from '../safety/EmergencyCallModal';
 import { ActiveIncidentsBanner } from './ActiveIncidentsBanner';
 import { CustomJourneyCheckInPrompt } from '../journey/CustomJourneyCheckInPrompt';
 import {
-  Shield,
-  ShieldCheck,
   ShieldAlert,
   Clock,
   Compass,
-  AlertTriangle,
   ArrowRight,
-  MapPin,
   Users,
-  ChevronRight,
-  Radio,
-  Sparkles,
-  PhoneCall,
   CheckCircle2,
-  Sliders,
   Settings,
-  X,
-  UserCheck,
+  PhoneCall,
+  History,
+  Check,
+  ShieldCheck,
 } from 'lucide-react';
-import { formatRelativeTime, formatTimeOnly } from '@/lib/utils';
+import { formatTimeOnly, formatRelativeTime } from '@/lib/utils';
 
 export const UserDashboard: React.FC = () => {
   const {
@@ -35,9 +28,6 @@ export const UserDashboard: React.FC = () => {
     activeCheckIn,
     activeJourney,
     activeIncident,
-    locationPermission,
-    defaultProtocol,
-    protocols,
     setCurrentScreen,
     openIncidentDetails,
     confirmCheckInSafe,
@@ -48,19 +38,9 @@ export const UserDashboard: React.FC = () => {
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
   const [isEmergencyMessageOpen, setIsEmergencyMessageOpen] = useState(false);
   const [isEmergencyCallOpen, setIsEmergencyCallOpen] = useState(false);
-  const [isChecklistDismissed, setIsChecklistDismissed] = useState(false);
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
-  const pendingContacts = contacts.filter((c) => c.status === 'pending');
-  const recentEvents = incidentEvents.slice(0, 3);
-
-  // Time-based greeting
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
-    return 'Good evening';
-  };
+  const recentEvents = incidentEvents.slice(0, 2);
 
   const isCheckInOverdue =
     activeCheckIn &&
@@ -77,83 +57,41 @@ export const UserDashboard: React.FC = () => {
       activeJourney.check_in_status === 'prompt_due' ||
       activeJourney.check_in_status === 'missed');
 
-  // Real-data completion checks for first-time onboarding flow
-  const isProfileComplete = Boolean(
-    currentUser.full_name &&
-    (currentUser.emergency_notes || currentUser.medical_info)
-  );
-  const isContactComplete = contacts.length > 0;
-  const isCheckInComplete = Boolean(protocols.length > 0 || defaultProtocol);
-  const isEmergencyComplete = Boolean(
-    currentUser.emergency_notes || currentUser.discreet_exit_pin || currentUser.medical_info
-  );
-
-  const checklistItems = [
-    {
-      id: 'profile',
-      label: 'Complete your basic profile',
-      description: 'Add your contact number and emergency medical notes.',
-      completed: isProfileComplete,
-      actionLabel: 'Edit Profile',
-      onAction: () => setCurrentScreen('settings'),
-    },
-    {
-      id: 'contact',
-      label: 'Add at least one trusted contact',
-      description: 'Your circle receives automated check-in and distress alerts.',
-      completed: isContactComplete,
-      actionLabel: 'Add Contact',
-      onAction: () => setCurrentScreen('circle'),
-    },
-    {
-      id: 'checkins',
-      label: 'Configure safety check-ins',
-      description: 'Choose intervals and escalation grace periods.',
-      completed: isCheckInComplete,
-      actionLabel: 'Setup Check-ins',
-      onAction: () => setCurrentScreen('safety_setup'),
-    },
-    {
-      id: 'emergency',
-      label: 'Review emergency & privacy preferences',
-      description: 'Configure discreet exit PIN and emergency phone numbers.',
-      completed: isEmergencyComplete,
-      actionLabel: 'Review Settings',
-      onAction: () => setCurrentScreen('settings'),
-    },
-  ];
-
-  const completedCount = checklistItems.filter((item) => item.completed).length;
-  const isSetupIncomplete = !currentUser.onboarding_completed && completedCount < checklistItems.length && !isChecklistDismissed;
+  const firstName = currentUser.full_name ? currentUser.full_name.split(' ')[0] : 'there';
 
   return (
-    <div className="space-y-6 animate-fadeIn">
-      {/* 1. TOP HEADER: Greeting, Status & Direct Emergency Controls */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E8E1F3] shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
-        {/* Soft background glow */}
-        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] blur-2xl pointer-events-none" />
+    <div className="space-y-5 sm:space-y-6 animate-fadeIn">
+      {/* =========================================================================
+          1. COMPACT WELCOMING HEADER
+          Answers: "Who is logged in?"
+          Includes user greeting, protection status badge, and immediate emergency access.
+      ========================================================================= */}
+      <div className="bg-white rounded-2xl sm:rounded-3xl p-5 sm:p-6 border border-[#E8E1F3] shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative overflow-hidden">
+        {/* Soft brand glow */}
+        <div className="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] blur-2xl pointer-events-none" />
 
-        <div className="space-y-1.5 relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F2EDFF] border border-[#5517C8]/20 shadow-2xs mb-1">
-            <span className="w-2 h-2 rounded-full bg-[#5517C8] animate-pulse" />
-            <span className="text-xs font-extrabold text-[#351078]">
-              DigiSakhi Protection
+        <div className="space-y-1 relative z-10">
+          <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#F2EDFF] border border-[#5517C8]/20">
+            <span className={`w-2 h-2 rounded-full ${activeIncident ? 'bg-[#D92D45] animate-ping' : 'bg-[#16865C]'}`} />
+            <span className="text-[11px] font-extrabold text-[#351078]">
+              {activeIncident ? 'Emergency Active' : 'Active Protection'}
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-black text-[#211638] tracking-tight">
-            Welcome back, {currentUser.full_name.split(' ')[0]}
+
+          <h1 className="text-xl sm:text-2xl lg:text-3xl font-black text-[#211638] tracking-tight">
+            Welcome back, {firstName}
           </h1>
-          <p className="text-xs sm:text-sm text-[#716B80] max-w-xl leading-relaxed">
+          <p className="text-xs sm:text-sm text-[#716B80]">
             Your journey, your circle, your peace of mind.
           </p>
         </div>
 
-        {/* Top Emergency Buttons & Quick Profile Link */}
-        <div className="flex items-center gap-2.5 shrink-0 relative z-10">
+        {/* Quick Emergency & Settings Controls */}
+        <div className="flex items-center gap-2 relative z-10 shrink-0">
           <button
             onClick={() => setIsEmergencyMessageOpen(true)}
-            className="px-4 py-2.5 bg-[#D92D45] hover:bg-red-700 text-white rounded-xl text-xs font-black shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
-            title="Dispatch Emergency SOS message with live GPS location"
+            className="px-3.5 py-2.5 bg-[#D92D45] hover:bg-[#B71C32] text-white rounded-xl text-xs font-black shadow-xs hover:shadow-md transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            title="Instant Emergency SOS Alert"
           >
             <ShieldAlert className="w-4 h-4 animate-pulse" />
             <span>Emergency SOS</span>
@@ -161,16 +99,16 @@ export const UserDashboard: React.FC = () => {
 
           <button
             onClick={() => setIsEmergencyCallOpen(true)}
-            className="px-4 py-2.5 bg-[#211638] hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
-            title="Directly dial 112 National Emergency Helpline or Primary Contact"
+            className="px-3 py-2.5 bg-[#211638] hover:bg-black text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
+            title="Dial 112 National Emergency Helpline"
           >
-            <PhoneCall className="w-4 h-4 text-red-400" />
+            <PhoneCall className="w-3.5 h-3.5 text-red-400" />
             <span>Call 112</span>
           </button>
 
           <button
             onClick={() => setCurrentScreen('settings')}
-            className="p-2.5 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl transition-colors"
+            className="p-2.5 bg-[#FAF9FF] hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl transition-colors cursor-pointer"
             title="Profile & Settings"
           >
             <Settings className="w-4 h-4 text-[#716B80] hover:text-[#5517C8]" />
@@ -178,288 +116,87 @@ export const UserDashboard: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. ACTIVE DISTRESS ALERT BANNER (Only when emergency incident is active) */}
+      {/* =========================================================================
+          2. ACTIVE DISTRESS ALERT BANNER (Only when emergency incident is active)
+      ========================================================================= */}
       <ActiveIncidentsBanner />
 
-      {/* 3. CURRENT SAFETY STATUS (Answers: "Am I currently in a safety session?") */}
+      {/* =========================================================================
+          3. PRIMARY ACTION & CURRENT JOURNEY STATUS
+          Answers: "What is my current safety-journey status?" & "What should I do next?"
+          Shows EXACTLY ONE prominent card:
+          - If Active Distress: Distress banner with details button
+          - Else if Overdue Check-in: Overdue grace period prompt with I'm Safe button
+          - Else if Custom Journey Prompt Due: 3-button interactive prompt
+          - Else if Active Journey: Journey in progress card (ETA, Safe Radius, Confirm Arrival)
+          - Else: Start a Safety Journey (The primary inactive action card)
+      ========================================================================= */}
       {activeIncident ? (
-        <div className="p-4 sm:p-5 bg-brand-peach border border-coral-300 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-coral animate-fadeIn">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-coral text-white flex items-center justify-center shrink-0">
-              <ShieldAlert className="w-5 h-5 animate-pulse" />
+        <div className="p-5 bg-[#FFF1F3] border border-[#D92D45]/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs shadow-card animate-fadeIn">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#D92D45] text-white flex items-center justify-center shrink-0 shadow-xs">
+              <ShieldAlert className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <strong className="text-brand-coral font-black text-sm block">
+              <strong className="text-[#D92D45] font-black text-sm block">
                 Active Emergency Distress Alert Dispatched
               </strong>
-              <span className="text-brand-text">
-                Your circle is actively notified. Live GPS broadcast is active.
-              </span>
+              <p className="text-[#211638] text-xs mt-0.5">
+                Your trusted circle is notified with your live GPS location.
+              </p>
             </div>
           </div>
           <button
             onClick={() => openIncidentDetails(activeIncident.id)}
-            className="px-4 py-2 bg-brand-coral hover:bg-red-600 text-white font-bold rounded-xl text-xs shadow-xs transition-all flex items-center gap-1.5"
+            className="px-4 py-2.5 bg-[#D92D45] hover:bg-[#B71C32] text-white font-extrabold rounded-xl text-xs transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer"
           >
-            <span>View Distress Details & Timeline</span>
+            <span>View Incident Details</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
       ) : isCheckInOverdue ? (
-        <div className="p-4 sm:p-5 bg-brand-peach/90 border border-brand-coral/50 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-coral animate-pulse-subtle">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-coral text-white flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5 animate-spin-slow" />
+        <div className="p-5 bg-[#FFF1F3] border border-[#D92D45]/30 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs shadow-card animate-fadeIn">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-[#D92D45] text-white flex items-center justify-center shrink-0">
+              <Clock className="w-6 h-6 animate-spin-slow" />
             </div>
             <div>
-              <strong className="text-brand-coral font-black text-sm block">
-                ⚠️ Safety Check-in Overdue (+Grace Period Active)
+              <strong className="text-[#D92D45] font-black text-sm block">
+                Check-in Overdue • Grace Period Active
               </strong>
-              <span className="text-brand-text">
-                Your scheduled deadline has elapsed. Confirm you are safe now before escalation alerts your circle.
-              </span>
+              <p className="text-[#211638] text-xs mt-0.5">
+                Your scheduled check-in time elapsed. Confirm you are safe to cancel escalation.
+              </p>
             </div>
           </div>
           <button
             onClick={() => activeCheckIn && confirmCheckInSafe(activeCheckIn.id)}
-            className="px-4 py-2 bg-brand-coral hover:bg-red-600 text-white font-bold rounded-xl text-xs shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
+            className="px-5 py-2.5 bg-[#16865C] hover:bg-emerald-700 text-white font-extrabold rounded-xl text-xs shadow-sm transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer active:scale-95"
           >
             <CheckCircle2 className="w-4 h-4" />
-            <span>Confirm Safe Now</span>
+            <span>I'm Safe</span>
           </button>
         </div>
       ) : isCustomJourneyPromptDue && activeJourney ? (
         <CustomJourneyCheckInPrompt journey={activeJourney} />
       ) : activeJourney ? (
-        <div className="p-4 sm:p-5 bg-brand-lavender/50 border border-violet-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-violet flex items-center justify-center shrink-0">
-              <Compass className="w-5 h-5 animate-spin-slow" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <strong className="text-brand-violet font-extrabold text-sm">
-                  Safety Journey in Progress
-                </strong>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
-                  ETA: {formatTimeOnly(activeJourney.expected_arrival_time)}
-                </span>
-              </div>
-              <span className="text-brand-muted">
-                Destination: <strong className="text-brand-text">{activeJourney.destination_name}</strong> • Safe Radius: {activeJourney.safe_radius_meters}m
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => confirmSafeArrival(activeJourney.id)}
-              className="px-3.5 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-bold text-xs shadow-teal transition-all flex items-center gap-1.5 active:scale-95"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>Confirm Safe Arrival</span>
-            </button>
-            <button
-              onClick={() => setCurrentScreen('journeys')}
-              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-brand-violet border border-violet-200 rounded-xl font-bold text-xs transition-colors flex items-center gap-1"
-            >
-              <span>View Route Map</span>
-              <ArrowRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-        </div>
-      ) : activeCheckIn ? (
-        <div className="p-4 sm:p-5 bg-brand-aqua/40 border border-teal-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-card">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-deepTeal flex items-center justify-center shrink-0">
-              <Clock className="w-5 h-5 text-brand-teal" />
-            </div>
-            <div>
-              <strong className="text-brand-deepTeal font-extrabold text-sm block">
-                Safety Check-in Session Active
-              </strong>
-              <span className="text-brand-muted">
-                Next response deadline: <strong className="text-brand-text">{formatTimeOnly(activeCheckIn.deadline_at)}</strong>
-              </span>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => confirmCheckInSafe(activeCheckIn.id)}
-              className="px-4 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-bold text-xs shadow-teal transition-all flex items-center gap-1.5 active:scale-95"
-            >
-              <CheckCircle2 className="w-4 h-4" />
-              <span>I'm Safe</span>
-            </button>
-            <button
-              onClick={() => setCurrentScreen('safety_setup')}
-              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors"
-            >
-              Manage Check-ins
-            </button>
-          </div>
-        </div>
-      ) : (
-        <div className="p-5 bg-gradient-to-r from-white to-[#F2EDFF]/40 border border-[#E8E1F3] rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs shadow-card">
-          <div className="flex items-center gap-3.5">
-            <div className="w-11 h-11 rounded-2xl bg-[#F2EDFF] border border-[#5517C8]/20 text-[#5517C8] flex items-center justify-center shrink-0 shadow-xs">
-              <Compass className="w-5 h-5 text-[#5517C8]" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <strong className="text-[#211638] font-black text-sm">
-                  You're not currently on a safety journey.
-                </strong>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-100 text-[#716B80] border border-[#E8E1F3]">
-                  Standby Mode
-                </span>
-              </div>
-              <p className="text-[#716B80] text-xs mt-0.5">
-                Start a safety journey with customizable check-ins or automated presets before heading out.
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2.5">
-            <button
-              onClick={() => setCurrentScreen('journeys')}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl font-extrabold text-xs shadow-md transition-all flex items-center gap-2 cursor-pointer active:scale-95"
-            >
-              <Compass className="w-4 h-4" />
-              <span>Start a Safety Journey</span>
-            </button>
-          </div>
-        </div>
-      )}
-
-      {/* 4. FIRST-TIME USER SETUP CHECKLIST (Guided onboarding based on actual saved state) */}
-      {isSetupIncomplete && (
-        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-brand-border shadow-card space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-brand-border">
-            <div>
-              <div className="flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-brand-teal" />
-                <h3 className="font-extrabold text-brand-text text-base">
-                  Getting Started with DigiSakhi
-                </h3>
-                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-brand-aqua text-brand-deepTeal">
-                  {completedCount} of {checklistItems.length} Complete
-                </span>
-              </div>
-              <p className="text-xs text-brand-muted mt-0.5">
-                Complete these initial steps to activate your personal safety circle.
-              </p>
-            </div>
-            <button
-              onClick={() => setIsChecklistDismissed(true)}
-              className="text-xs text-brand-muted hover:text-brand-text p-1 flex items-center gap-1"
-              title="Dismiss checklist"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {checklistItems.map((item) => (
-              <div
-                key={item.id}
-                className={`p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 text-xs ${
-                  item.completed
-                    ? 'bg-slate-50/70 border-slate-200 text-brand-muted'
-                    : 'bg-white border-brand-border shadow-2xs hover:border-teal-200'
-                }`}
-              >
-                <div className="flex items-start gap-2.5">
-                  <div
-                    className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
-                      item.completed
-                        ? 'bg-teal-100 text-brand-teal'
-                        : 'border border-slate-300 text-transparent'
-                    }`}
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  </div>
-                  <div>
-                    <h4
-                      className={`font-bold ${
-                        item.completed ? 'text-brand-muted line-through' : 'text-brand-text'
-                      }`}
-                    >
-                      {item.label}
-                    </h4>
-                    <p className="text-[11px] text-brand-muted mt-0.5 leading-relaxed">
-                      {item.description}
-                    </p>
-                  </div>
-                </div>
-
-                {!item.completed && (
-                  <button
-                    onClick={item.onAction}
-                    className="px-3 py-1.5 bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal rounded-lg font-bold text-[11px] shrink-0 transition-colors"
-                  >
-                    {item.actionLabel}
-                  </button>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* 5. ONE LARGE PROMINENT PRIMARY CARD (Answers: "What should I do next?") */}
-      {!activeJourney ? (
-        <div className="bg-gradient-to-br from-[#F2EDFF]/50 via-white to-[#EAF7FF]/50 rounded-3xl p-6 sm:p-8 border border-[#E8E1F3] shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6 relative overflow-hidden">
+        /* Single Active Journey Panel */
+        <div className="bg-gradient-to-br from-[#F2EDFF]/60 via-white to-[#EAF7FF]/60 rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-[#5517C8]/25 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5">
           <div className="max-w-xl space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20">
-              Primary Protection Workflow
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20">
+              Safety Journey in Progress
             </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#211638] tracking-tight mt-1">
-              Start a Safety Journey
-            </h2>
-            <p className="text-xs sm:text-sm text-[#716B80] leading-relaxed">
-              Going out, commuting, or walking home alone? Launch a monitored journey. DigiSakhi verifies your arrival upon entering your destination safe radius, and escalates to your trusted circle if overdue.
-            </p>
-            <div className="pt-2 flex flex-wrap items-center gap-3">
-              <button
-                onClick={() => setCurrentScreen('journeys')}
-                className="px-6 py-3.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-sm font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95"
-              >
-                <Compass className="w-4 h-4" />
-                <span>Start a Safety Journey</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
-
-              <button
-                onClick={() => setIsCheckInModalOpen(true)}
-                className="px-4 py-3 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
-              >
-                <Clock className="w-4 h-4 text-[#5517C8]" />
-                <span>Quick Check-in</span>
-              </button>
-            </div>
-          </div>
-
-          <div className="hidden lg:flex items-center justify-center p-6 shrink-0">
-            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] border border-[#5517C8]/20 shadow-elevated flex items-center justify-center text-[#5517C8]">
-              <Compass className="w-14 h-14 stroke-[2.2] animate-pulse-subtle" />
-            </div>
-          </div>
-        </div>
-      ) : (
-        <div className="bg-gradient-to-br from-[#F2EDFF]/60 via-white to-[#EAF7FF]/60 rounded-3xl p-6 sm:p-8 border border-[#5517C8]/20 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="max-w-xl space-y-2">
-            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20">
-              Active Transit
-            </span>
-            <h2 className="text-2xl sm:text-3xl font-black text-[#211638] tracking-tight mt-1">
+            <h2 className="text-xl sm:text-2xl font-black text-[#211638] tracking-tight">
               En Route to {activeJourney.destination_name}
             </h2>
             <p className="text-xs sm:text-sm text-[#716B80] leading-relaxed">
-              Safe arrival geofencing is active. Expected arrival: <strong className="text-[#211638]">{formatTimeOnly(activeJourney.expected_arrival_time)}</strong>. Confirm your safe arrival once you reach your destination.
+              Safe arrival geofencing active ({activeJourney.safe_radius_meters}m radius). Expected arrival:{' '}
+              <strong className="text-[#211638] font-mono">{formatTimeOnly(activeJourney.expected_arrival_time)}</strong>.
             </p>
-            <div className="pt-2 flex flex-wrap items-center gap-3">
+            <div className="pt-2 flex flex-wrap items-center gap-2.5">
               <button
                 onClick={() => confirmSafeArrival(activeJourney.id)}
-                className="px-6 py-3.5 bg-[#16865C] hover:bg-emerald-700 text-white rounded-xl text-sm font-bold shadow-md transition-all flex items-center gap-2 active:scale-95"
+                className="px-5 py-2.5 bg-[#16865C] hover:bg-emerald-700 text-white rounded-xl text-xs font-black shadow-sm transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
                 <span>Confirm Safe Arrival</span>
@@ -467,33 +204,78 @@ export const UserDashboard: React.FC = () => {
 
               <button
                 onClick={() => setCurrentScreen('journeys')}
-                className="px-4 py-3 bg-white hover:bg-slate-50 text-[#351078] border border-[#E8E1F3] rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
+                className="px-4 py-2.5 bg-white hover:bg-slate-50 text-[#351078] border border-[#E8E1F3] rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
               >
                 <Compass className="w-4 h-4 text-[#5517C8]" />
-                <span>Open Journey Map</span>
+                <span>View Route Map</span>
                 <ArrowRight className="w-3.5 h-3.5" />
               </button>
             </div>
           </div>
 
-          <div className="hidden lg:flex items-center justify-center p-6 shrink-0">
-            <div className="w-28 h-28 rounded-3xl bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] border border-[#5517C8]/20 shadow-elevated flex items-center justify-center text-[#5517C8]">
-              <Compass className="w-14 h-14 stroke-[2.2] animate-spin-slow" />
+          <div className="hidden lg:flex items-center justify-center p-4 shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-[#F2EDFF] border border-[#5517C8]/20 shadow-sm flex items-center justify-center text-[#5517C8]">
+              <Compass className="w-10 h-10 animate-spin-slow" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        /* Single Primary Action: Start a Safety Journey (When Standby) */
+        <div className="bg-gradient-to-br from-[#F2EDFF]/50 via-white to-[#EAF7FF]/50 rounded-2xl sm:rounded-3xl p-5 sm:p-7 border border-[#E8E1F3] shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+          <div className="max-w-xl space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-[#F2EDFF] text-[#351078] border border-[#5517C8]/20">
+              Primary Safety Workflow
+            </span>
+            <h2 className="text-xl sm:text-2xl font-black text-[#211638] tracking-tight">
+              Start a Safety Journey
+            </h2>
+            <p className="text-xs sm:text-sm text-[#716B80] leading-relaxed">
+              Going out, commuting, or walking alone? Launch a monitored journey with automated arrival detection, custom check-ins, and trusted circle backup.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setCurrentScreen('journeys')}
+                className="px-5 py-3 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-black shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Start a Safety Journey</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+
+              <button
+                onClick={() => setIsCheckInModalOpen(true)}
+                className="px-4 py-3 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer shadow-2xs"
+              >
+                <Clock className="w-4 h-4 text-[#5517C8]" />
+                <span>Quick Check-in</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center justify-center p-4 shrink-0">
+            <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-[#F2EDFF] to-[#EAF7FF] border border-[#5517C8]/20 shadow-sm flex items-center justify-center text-[#5517C8]">
+              <Compass className="w-10 h-10 animate-pulse-subtle" />
             </div>
           </div>
         </div>
       )}
 
-      {/* 6. SECONDARY AREA: 3 Clean Compact Summaries (Check-in, Trusted Circle, Recent Activity) */}
+      {/* =========================================================================
+          4. ESSENTIAL INFORMATION GRID (Clean 3-Card Summary Row)
+          Provides quick visibility without duplicating full page content:
+          - Card A: Safety Check-in Timer Status
+          - Card B: Trusted Circle Responders Status
+          - Card C: Recent Activity Timeline Snippet
+      ========================================================================= */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card A: Next Check-in Summary */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
+        {/* Card A: Safety Check-in Status */}
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center">
                 <Clock className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-[#716B80]">
+              <span className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${activeCheckIn ? 'bg-[#16865C]/10 text-[#16865C]' : 'bg-slate-100 text-[#716B80]'}`}>
                 {activeCheckIn ? 'Active' : 'Standby'}
               </span>
             </div>
@@ -502,16 +284,16 @@ export const UserDashboard: React.FC = () => {
             </h3>
             <p className="text-xs text-[#716B80] leading-relaxed">
               {activeCheckIn
-                ? `Response scheduled for ${formatTimeOnly(activeCheckIn.deadline_at)}.`
-                : 'No check-in currently counting down. Set a timer before leaving.'}
+                ? `Next response scheduled for ${formatTimeOnly(activeCheckIn.deadline_at)}.`
+                : 'No timer currently counting down. Set a check-in before heading out.'}
             </p>
           </div>
 
-          <div className="pt-4 border-t border-[#E8E1F3] mt-4 flex items-center justify-between">
+          <div className="pt-3.5 border-t border-[#E8E1F3] mt-4">
             {activeCheckIn ? (
               <button
                 onClick={() => confirmCheckInSafe(activeCheckIn.id)}
-                className="w-full py-2 bg-[#16865C] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-md transition-all flex items-center justify-center gap-1.5"
+                className="w-full py-2 bg-[#16865C] hover:bg-emerald-700 text-white rounded-xl font-bold text-xs shadow-xs transition-all flex items-center justify-center gap-1.5 cursor-pointer"
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
                 <span>I'm Safe</span>
@@ -519,7 +301,7 @@ export const UserDashboard: React.FC = () => {
             ) : (
               <button
                 onClick={() => setIsCheckInModalOpen(true)}
-                className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+                className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
               >
                 <span>Schedule Check-in</span>
                 <ArrowRight className="w-3 h-3 text-[#5517C8]" />
@@ -529,13 +311,13 @@ export const UserDashboard: React.FC = () => {
         </div>
 
         {/* Card B: Trusted Circle Status */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-[#F2EDFF] text-[#365BFF] flex items-center justify-center">
+              <div className="w-8 h-8 rounded-xl bg-[#F2EDFF] text-[#365BFF] flex items-center justify-center">
                 <Users className="w-4 h-4" />
               </div>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#16865C]/10 text-[#16865C] border border-[#16865C]/30 font-mono">
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#16865C]/10 text-[#16865C] border border-[#16865C]/20 font-mono">
                 {acceptedContacts.length > 0
                   ? `${acceptedContacts.length} Verified`
                   : contacts.length > 0
@@ -548,17 +330,17 @@ export const UserDashboard: React.FC = () => {
             </h3>
             <p className="text-xs text-[#716B80] leading-relaxed">
               {acceptedContacts.length > 0
-                ? `${acceptedContacts.length} responder(s) authorized for check-ins and emergency alerts.`
+                ? `${acceptedContacts.length} responder(s) verified for check-ins and emergency alerts.`
                 : contacts.length > 0
-                ? `${contacts.length} responder(s) in escalation circle (${contacts.length - acceptedContacts.length} pending recipient acceptance).`
-                : 'No contacts added yet. Add your trusted friends or family members.'}
+                ? `${contacts.length} responder(s) in circle (${contacts.length - acceptedContacts.length} pending acceptance).`
+                : 'No contacts added yet. Add trusted friends or family members.'}
             </p>
           </div>
 
-          <div className="pt-4 border-t border-[#E8E1F3] mt-4">
+          <div className="pt-3.5 border-t border-[#E8E1F3] mt-4">
             <button
               onClick={() => setCurrentScreen('circle')}
-              className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+              className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
             >
               <span>Manage Circle</span>
               <ArrowRight className="w-3 h-3 text-[#5517C8]" />
@@ -567,26 +349,26 @@ export const UserDashboard: React.FC = () => {
         </div>
 
         {/* Card C: Recent Activity Preview */}
-        <div className="bg-white rounded-2xl p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
+        <div className="bg-white rounded-2xl p-4 sm:p-5 border border-[#E8E1F3] shadow-card flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
-                <Clock className="w-4 h-4" />
+              <div className="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <History className="w-4 h-4" />
               </div>
               <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-[#716B80]">
-                Audit Trail
+                Activity
               </span>
             </div>
             <h3 className="font-extrabold text-[#211638] text-sm">
-              Recent Activity
+              Recent Events
             </h3>
             {recentEvents.length === 0 ? (
               <p className="text-xs text-[#716B80] leading-relaxed">
-                No safety events recorded yet. Recent events will appear here.
+                No safety events recorded yet. Check-ins and journeys appear here.
               </p>
             ) : (
-              <div className="space-y-1.5 pt-1">
-                {recentEvents.slice(0, 2).map((ev) => (
+              <div className="space-y-1.5 pt-0.5">
+                {recentEvents.map((ev) => (
                   <div key={ev.id} className="text-[11px] leading-tight">
                     <span className="font-bold text-[#211638] truncate block">
                       {ev.description}
@@ -600,19 +382,19 @@ export const UserDashboard: React.FC = () => {
             )}
           </div>
 
-          <div className="pt-4 border-t border-[#E8E1F3] mt-4">
+          <div className="pt-3.5 border-t border-[#E8E1F3] mt-4">
             <button
               onClick={() => setCurrentScreen('history')}
-              className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+              className="w-full py-2 bg-slate-50 hover:bg-[#F2EDFF] text-[#211638] border border-[#E8E1F3] rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1 cursor-pointer"
             >
-              <span>View Activity History</span>
+              <span>View Full History</span>
               <ArrowRight className="w-3 h-3 text-[#5517C8]" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Modals */}
+      {/* Interactive Emergency Modals */}
       <CheckInSetupModal
         isOpen={isCheckInModalOpen}
         onClose={() => setIsCheckInModalOpen(false)}
