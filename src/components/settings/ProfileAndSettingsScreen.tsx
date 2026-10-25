@@ -183,18 +183,18 @@ export const ProfileAndSettingsScreen: React.FC = () => {
 
       {/* TAB 1: PROFILE INFORMATION */}
       {activeTab === 'profile' && (
-        <form onSubmit={handleSaveProfile} className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-5 animate-fadeIn">
-          <div className="flex items-center justify-between pb-4 border-b border-brand-border">
+        <form onSubmit={handleSaveProfile} className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card space-y-5 animate-fadeIn">
+          <div className="flex items-center justify-between pb-4 border-b border-[#E8E1F3]">
             <div>
-              <h3 className="text-lg font-extrabold text-brand-text">Personal & Emergency Information</h3>
-              <p className="text-xs text-brand-muted mt-0.5">
+              <h3 className="text-lg font-extrabold text-[#211638]">Personal & Emergency Information</h3>
+              <p className="text-xs text-[#716B80] mt-0.5">
                 This information is shared with verified circle contacts when an urgent safety alert is triggered.
               </p>
             </div>
             <button
               type="submit"
               disabled={isSavingProfile}
-              className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 transition-all disabled:opacity-50"
+              className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{isSavingProfile ? 'Saving...' : 'Save Profile'}</span>
@@ -203,53 +203,53 @@ export const ProfileAndSettingsScreen: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="font-bold text-brand-text block mb-1">Full Legal Name</label>
+              <label className="font-bold text-[#211638] block mb-1">Full Legal Name</label>
               <input
                 type="text"
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2.5 text-xs font-medium text-brand-text focus:outline-none focus:border-brand-teal"
+                className="w-full bg-slate-50 border border-[#E8E1F3] rounded-xl px-3 py-2.5 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
               />
             </div>
 
             <div>
-              <label className="font-bold text-brand-text block mb-1">Contact Phone Number</label>
+              <label className="font-bold text-[#211638] block mb-1">Contact Phone Number</label>
               <input
                 type="tel"
                 required
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2.5 text-xs font-medium text-brand-text focus:outline-none focus:border-brand-teal font-mono"
+                className="w-full bg-slate-50 border border-[#E8E1F3] rounded-xl px-3 py-2.5 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8] font-mono"
               />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             <div>
-              <label className="font-bold text-brand-text block mb-1">Account Email (Verified)</label>
+              <label className="font-bold text-[#211638] block mb-1">Account Email (Verified)</label>
               <input
                 type="email"
                 disabled
                 value={currentUser.email}
-                className="w-full bg-slate-100 border border-brand-border rounded-xl px-3 py-2.5 text-xs font-medium text-brand-muted cursor-not-allowed"
+                className="w-full bg-slate-100 border border-[#E8E1F3] rounded-xl px-3 py-2.5 text-xs font-medium text-[#716B80] cursor-not-allowed"
               />
             </div>
 
             <div>
-              <label className="font-bold text-brand-text block mb-1">Emergency Medical Info (Blood Group / Allergies)</label>
+              <label className="font-bold text-[#211638] block mb-1">Emergency Medical Info (Blood Group / Allergies)</label>
               <input
                 type="text"
                 placeholder="e.g. Blood type O+, Penicillin allergy"
                 value={medicalInfo}
                 onChange={(e) => setMedicalInfo(e.target.value)}
-                className="w-full bg-slate-50 border border-brand-border rounded-xl px-3 py-2.5 text-xs font-medium text-brand-text focus:outline-none focus:border-brand-teal"
+                className="w-full bg-slate-50 border border-[#E8E1F3] rounded-xl px-3 py-2.5 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
               />
             </div>
           </div>
 
           <div>
-            <label className="font-bold text-brand-text block mb-1">
+            <label className="font-bold text-[#211638] block mb-1">
               Emergency Responder Notes (Visible to circle during active incidents)
             </label>
             <textarea
@@ -257,7 +257,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
               placeholder="e.g. Asthma inhaler in outer bag pocket. Front door keycard code is 4921."
               value={emergencyNotes}
               onChange={(e) => setEmergencyNotes(e.target.value)}
-              className="w-full bg-slate-50 border border-brand-border rounded-xl p-3 text-xs font-medium text-brand-text focus:outline-none focus:border-brand-teal leading-relaxed"
+              className="w-full bg-slate-50 border border-[#E8E1F3] rounded-xl p-3 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8] leading-relaxed"
             />
           </div>
         </form>
@@ -265,18 +265,18 @@ export const ProfileAndSettingsScreen: React.FC = () => {
 
       {/* TAB 2: PRIVACY & DISCREET MODE */}
       {activeTab === 'privacy' && (
-        <form onSubmit={handleSavePrivacy} className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-6 animate-fadeIn">
-          <div className="flex items-center justify-between pb-4 border-b border-brand-border">
+        <form onSubmit={handleSavePrivacy} className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card space-y-6 animate-fadeIn">
+          <div className="flex items-center justify-between pb-4 border-b border-[#E8E1F3]">
             <div>
-              <h3 className="text-lg font-extrabold text-brand-text">Privacy & Discreet Camouflage</h3>
-              <p className="text-xs text-brand-muted mt-0.5">
+              <h3 className="text-lg font-extrabold text-[#211638]">Privacy & Discreet Camouflage</h3>
+              <p className="text-xs text-[#716B80] mt-0.5">
                 Instant camouflage disguise protects you from shoulder-surfing without interrupting active safety sessions.
               </p>
             </div>
             <button
               type="submit"
               disabled={isSavingPrivacy}
-              className="px-4 py-2 bg-brand-violet hover:bg-violet-700 text-white rounded-xl text-xs font-bold shadow-violet flex items-center gap-2 transition-all disabled:opacity-50"
+              className="px-4 py-2 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2 transition-all disabled:opacity-50 cursor-pointer"
             >
               <Save className="w-4 h-4" />
               <span>{isSavingPrivacy ? 'Saving...' : 'Save Privacy'}</span>
@@ -285,10 +285,10 @@ export const ProfileAndSettingsScreen: React.FC = () => {
 
           <div className="space-y-4 text-xs">
             {/* Discreet Mode Toggle */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E1F3] flex items-center justify-between">
               <div>
-                <span className="font-extrabold text-brand-text text-sm block">Quick Exit Disguise Enabled (Esc Key)</span>
-                <span className="text-brand-muted text-[11px] leading-relaxed">
+                <span className="font-extrabold text-[#211638] text-sm block">Quick Exit Disguise Enabled (Esc Key)</span>
+                <span className="text-[#716B80] text-[11px] leading-relaxed">
                   Pressing the <strong>Esc</strong> key immediately covers the screen with an innocent disguise app.
                 </span>
               </div>
@@ -296,13 +296,13 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                 type="checkbox"
                 checked={discreetMode}
                 onChange={(e) => setDiscreetMode(e.target.checked)}
-                className="rounded border-brand-border text-brand-violet focus:ring-brand-violet h-5 w-5"
+                className="rounded border-[#E8E1F3] text-[#5517C8] focus:ring-[#5517C8] h-5 w-5 accent-[#5517C8]"
               />
             </div>
 
             {/* Disguise Appearance */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border space-y-2">
-              <label className="font-bold text-brand-text block">Camouflage Disguise Screen</label>
+            <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E1F3] space-y-2">
+              <label className="font-bold text-[#211638] block">Camouflage Disguise Screen</label>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 {[
                   { id: 'weather', name: 'Weather Forecast', desc: 'Daily weather planner with real temperatures' },
@@ -314,8 +314,8 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                     onClick={() => setDisguise(item.id as any)}
                     className={`p-3 rounded-xl border cursor-pointer transition-all ${
                       disguise === item.id
-                        ? 'bg-brand-lavender/50 border-brand-violet text-brand-text shadow-xs'
-                        : 'bg-white border-brand-border hover:bg-slate-100 text-brand-muted'
+                        ? 'bg-[#F2EDFF] border-[#5517C8] text-[#351078] shadow-xs'
+                        : 'bg-white border-[#E8E1F3] hover:bg-slate-100 text-[#716B80]'
                     }`}
                   >
                     <div className="flex items-center gap-2 mb-1">
@@ -324,19 +324,19 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                         name="disguise_type"
                         checked={disguise === item.id}
                         onChange={() => setDisguise(item.id as any)}
-                        className="text-brand-violet focus:ring-brand-violet"
+                        className="text-[#5517C8] focus:ring-[#5517C8] accent-[#5517C8]"
                       />
-                      <span className="font-bold text-xs text-brand-text">{item.name}</span>
+                      <span className="font-bold text-xs text-[#211638]">{item.name}</span>
                     </div>
-                    <p className="text-[10px] text-brand-muted pl-5">{item.desc}</p>
+                    <p className="text-[10px] text-[#716B80] pl-5">{item.desc}</p>
                   </label>
                 ))}
               </div>
             </div>
 
             {/* PIN Unlock */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border space-y-2">
-              <label className="font-bold text-brand-text block">
+            <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E1F3] space-y-2">
+              <label className="font-bold text-[#211638] block">
                 Discreet Unlock PIN (Minimum 4 digits)
               </label>
               <input
@@ -344,18 +344,18 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                 maxLength={8}
                 value={pin}
                 onChange={(e) => setPin(e.target.value.replace(/\D/g, ''))}
-                className="w-48 bg-white border border-brand-border rounded-xl px-3 py-2 text-sm font-mono tracking-widest text-brand-text focus:outline-none focus:border-brand-violet"
+                className="w-48 bg-white border border-[#E8E1F3] rounded-xl px-3 py-2 text-sm font-mono tracking-widest text-[#211638] focus:outline-none focus:border-[#5517C8]"
               />
-              <p className="text-[11px] text-brand-muted">
+              <p className="text-[11px] text-[#716B80]">
                 Enter this PIN on the disguise screen to unlock your safety dashboard.
               </p>
             </div>
 
             {/* Lockscreen Masking */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border flex items-center justify-between">
+            <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E1F3] flex items-center justify-between">
               <div>
-                <span className="font-extrabold text-brand-text text-sm block">Lockscreen Notification Masking</span>
-                <span className="text-brand-muted text-[11px] leading-relaxed">
+                <span className="font-extrabold text-[#211638] text-sm block">Lockscreen Notification Masking</span>
+                <span className="text-[#716B80] text-[11px] leading-relaxed">
                   Masks sensitive safety alerts on lockscreens as "Calendar Schedule Reminder".
                 </span>
               </div>
@@ -363,7 +363,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                 type="checkbox"
                 checked={lockscreenMask}
                 onChange={(e) => setLockscreenMask(e.target.checked)}
-                className="rounded border-brand-border text-brand-violet focus:ring-brand-violet h-5 w-5"
+                className="rounded border-[#E8E1F3] text-[#5517C8] focus:ring-[#5517C8] h-5 w-5 accent-[#5517C8]"
               />
             </div>
           </div>
@@ -372,22 +372,22 @@ export const ProfileAndSettingsScreen: React.FC = () => {
 
       {/* TAB 3: NOTIFICATIONS & PERMISSIONS */}
       {activeTab === 'permissions' && (
-        <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-6 animate-fadeIn">
+        <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card space-y-6 animate-fadeIn">
           <div>
-            <h3 className="text-lg font-extrabold text-brand-text">Device Permissions & Alerts</h3>
-            <p className="text-xs text-brand-muted mt-0.5">
+            <h3 className="text-lg font-extrabold text-[#211638]">Device Permissions & Alerts</h3>
+            <p className="text-xs text-[#716B80] mt-0.5">
               Ensure browser push alerts and device GPS have proper authorization.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
             {/* Push Notifications Card */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-brand-border space-y-3 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-[#E8E1F3] space-y-3 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Bell className="w-5 h-5 text-brand-teal" />
-                    <h4 className="font-extrabold text-brand-text text-sm">Browser Push Notifications</h4>
+                    <Bell className="w-5 h-5 text-[#5517C8]" />
+                    <h4 className="font-extrabold text-[#211638] text-sm">Browser Push Notifications</h4>
                   </div>
                   <span
                     className={`text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${
@@ -399,7 +399,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                     {notifPermission}
                   </span>
                 </div>
-                <p className="text-brand-muted text-xs leading-relaxed">
+                <p className="text-[#716B80] text-xs leading-relaxed">
                   Receive audible pre-deadline check-in reminders and urgent circle response notifications.
                 </p>
               </div>
@@ -408,7 +408,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleRequestPush}
-                  className="w-full py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md transition-all"
+                  className="w-full py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md transition-all cursor-pointer"
                 >
                   Enable Push Notifications
                 </button>
@@ -416,18 +416,18 @@ export const ProfileAndSettingsScreen: React.FC = () => {
             </div>
 
             {/* Geolocation GPS Card */}
-            <div className="p-5 rounded-2xl bg-slate-50 border border-brand-border space-y-3 flex flex-col justify-between">
+            <div className="p-5 rounded-2xl bg-slate-50 border border-[#E8E1F3] space-y-3 flex flex-col justify-between">
               <div>
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <MapPin className="w-5 h-5 text-brand-violet" />
-                    <h4 className="font-extrabold text-brand-text text-sm">Geolocation Device GPS</h4>
+                    <MapPin className="w-5 h-5 text-[#365BFF]" />
+                    <h4 className="font-extrabold text-[#211638] text-sm">Geolocation Device GPS</h4>
                   </div>
-                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-lavender text-brand-violet">
+                  <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-[#F2EDFF] text-[#5517C8] border border-[#5517C8]/20">
                     {locationPermission}
                   </span>
                 </div>
-                <p className="text-brand-muted text-xs leading-relaxed">
+                <p className="text-[#716B80] text-xs leading-relaxed">
                   Used exclusively during active safety journeys and urgent SOS broadcasts. Never runs continuously in the background.
                 </p>
               </div>
@@ -438,7 +438,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                   refreshLocation(false);
                   toast.success('Querying live GPS coordinates...');
                 }}
-                className="w-full py-2.5 bg-brand-violet hover:bg-violet-700 text-white rounded-xl text-xs font-bold transition-colors"
+                className="w-full py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold transition-all shadow-md cursor-pointer"
               >
                 Refresh Device GPS Fix
               </button>
@@ -449,49 +449,49 @@ export const ProfileAndSettingsScreen: React.FC = () => {
 
       {/* TAB 4: ACCOUNT SECURITY & SIGN OUT */}
       {activeTab === 'account' && (
-        <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-6 animate-fadeIn">
+        <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card space-y-6 animate-fadeIn">
           <div>
-            <h3 className="text-lg font-extrabold text-brand-text">Account Security & Audit Trail</h3>
-            <p className="text-xs text-brand-muted mt-0.5">
+            <h3 className="text-lg font-extrabold text-[#211638]">Account Security & Audit Trail</h3>
+            <p className="text-xs text-[#716B80] mt-0.5">
               Export encrypted safety audit logs or sign out of your active session.
             </p>
           </div>
 
           <div className="space-y-4 text-xs">
             {/* Account Details Card */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border space-y-2">
-              <span className="font-bold text-brand-text block text-sm">Account Overview</span>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-brand-muted">
-                <div>User ID: <span className="font-mono text-brand-text">{currentUser.id}</span></div>
-                <div>Email: <span className="font-mono text-brand-text">{currentUser.email}</span></div>
-                <div>Phone: <span className="font-mono text-brand-text">{currentUser.phone_number || 'Not configured'}</span></div>
-                <div>Account Role: <span className="font-bold text-brand-teal capitalize">Protected User</span></div>
+            <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E1F3] space-y-2">
+              <span className="font-bold text-[#211638] block text-sm">Account Overview</span>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px] text-[#716B80]">
+                <div>User ID: <span className="font-mono text-[#211638]">{currentUser.id}</span></div>
+                <div>Email: <span className="font-mono text-[#211638]">{currentUser.email}</span></div>
+                <div>Phone: <span className="font-mono text-[#211638]">{currentUser.phone_number || 'Not configured'}</span></div>
+                <div>Account Role: <span className="font-bold text-[#5517C8] capitalize">Protected User</span></div>
               </div>
             </div>
 
             {/* Export Audit Data */}
-            <div className="p-4 rounded-xl bg-slate-50 border border-brand-border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-slate-50 border border-[#E8E1F3] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="font-extrabold text-brand-text text-sm block">Export Safety Audit Data</span>
-                <span className="text-brand-muted text-[11px]">
+                <span className="font-extrabold text-[#211638] text-sm block">Export Safety Audit Data</span>
+                <span className="text-[#716B80] text-[11px]">
                   Download your encrypted historical incident timelines, check-in records, and profile details.
                 </span>
               </div>
               <button
                 type="button"
                 onClick={handleExportData}
-                className="px-4 py-2 border border-brand-border bg-white hover:bg-slate-50 text-brand-text rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs shrink-0 cursor-pointer"
+                className="px-4 py-2 border border-[#E8E1F3] bg-white hover:bg-slate-50 text-[#211638] rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-xs shrink-0 cursor-pointer"
               >
-                <Download className="w-4 h-4 text-brand-teal" />
+                <Download className="w-4 h-4 text-[#5517C8]" />
                 <span>Export JSON</span>
               </button>
             </div>
 
             {/* Sign Out Card */}
-            <div className="p-4 rounded-xl bg-brand-peach/40 border border-coral-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="p-4 rounded-xl bg-red-50/50 border border-red-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
               <div>
-                <span className="font-extrabold text-brand-coral text-sm block">Sign Out of Session</span>
-                <span className="text-brand-muted text-[11px]">
+                <span className="font-extrabold text-[#D92D45] text-sm block">Sign Out of Session</span>
+                <span className="text-[#716B80] text-[11px]">
                   End your current browser session and return to the login screen.
                 </span>
               </div>
@@ -501,7 +501,7 @@ export const ProfileAndSettingsScreen: React.FC = () => {
                   signOut();
                   toast.success('Signed out successfully.');
                 }}
-                className="px-5 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-bold transition-colors flex items-center justify-center gap-2 shadow-coral shrink-0 cursor-pointer"
+                className="px-5 py-2.5 bg-gradient-to-r from-[#D92D45] to-[#B91C1C] hover:opacity-95 text-white rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-md shrink-0 cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>

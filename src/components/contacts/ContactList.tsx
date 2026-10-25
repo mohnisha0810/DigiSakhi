@@ -170,15 +170,15 @@ export const ContactList: React.FC = () => {
       )}
 
       {/* Escalation Hierarchy List */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card space-y-4">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E8E1F3]">
           <div>
-            <h3 className="font-extrabold text-brand-text text-base">Escalation Chain Order</h3>
-            <p className="text-xs text-brand-muted mt-0.5">
+            <h3 className="font-extrabold text-[#211638] text-base">Escalation Chain Order</h3>
+            <p className="text-xs text-[#716B80] mt-0.5">
               Tier 1 contact is alerted first. If unacknowledged within protocol timeout, escalates to Tier 2.
             </p>
           </div>
-          <span className="text-xs text-brand-muted font-mono font-bold">
+          <span className="text-xs text-[#716B80] font-mono font-bold">
             {acceptedContacts.length} verified responder{acceptedContacts.length !== 1 ? 's' : ''}
           </span>
         </div>
@@ -205,7 +205,7 @@ export const ContactList: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-brand-border">
+          <div className="divide-y divide-[#E8E1F3]">
             {acceptedContacts.map((contact, index) => (
               <div
                 key={contact.id}
@@ -248,14 +248,14 @@ export const ContactList: React.FC = () => {
 
                 {/* Reorder and Delete Controls */}
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-brand-muted font-mono mr-1">
+                  <span className="text-[11px] text-[#716B80] font-mono mr-1">
                     Tier {contact.escalation_order}
                   </span>
 
                   <button
                     onClick={() => moveContact(index, 'up')}
                     disabled={index === 0}
-                    className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-brand-text disabled:opacity-30 transition-colors"
+                    className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#211638] disabled:opacity-30 transition-colors cursor-pointer"
                     title="Move higher in escalation chain"
                   >
                     <ArrowUp className="w-4 h-4" />
@@ -264,7 +264,7 @@ export const ContactList: React.FC = () => {
                   <button
                     onClick={() => moveContact(index, 'down')}
                     disabled={index === acceptedContacts.length - 1}
-                    className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-brand-text disabled:opacity-30 transition-colors"
+                    className="p-2 rounded-lg bg-slate-100 hover:bg-slate-200 text-[#211638] disabled:opacity-30 transition-colors cursor-pointer"
                     title="Move lower in escalation chain"
                   >
                     <ArrowDown className="w-4 h-4" />
@@ -272,7 +272,7 @@ export const ContactList: React.FC = () => {
 
                   <button
                     onClick={() => removeContact(contact.id)}
-                    className="p-2 rounded-lg text-brand-muted hover:text-brand-coral hover:bg-brand-peach transition-colors ml-1"
+                    className="p-2 rounded-lg text-[#716B80] hover:text-[#D92D45] hover:bg-red-50 transition-colors ml-1 cursor-pointer"
                     title="Remove from circle"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -285,14 +285,14 @@ export const ContactList: React.FC = () => {
       </div>
 
       {/* Pending Invitations Section (Unverified) */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-4">
-        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-brand-border">
+      <div className="bg-white rounded-2xl p-6 border border-[#E8E1F3] shadow-card space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-[#E8E1F3]">
           <div>
-            <h3 className="font-extrabold text-brand-text text-base flex items-center gap-2">
+            <h3 className="font-extrabold text-[#211638] text-base flex items-center gap-2">
               <Clock className="w-4 h-4 text-amber-500" />
               <span>Pending Contact Invitations (Awaiting Recipient Acceptance)</span>
             </h3>
-            <p className="text-xs text-brand-muted mt-0.5">
+            <p className="text-xs text-[#716B80] mt-0.5">
               These contacts have been saved but have not yet accepted on their phone. Use WhatsApp, SMS, or link sharing to send their verification link.
             </p>
           </div>
@@ -302,21 +302,21 @@ export const ContactList: React.FC = () => {
                 type="button"
                 onClick={handleManualSync}
                 disabled={isSyncing}
-                className="px-3 py-1.5 rounded-lg border border-[#5517C8]/30 bg-[#F2EDFF] hover:bg-[#EAF7FF] text-[#5517C8] text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50"
+                className="px-3 py-1.5 rounded-lg border border-[#5517C8]/30 bg-[#F2EDFF] hover:bg-[#EAF7FF] text-[#5517C8] text-xs font-bold transition-all flex items-center gap-1.5 disabled:opacity-50 cursor-pointer"
                 title="Check server to see if any recipient has accepted"
               >
                 <RefreshCw className={`w-3.5 h-3.5 ${isSyncing ? 'animate-spin' : ''}`} />
                 <span>{isSyncing ? 'Checking...' : 'Check Status'}</span>
               </button>
             )}
-            <span className="text-xs text-amber-600 font-mono font-bold bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+            <span className="text-xs text-amber-700 font-mono font-bold bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
               {pendingContacts.length} pending
             </span>
           </div>
         </div>
 
         {pendingContacts.length === 0 ? (
-          <p className="text-xs text-brand-muted py-4">No pending invitations. All circle members are active and verified.</p>
+          <p className="text-xs text-[#716B80] py-4">No pending invitations. All circle members are active and verified.</p>
         ) : (
           <div className="space-y-3">
             {pendingContacts.map((contact) => {
@@ -331,18 +331,18 @@ export const ContactList: React.FC = () => {
               return (
                 <div
                   key={contact.id}
-                  className="p-4 rounded-xl bg-slate-50 border border-brand-border flex flex-wrap items-center justify-between gap-4 text-xs transition-colors hover:bg-slate-100/60"
+                  className="p-4 rounded-2xl bg-slate-50/70 border border-[#E8E1F3] flex flex-wrap items-center justify-between gap-4 text-xs transition-colors hover:bg-slate-100/60"
                 >
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-extrabold text-brand-text text-sm">{contact.full_name}</span>
+                      <span className="font-extrabold text-[#211638] text-sm">{contact.full_name}</span>
                       <StatusBadge status="pending" />
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white text-brand-muted border border-brand-border">
+                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-white text-[#716B80] border border-[#E8E1F3]">
                         {contact.relationship}
                       </span>
                     </div>
 
-                    <div className="flex items-center gap-3 text-brand-muted text-[11px] flex-wrap">
+                    <div className="flex items-center gap-3 text-[#716B80] text-[11px] flex-wrap">
                       <span className="flex items-center gap-1 font-mono">
                         <Phone className="w-3 h-3" />
                         {contact.phone_number}
@@ -355,59 +355,45 @@ export const ContactList: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Actions for Pending Contacts: Direct WhatsApp, SMS, Copy, Review */}
+                  {/* Clean Grouped Actions for Pending Contacts */}
                   <div className="flex items-center gap-2 flex-wrap">
                     {matchedInv?.invitation_token && (
-                      <>
+                      <div className="flex items-center gap-1.5 bg-white p-1 rounded-xl border border-[#E8E1F3] shadow-xs">
+                        {/* Primary Send 1: WhatsApp */}
                         <button
                           type="button"
                           onClick={() => handleWhatsApp(contact, token)}
-                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
+                          className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98] cursor-pointer"
                           title="Open WhatsApp chat with pre-filled invitation"
                         >
                           <Phone className="w-3.5 h-3.5 fill-current" />
                           <span>WhatsApp</span>
                         </button>
 
+                        {/* Primary Send 2: SMS */}
                         <button
                           type="button"
                           onClick={() => handleSms(contact, token)}
-                          className="px-3 py-1.5 bg-[#5517C8] hover:bg-[#4510AB] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98]"
+                          className="px-3 py-1.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-lg text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 active:scale-[0.98] cursor-pointer"
                           title="Open phone Messages app (or copy message on desktop)"
                         >
                           <MessageSquare className="w-3.5 h-3.5 fill-current" />
                           <span>SMS</span>
                         </button>
 
-                        <button
-                          type="button"
-                          onClick={() => handleCopyMessage(contact, token)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
-                          title="Copy complete invitation text to clipboard"
-                        >
-                          {copiedMsgToken === token ? (
-                            <>
-                              <Check className="w-3.5 h-3.5 text-[#16865C]" />
-                              <span className="text-[#16865C]">Copied!</span>
-                            </>
-                          ) : (
-                            <>
-                              <Copy className="w-3.5 h-3.5 text-[#716B80]" />
-                              <span>Copy Msg</span>
-                            </>
-                          )}
-                        </button>
+                        <span className="w-px h-5 bg-[#E8E1F3] mx-0.5" />
 
+                        {/* Secondary Link Action 1: Copy Link */}
                         <button
                           type="button"
                           onClick={() => handleCopyInviteLink(token, contact)}
-                          className="px-2.5 py-1.5 bg-white hover:bg-slate-50 text-[#211638] border border-[#E8E1F3] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-[#211638] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                           title="Copy verification link only"
                         >
                           {copiedToken === token ? (
                             <>
-                              <Check className="w-3.5 h-3.5 text-[#16865C]" />
-                              <span className="text-[#16865C]">Link!</span>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-700 font-bold">Copied!</span>
                             </>
                           ) : (
                             <>
@@ -417,22 +403,44 @@ export const ContactList: React.FC = () => {
                           )}
                         </button>
 
+                        {/* Secondary Link Action 2: Copy Message */}
+                        <button
+                          type="button"
+                          onClick={() => handleCopyMessage(contact, token)}
+                          className="px-2.5 py-1.5 bg-slate-50 hover:bg-slate-100 text-[#211638] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
+                          title="Copy complete invitation text to clipboard"
+                        >
+                          {copiedMsgToken === token ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              <span className="text-emerald-700 font-bold">Copied!</span>
+                            </>
+                          ) : (
+                            <>
+                              <MessageSquare className="w-3.5 h-3.5 text-[#716B80]" />
+                              <span>Msg</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* Secondary Link Action 3: Review Portal */}
                         <button
                           type="button"
                           onClick={() => handleOpenRecipientPage(token, contact)}
-                          className="px-2.5 py-1.5 bg-[#F2EDFF] hover:bg-[#EAF7FF] text-[#351078] border border-[#5517C8]/20 rounded-lg text-xs font-bold transition-colors flex items-center gap-1 shadow-xs"
+                          className="px-2.5 py-1.5 bg-[#F2EDFF] hover:bg-[#EAF7FF] text-[#5517C8] rounded-lg text-xs font-bold transition-colors flex items-center gap-1 cursor-pointer"
                           title="Test recipient acceptance screen in new tab"
                         >
                           <ExternalLink className="w-3.5 h-3.5" />
                           <span>Review</span>
                         </button>
-                      </>
+                      </div>
                     )}
 
+                    {/* Delete action */}
                     <button
                       type="button"
                       onClick={() => removeContact(contact.id)}
-                      className="p-1.5 text-brand-muted hover:text-brand-coral hover:bg-brand-peach rounded-lg transition-colors ml-1"
+                      className="p-2 text-[#716B80] hover:text-[#D92D45] hover:bg-red-50 rounded-xl transition-colors cursor-pointer border border-transparent hover:border-red-100"
                       title="Cancel invitation and remove"
                     >
                       <Trash2 className="w-4 h-4" />

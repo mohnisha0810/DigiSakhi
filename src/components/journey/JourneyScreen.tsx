@@ -241,15 +241,15 @@ export const JourneyScreen: React.FC = () => {
   return (
     <div className="space-y-6 animate-fadeIn">
       {/* 1. TOP HEADER */}
-      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-[#E8E1F3] shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
-          <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-violet bg-brand-lavender px-3 py-1 rounded-full border border-violet-200">
+          <span className="text-[11px] font-extrabold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-3 py-1 rounded-full border border-[#5517C8]/20">
             Automated Check-ins & Transit Monitoring
           </span>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text mt-2 tracking-tight">
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-[#211638] mt-2 tracking-tight">
             My Safety Journeys
           </h1>
-          <p className="text-xs sm:text-sm text-brand-muted mt-1 max-w-2xl leading-relaxed">
+          <p className="text-sm text-[#716B80] mt-1 max-w-2xl leading-relaxed">
             Configure periodic safety check-ins with visible response countdowns, 1-click Tier 1 & Tier 2 calling, and urgent emergency dialer handoffs.
           </p>
         </div>
@@ -258,16 +258,16 @@ export const JourneyScreen: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsEmergencyMessageOpen(true)}
-              className="px-3.5 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-black shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
+              className="px-3.5 py-2.5 bg-gradient-to-r from-[#D92D45] to-[#B91C1C] hover:opacity-95 text-white rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-1.5 active:scale-95 cursor-pointer"
             >
               <ShieldAlert className="w-3.5 h-3.5 animate-pulse" />
               <span>Emergency SOS</span>
             </button>
             <button
               onClick={() => setIsEndingConfirmOpen(true)}
-              className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-brand-text border border-brand-border rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5"
+              className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-[#211638] border border-[#E8E1F3] rounded-xl text-xs font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
             >
-              <XCircle className="w-3.5 h-3.5 text-brand-muted" />
+              <XCircle className="w-3.5 h-3.5 text-[#716B80]" />
               <span>End Journey</span>
             </button>
           </div>
@@ -278,15 +278,15 @@ export const JourneyScreen: React.FC = () => {
       {activeJourney ? (
         <div className="space-y-6 animate-fadeIn">
           {/* Main Active Journey Status Panel */}
-          <div className="bg-white border border-brand-border rounded-3xl p-6 sm:p-8 shadow-card space-y-6">
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-brand-border">
+          <div className="bg-white border border-[#E8E1F3] rounded-3xl p-6 sm:p-8 shadow-card space-y-6">
+            <div className="flex flex-wrap items-center justify-between gap-4 pb-5 border-b border-[#E8E1F3]">
               <div className="flex items-center gap-3.5">
-                <div className="w-13 h-13 rounded-2xl bg-brand-lavender text-brand-violet flex items-center justify-center shrink-0 shadow-xs">
+                <div className="w-13 h-13 rounded-2xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center shrink-0 shadow-xs">
                   <Compass className="w-7 h-7 stroke-[2.2] animate-spin-slow" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2.5 flex-wrap">
-                    <h2 className="text-xl font-extrabold text-brand-text">
+                    <h2 className="text-xl font-extrabold text-[#211638]">
                       {activeJourney.journey_name || activeJourney.destination_name}
                     </h2>
                     <span className="text-xs font-extrabold px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
@@ -294,14 +294,14 @@ export const JourneyScreen: React.FC = () => {
                       Safety Journey Active
                     </span>
                     {activeJourney.journey_type === 'custom' && (
-                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#F2EDFF] text-[#5517C8] border border-[#5517C8]/20">
                         Custom Plan • {activeJourney.check_in_interval_minutes || 10}m
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-brand-muted mt-1 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-brand-teal" />
-                    <span>Destination: <strong className="text-brand-text">{activeJourney.destination_name}</strong></span>
+                  <p className="text-xs text-[#716B80] mt-1 flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-[#5517C8]" />
+                    <span>Destination: <strong className="text-[#211638]">{activeJourney.destination_name}</strong></span>
                     <span>•</span>
                     <span>Started: {formatTimeOnly(activeJourney.start_time)}</span>
                   </p>
@@ -309,20 +309,20 @@ export const JourneyScreen: React.FC = () => {
               </div>
 
               {/* Countdown Ticker Box */}
-              <div className="bg-slate-50 border border-brand-border rounded-2xl p-3.5 sm:p-4 text-right shrink-0">
-                <span className="text-[10px] uppercase font-bold text-brand-muted tracking-wider block">
+              <div className="bg-slate-50 border border-[#E8E1F3] rounded-2xl p-3.5 sm:p-4 text-right shrink-0">
+                <span className="text-[10px] uppercase font-bold text-[#716B80] tracking-wider block">
                   Next Scheduled Check-in
                 </span>
                 <div className="flex items-baseline gap-2 justify-end">
-                  <span className="text-2xl font-mono font-black text-brand-deepTeal">
+                  <span className="text-2xl font-mono font-black text-[#5517C8]">
                     {isCheckInDue ? 'Due Now' : formatCountdownTimer(secondsUntilNextCheckIn)}
                   </span>
-                  <span className="text-xs text-brand-muted font-mono font-bold">
+                  <span className="text-xs text-[#716B80] font-mono font-bold">
                     ({formattedNextCheckIn})
                   </span>
                 </div>
-                <span className="text-[10px] text-brand-muted block mt-0.5">
-                  Last safe confirmation: <strong className="text-brand-text">{formattedLastCheckIn}</strong>
+                <span className="text-[10px] text-[#716B80] block mt-0.5">
+                  Last safe confirmation: <strong className="text-[#211638]">{formattedLastCheckIn}</strong>
                 </span>
               </div>
             </div>
@@ -337,7 +337,7 @@ export const JourneyScreen: React.FC = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => confirmSafeArrival(activeJourney.id)}
-                  className="px-5 py-3 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal transition-all flex items-center gap-2 active:scale-95"
+                  className="px-5 py-3 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-2 active:scale-95 cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4" />
                   <span>Confirm Safe Arrival (End Session)</span>
@@ -345,9 +345,9 @@ export const JourneyScreen: React.FC = () => {
 
                 <button
                   onClick={() => setIsEmergencyCallOpen(true)}
-                  className="px-4 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 active:scale-95"
+                  className="px-4 py-3 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-colors flex items-center gap-1.5 active:scale-95 cursor-pointer"
                 >
-                  <PhoneCall className="w-3.5 h-3.5 text-coral-400" />
+                  <PhoneCall className="w-3.5 h-3.5 text-red-400" />
                   <span>Call 112</span>
                 </button>
               </div>
@@ -356,7 +356,7 @@ export const JourneyScreen: React.FC = () => {
                 {activeJourney.share_location && (
                   <button
                     onClick={stopLocationSharing}
-                    className="text-xs text-brand-coral hover:text-red-700 px-3.5 py-2.5 rounded-xl bg-brand-peach border border-coral-200 font-bold transition-colors flex items-center gap-1.5"
+                    className="text-xs text-[#D92D45] hover:text-red-700 px-3.5 py-2.5 rounded-xl bg-red-50 border border-red-200 font-bold transition-colors flex items-center gap-1.5 cursor-pointer"
                   >
                     <EyeOff className="w-3.5 h-3.5" />
                     <span>Stop Sharing GPS</span>
@@ -365,7 +365,7 @@ export const JourneyScreen: React.FC = () => {
 
                 <button
                   onClick={() => setIsEndingConfirmOpen(true)}
-                  className="text-xs text-brand-muted hover:text-brand-coral px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-red-50 border border-brand-border font-bold transition-colors flex items-center gap-1"
+                  className="text-xs text-[#716B80] hover:text-[#D92D45] px-3.5 py-2.5 rounded-xl bg-slate-50 hover:bg-red-50 border border-[#E8E1F3] font-bold transition-colors flex items-center gap-1 cursor-pointer"
                 >
                   <XCircle className="w-3.5 h-3.5" />
                   <span>End Journey</span>
@@ -375,26 +375,26 @@ export const JourneyScreen: React.FC = () => {
 
             {/* Initiated Call History / Escalation Log */}
             {activeJourney.call_actions && activeJourney.call_actions.length > 0 && (
-              <div className="mt-4 pt-4 border-t border-brand-border space-y-2">
-                <h4 className="text-xs font-extrabold text-brand-text flex items-center gap-1.5">
-                  <Phone className="w-3.5 h-3.5 text-brand-teal" />
+              <div className="mt-4 pt-4 border-t border-[#E8E1F3] space-y-2">
+                <h4 className="text-xs font-extrabold text-[#211638] flex items-center gap-1.5">
+                  <Phone className="w-3.5 h-3.5 text-[#5517C8]" />
                   <span>Recent Call Actions in this Journey</span>
                 </h4>
                 <div className="space-y-1.5">
                   {activeJourney.call_actions.map((act) => (
                     <div
                       key={act.id}
-                      className="p-3 rounded-xl bg-slate-50 border border-brand-border flex items-center justify-between text-xs"
+                      className="p-3 rounded-xl bg-slate-50 border border-[#E8E1F3] flex items-center justify-between text-xs"
                     >
                       <div>
-                        <span className="font-bold text-brand-text capitalize">
+                        <span className="font-bold text-[#211638] capitalize">
                           {act.action_type.replace('_', ' ')}
                         </span>
-                        <span className="text-brand-muted ml-2">
+                        <span className="text-[#716B80] ml-2">
                           → {act.recipient_name} ({act.phone_number})
                         </span>
                       </div>
-                      <span className="text-[11px] text-brand-muted font-mono">
+                      <span className="text-[11px] text-[#716B80] font-mono">
                         {formatTimeOnly(act.timestamp)} • Dialer Opened
                       </span>
                     </div>
@@ -405,15 +405,15 @@ export const JourneyScreen: React.FC = () => {
           </div>
 
           {/* Interactive Route Map */}
-          <div className="bg-white rounded-3xl p-6 border border-brand-border shadow-card space-y-4">
-            <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+          <div className="bg-white rounded-3xl p-6 border border-[#E8E1F3] shadow-card space-y-4">
+            <div className="flex items-center justify-between pb-3 border-b border-[#E8E1F3]">
               <div className="flex items-center gap-2">
-                <Compass className="w-5 h-5 text-brand-teal" />
-                <h3 className="font-extrabold text-brand-text text-base">
+                <Compass className="w-5 h-5 text-[#5517C8]" />
+                <h3 className="font-extrabold text-[#211638] text-base">
                   Live Transit Route & Safe Arrival Radius
                 </h3>
               </div>
-              <span className="text-xs text-brand-muted font-medium">
+              <span className="text-xs text-[#716B80] font-medium">
                 OpenStreetMap • Geofenced Perimeter
               </span>
             </div>
@@ -429,24 +429,24 @@ export const JourneyScreen: React.FC = () => {
             <button
               type="button"
               onClick={() => setStartMode('custom')}
-              className={`p-5 rounded-3xl border text-left transition-all relative ${
+              className={`p-5 rounded-3xl border text-left transition-all relative cursor-pointer ${
                 startMode === 'custom'
-                  ? 'bg-gradient-to-br from-brand-aqua/40 via-white to-brand-lavender/30 border-teal-300 shadow-card ring-2 ring-brand-teal/20'
-                  : 'bg-white border-brand-border hover:border-slate-300 shadow-2xs'
+                  ? 'bg-gradient-to-br from-[#F2EDFF] via-white to-[#FAF9FF] border-[#5517C8] shadow-md ring-2 ring-[#5517C8]/20'
+                  : 'bg-white border-[#E8E1F3] hover:border-slate-300 shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-2xl bg-brand-aqua text-brand-deepTeal flex items-center justify-center font-bold">
-                  <Sliders className="w-5 h-5 text-brand-teal" />
+                <div className="w-10 h-10 rounded-2xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center font-bold">
+                  <Sliders className="w-5 h-5 text-[#5517C8]" />
                 </div>
-                <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-brand-teal text-white">
+                <span className="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-[#5517C8] text-white">
                   Customizable
                 </span>
               </div>
-              <h3 className="font-extrabold text-brand-text text-base">
+              <h3 className="font-extrabold text-[#211638] text-base">
                 Customize My Own Safety Plan
               </h3>
-              <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+              <p className="text-xs text-[#716B80] mt-1 leading-relaxed">
                 Choose custom check-in intervals (5, 10, 15, 20, 30m, or custom), response countdown, Tier 1 & Tier 2 contacts, and emergency dialer numbers.
               </p>
             </button>
@@ -455,24 +455,24 @@ export const JourneyScreen: React.FC = () => {
             <button
               type="button"
               onClick={() => setStartMode('preset')}
-              className={`p-5 rounded-3xl border text-left transition-all ${
+              className={`p-5 rounded-3xl border text-left transition-all cursor-pointer ${
                 startMode === 'preset'
-                  ? 'bg-gradient-to-br from-brand-lavender/40 via-white to-brand-aqua/20 border-violet-300 shadow-card ring-2 ring-brand-violet/20'
-                  : 'bg-white border-brand-border hover:border-slate-300 shadow-2xs'
+                  ? 'bg-gradient-to-br from-[#F2EDFF] via-white to-[#FAF9FF] border-[#365BFF] shadow-md ring-2 ring-[#365BFF]/20'
+                  : 'bg-white border-[#E8E1F3] hover:border-slate-300 shadow-xs'
               }`}
             >
               <div className="flex items-center justify-between mb-2">
-                <div className="w-10 h-10 rounded-2xl bg-brand-lavender text-brand-violet flex items-center justify-center font-bold">
-                  <Compass className="w-5 h-5 text-brand-violet" />
+                <div className="w-10 h-10 rounded-2xl bg-[#F2EDFF] text-[#365BFF] flex items-center justify-center font-bold">
+                  <Compass className="w-5 h-5 text-[#365BFF]" />
                 </div>
-                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-slate-100 text-brand-muted">
+                <span className="text-[10px] font-bold uppercase px-2.5 py-0.5 rounded-full bg-slate-100 text-[#716B80]">
                   Quick Preset
                 </span>
               </div>
-              <h3 className="font-extrabold text-brand-text text-base">
+              <h3 className="font-extrabold text-[#211638] text-base">
                 Use a Preset Safety Plan
               </h3>
-              <p className="text-xs text-brand-muted mt-1 leading-relaxed">
+              <p className="text-xs text-[#716B80] mt-1 leading-relaxed">
                 Rapid launch with standard destination arrival verification (Montgomery Station, Campus Library, Mission Bay Home).
               </p>
             </button>
@@ -480,23 +480,23 @@ export const JourneyScreen: React.FC = () => {
 
           {/* Validation Notice Banner */}
           {validationError && (
-            <div className="p-4 bg-brand-peach border border-coral-300 rounded-2xl text-xs text-brand-coral flex items-center gap-2.5 animate-fadeIn">
-              <AlertCircle className="w-4 h-4 text-brand-coral shrink-0" />
+            <div className="p-4 bg-red-50 border border-red-200 rounded-2xl text-xs text-[#D92D45] flex items-center gap-2.5 animate-fadeIn">
+              <AlertCircle className="w-4 h-4 text-[#D92D45] shrink-0" />
               <span className="font-bold">{validationError}</span>
             </div>
           )}
 
           {/* MODE 1: CUSTOM SAFETY JOURNEY SETUP FORM */}
           {startMode === 'custom' && (
-            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-brand-border shadow-card space-y-6 animate-fadeIn">
-              <div className="pb-4 border-b border-brand-border">
+            <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#E8E1F3] shadow-card space-y-6 animate-fadeIn">
+              <div className="pb-4 border-b border-[#E8E1F3]">
                 <div className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-brand-teal" />
-                  <h2 className="text-xl font-extrabold text-brand-text">
+                  <Sparkles className="w-5 h-5 text-[#5517C8]" />
+                  <h2 className="text-xl font-extrabold text-[#211638]">
                     Configure Custom Safety Journey
                   </h2>
                 </div>
-                <p className="text-xs text-brand-muted mt-1">
+                <p className="text-xs text-[#716B80] mt-1">
                   Tailor your check-in schedule, response countdown, escalation contacts, and emergency helpline.
                 </p>
               </div>
@@ -504,12 +504,12 @@ export const JourneyScreen: React.FC = () => {
               <form onSubmit={handleStartCustomJourney} className="space-y-6">
                 {/* 1. Journey Name & Route */}
                 <div className="space-y-3">
-                  <h3 className="text-xs font-black uppercase text-brand-deepTeal tracking-wider">
+                  <h3 className="text-xs font-black uppercase text-[#351078] tracking-wider">
                     1. Journey Details
                   </h3>
                   <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
                     <div>
-                      <label className="block text-xs font-bold text-brand-text mb-1">
+                      <label className="block text-xs font-bold text-[#211638] mb-1">
                         Journey Name (Optional)
                       </label>
                       <input
@@ -517,12 +517,12 @@ export const JourneyScreen: React.FC = () => {
                         value={customJourneyName}
                         onChange={(e) => setCustomJourneyName(e.target.value)}
                         placeholder="e.g. Evening Commute, Cab to Airport"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs focus:ring-2 focus:ring-brand-teal focus:border-brand-teal"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1F3] text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-brand-text mb-1">
+                      <label className="block text-xs font-bold text-[#211638] mb-1">
                         Origin (Starting Point)
                       </label>
                       <input
@@ -530,12 +530,12 @@ export const JourneyScreen: React.FC = () => {
                         value={customOrigin}
                         onChange={(e) => setCustomOrigin(e.target.value)}
                         placeholder="Current Location"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs focus:ring-2 focus:ring-brand-teal focus:border-brand-teal"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1F3] text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-brand-text mb-1">
+                      <label className="block text-xs font-bold text-[#211638] mb-1">
                         Destination
                       </label>
                       <input
@@ -543,60 +543,77 @@ export const JourneyScreen: React.FC = () => {
                         value={customDestination}
                         onChange={(e) => setCustomDestination(e.target.value)}
                         placeholder="Home, Office, Station"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-brand-border text-xs focus:ring-2 focus:ring-brand-teal focus:border-brand-teal"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1F3] text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* 2. Check-in Interval Selection */}
-                <div className="space-y-3 pt-2 border-t border-brand-border/60">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase text-brand-deepTeal tracking-wider">
-                        2. Check-in Interval
-                      </h3>
-                      <p className="text-[11px] text-brand-muted">
+                {/* 2. Safety Timers & Check-in Intervals */}
+                <div className="space-y-4 pt-3 border-t border-[#E8E1F3]">
+                  <div>
+                    <h3 className="text-xs font-black uppercase text-[#351078] tracking-wider">
+                      2. Safety Timers & Check-in Intervals
+                    </h3>
+                    <p className="text-[11px] text-[#716B80]">
+                      Configure how often DigiSakhi prompts you and how long you have to confirm your safety.
+                    </p>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {/* Check-in Interval Dropdown */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-[#211638]">
+                        Check-in Interval
+                      </label>
+                      <select
+                        value={intervalType === 'custom' ? 'custom' : intervalType}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          if (val === 'custom') {
+                            setIntervalType('custom');
+                          } else {
+                            setIntervalType(Number(val));
+                          }
+                        }}
+                        className="w-full bg-white border border-[#E8E1F3] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
+                      >
+                        <option value={5}>5 Minutes (High alertness / quick walks)</option>
+                        <option value={10}>10 Minutes (Standard commute • Recommended)</option>
+                        <option value={15}>15 Minutes (Short transit)</option>
+                        <option value={20}>20 Minutes (Extended journey)</option>
+                        <option value={30}>30 Minutes (Long distance travel)</option>
+                        <option value="custom">Custom interval...</option>
+                      </select>
+                      <p className="text-[10px] text-[#716B80]">
                         How often DigiSakhi prompts: "Are you okay? Please confirm your safety."
                       </p>
                     </div>
-                    <span className="text-xs font-mono font-bold text-brand-teal">
-                      Selected: {intervalType === 'custom' ? customIntervalMinutes : intervalType} mins
-                    </span>
-                  </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-6 gap-2">
-                    {[5, 10, 15, 20, 30].map((mins) => (
-                      <button
-                        key={mins}
-                        type="button"
-                        onClick={() => setIntervalType(mins)}
-                        className={`p-3 rounded-xl border text-center text-xs font-bold transition-all ${
-                          intervalType === mins
-                            ? 'bg-brand-aqua text-brand-deepTeal border-teal-300 shadow-2xs font-black'
-                            : 'bg-slate-50 text-brand-muted border-brand-border hover:bg-slate-100'
-                        }`}
+                    {/* Response Countdown Window Dropdown */}
+                    <div className="space-y-1.5">
+                      <label className="block text-xs font-bold text-[#211638]">
+                        Response Countdown Window
+                      </label>
+                      <select
+                        value={countdownSeconds}
+                        onChange={(e) => setCountdownSeconds(Number(e.target.value))}
+                        className="w-full bg-white border border-[#E8E1F3] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
                       >
-                        {mins} Minutes
-                      </button>
-                    ))}
-
-                    <button
-                      type="button"
-                      onClick={() => setIntervalType('custom')}
-                      className={`p-3 rounded-xl border text-center text-xs font-bold transition-all ${
-                        intervalType === 'custom'
-                          ? 'bg-brand-aqua text-brand-deepTeal border-teal-300 shadow-2xs font-black'
-                          : 'bg-slate-50 text-brand-muted border-brand-border hover:bg-slate-100'
-                      }`}
-                    >
-                      Custom...
-                    </button>
+                        <option value={60}>60 Seconds (1 Minute • Fast confirmation)</option>
+                        <option value={120}>120 Seconds (2 Minutes • Standard)</option>
+                        <option value={180}>180 Seconds (3 Minutes • Recommended)</option>
+                        <option value={300}>300 Seconds (5 Minutes • Relaxed)</option>
+                      </select>
+                      <p className="text-[10px] text-[#716B80]">
+                        Time allowed to tap "I'M OKAY 💚" before check-in is considered missed.
+                      </p>
+                    </div>
                   </div>
 
                   {intervalType === 'custom' && (
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-brand-border space-y-2 animate-fadeIn">
-                      <label className="block text-xs font-bold text-brand-text">
+                    <div className="p-3.5 rounded-2xl bg-[#FAF9FF] border border-[#E8E1F3] space-y-2 animate-fadeIn">
+                      <label className="block text-xs font-bold text-[#211638]">
                         Enter Custom Check-in Interval (Minutes)
                       </label>
                       <div className="flex items-center gap-3">
@@ -606,10 +623,10 @@ export const JourneyScreen: React.FC = () => {
                           max={180}
                           value={customIntervalMinutes}
                           onChange={(e) => setCustomIntervalMinutes(Math.max(1, Number(e.target.value)))}
-                          className="w-32 px-3 py-2 rounded-xl border border-brand-border text-xs font-bold"
+                          className="w-32 px-3 py-2 rounded-xl border border-[#E8E1F3] text-xs font-bold text-[#211638]"
                           required
                         />
-                        <span className="text-xs text-brand-muted">
+                        <span className="text-xs text-[#716B80]">
                           Minutes between check-in prompts (1 to 180 min)
                         </span>
                       </div>
@@ -617,52 +634,13 @@ export const JourneyScreen: React.FC = () => {
                   )}
                 </div>
 
-                {/* 3. Response Countdown Duration */}
-                <div className="space-y-3 pt-2 border-t border-brand-border/60">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="text-xs font-black uppercase text-brand-deepTeal tracking-wider">
-                        3. Response Countdown Duration
-                      </h3>
-                      <p className="text-[11px] text-brand-muted">
-                        Time you have to tap "I'M OKAY 💚" before check-in is considered missed.
-                      </p>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-brand-violet">
-                      {countdownSeconds} Seconds ({Math.round(countdownSeconds / 60)} min)
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { secs: 60, label: '60s (1 min)' },
-                      { secs: 120, label: '120s (2 min)' },
-                      { secs: 180, label: '180s (3 min)' },
-                      { secs: 300, label: '300s (5 min)' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.secs}
-                        type="button"
-                        onClick={() => setCountdownSeconds(opt.secs)}
-                        className={`p-3 rounded-xl border text-center text-xs font-bold transition-all ${
-                          countdownSeconds === opt.secs
-                            ? 'bg-brand-lavender text-brand-violet border-violet-300 shadow-2xs font-black'
-                            : 'bg-slate-50 text-brand-muted border-brand-border hover:bg-slate-100'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
                 {/* 4. Tier 1 & Tier 2 Trusted Contacts */}
-                <div className="space-y-4 pt-2 border-t border-brand-border/60">
+                <div className="space-y-4 pt-3 border-t border-[#E8E1F3]">
                   <div>
-                    <h3 className="text-xs font-black uppercase text-brand-deepTeal tracking-wider">
-                      4. Trusted Responders (Tier 1 & Tier 2)
+                    <h3 className="text-xs font-black uppercase text-[#351078] tracking-wider">
+                      3. Trusted Responders (Tier 1 & Tier 2)
                     </h3>
-                    <p className="text-[11px] text-brand-muted">
+                    <p className="text-[11px] text-[#716B80]">
                       Select contacts from your circle. When you tap "I Need Help", Tier 1 is called first; Tier 2 is the backup responder.
                     </p>
                   </div>
@@ -678,7 +656,7 @@ export const JourneyScreen: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setCurrentScreen('circle')}
-                        className="px-3.5 py-1.5 bg-brand-teal text-white font-bold rounded-xl text-xs shadow-xs"
+                        className="px-3.5 py-1.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] text-white font-bold rounded-xl text-xs shadow-xs cursor-pointer"
                       >
                         Add Contacts in Circle →
                       </button>
@@ -686,13 +664,13 @@ export const JourneyScreen: React.FC = () => {
                   ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {/* Tier 1 Box */}
-                      <div className="p-4 rounded-2xl border border-brand-border bg-slate-50 space-y-2.5">
+                      <div className="p-4 rounded-2xl border border-[#E8E1F3] bg-slate-50 space-y-2.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-extrabold text-brand-text flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-brand-teal" />
+                          <label className="text-xs font-extrabold text-[#211638] flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#5517C8]" />
                             <span>Tier 1 Contact (Primary Responder)</span>
                           </label>
-                          <span className="text-[10px] text-brand-muted font-bold">
+                          <span className="text-[10px] text-[#716B80] font-bold">
                             Called 1st on "I Need Help"
                           </span>
                         </div>
@@ -703,8 +681,8 @@ export const JourneyScreen: React.FC = () => {
                               key={`t1_${contact.id}`}
                               className={`p-2.5 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-colors ${
                                 tier1Ids.includes(contact.id)
-                                  ? 'bg-brand-aqua/40 border-teal-300 text-brand-deepTeal font-bold'
-                                  : 'bg-white border-brand-border text-brand-muted'
+                                  ? 'bg-[#F2EDFF] border-[#5517C8]/40 text-[#351078] font-bold'
+                                  : 'bg-white border-[#E8E1F3] text-[#716B80]'
                               }`}
                             >
                               <div className="flex items-center gap-2">
@@ -712,11 +690,11 @@ export const JourneyScreen: React.FC = () => {
                                   type="checkbox"
                                   checked={tier1Ids.includes(contact.id)}
                                   onChange={() => handleToggleTier1(contact.id)}
-                                  className="w-4 h-4 rounded accent-brand-teal"
+                                  className="w-4 h-4 rounded accent-[#5517C8]"
                                 />
                                 <div>
-                                  <span className="font-bold text-brand-text">{contact.full_name}</span>
-                                  <span className="text-[10px] text-brand-muted ml-1.5">
+                                  <span className="font-bold text-[#211638]">{contact.full_name}</span>
+                                  <span className="text-[10px] text-[#716B80] ml-1.5">
                                     ({contact.relationship})
                                   </span>
                                   {contact.status !== 'accepted' && (
@@ -726,7 +704,7 @@ export const JourneyScreen: React.FC = () => {
                                   )}
                                 </div>
                               </div>
-                              <span className="text-[11px] font-mono text-brand-muted">
+                              <span className="text-[11px] font-mono text-[#716B80]">
                                 {contact.phone_number}
                               </span>
                             </label>
@@ -735,13 +713,13 @@ export const JourneyScreen: React.FC = () => {
                       </div>
 
                       {/* Tier 2 Box */}
-                      <div className="p-4 rounded-2xl border border-brand-border bg-slate-50 space-y-2.5">
+                      <div className="p-4 rounded-2xl border border-[#E8E1F3] bg-slate-50 space-y-2.5">
                         <div className="flex items-center justify-between">
-                          <label className="text-xs font-extrabold text-brand-text flex items-center gap-1.5">
-                            <span className="w-2 h-2 rounded-full bg-brand-violet" />
+                          <label className="text-xs font-extrabold text-[#211638] flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-[#365BFF]" />
                             <span>Tier 2 Contact (Backup Responder)</span>
                           </label>
-                          <span className="text-[10px] text-brand-muted font-bold">
+                          <span className="text-[10px] text-[#716B80] font-bold">
                             Available Escalation Step
                           </span>
                         </div>
@@ -752,8 +730,8 @@ export const JourneyScreen: React.FC = () => {
                               key={`t2_${contact.id}`}
                               className={`p-2.5 rounded-xl border flex items-center justify-between text-xs cursor-pointer transition-colors ${
                                 tier2Ids.includes(contact.id)
-                                  ? 'bg-brand-lavender/40 border-violet-300 text-brand-violet font-bold'
-                                  : 'bg-white border-brand-border text-brand-muted'
+                                  ? 'bg-[#F2EDFF] border-[#365BFF]/40 text-[#365BFF] font-bold'
+                                  : 'bg-white border-[#E8E1F3] text-[#716B80]'
                               }`}
                             >
                               <div className="flex items-center gap-2">
@@ -761,11 +739,11 @@ export const JourneyScreen: React.FC = () => {
                                   type="checkbox"
                                   checked={tier2Ids.includes(contact.id)}
                                   onChange={() => handleToggleTier2(contact.id)}
-                                  className="w-4 h-4 rounded accent-brand-violet"
+                                  className="w-4 h-4 rounded accent-[#365BFF]"
                                 />
                                 <div>
-                                  <span className="font-bold text-brand-text">{contact.full_name}</span>
-                                  <span className="text-[10px] text-brand-muted ml-1.5">
+                                  <span className="font-bold text-[#211638]">{contact.full_name}</span>
+                                  <span className="text-[10px] text-[#716B80] ml-1.5">
                                     ({contact.relationship})
                                   </span>
                                   {contact.status !== 'accepted' && (
@@ -775,7 +753,7 @@ export const JourneyScreen: React.FC = () => {
                                   )}
                                 </div>
                               </div>
-                              <span className="text-[11px] font-mono text-brand-muted">
+                              <span className="text-[11px] font-mono text-[#716B80]">
                                 {contact.phone_number}
                               </span>
                             </label>
@@ -787,41 +765,35 @@ export const JourneyScreen: React.FC = () => {
                 </div>
 
                 {/* 5. Emergency Phone Number for Urgent Help */}
-                <div className="space-y-3 pt-2 border-t border-brand-border/60">
+                <div className="space-y-3 pt-3 border-t border-[#E8E1F3]">
                   <div>
-                    <h3 className="text-xs font-black uppercase text-brand-deepTeal tracking-wider">
-                      5. Emergency Phone Number (for "URGENT HELP 🚨")
+                    <h3 className="text-xs font-black uppercase text-[#351078] tracking-wider">
+                      4. Emergency Phone Destination (for "URGENT HELP 🚨")
                     </h3>
-                    <p className="text-[11px] text-brand-muted">
-                      When you tap "Urgent Help", DigiSakhi immediately opens your native dialer with this number.
+                    <p className="text-[11px] text-[#716B80]">
+                      When you tap "Urgent Help", DigiSakhi immediately opens your native dialer with this number prefilled.
                     </p>
                   </div>
 
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { id: '112', label: '112 (National Emergency)' },
-                      { id: '1091', label: '1091 (Women Helpline)' },
-                      { id: '100', label: '100 (Police)' },
-                      { id: 'custom', label: 'Custom Number...' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => setEmergencyPhoneOption(opt.id as any)}
-                        className={`p-3 rounded-xl border text-center text-xs font-bold transition-all ${
-                          emergencyPhoneOption === opt.id
-                            ? 'bg-brand-peach text-brand-coral border-coral-300 shadow-2xs font-black'
-                            : 'bg-slate-50 text-brand-muted border-brand-border hover:bg-slate-100'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
+                  <div className="space-y-1.5 max-w-md">
+                    <label className="block text-xs font-bold text-[#211638]">
+                      Emergency Calling Destination
+                    </label>
+                    <select
+                      value={emergencyPhoneOption}
+                      onChange={(e) => setEmergencyPhoneOption(e.target.value as any)}
+                      className="w-full bg-white border border-[#E8E1F3] rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#211638] focus:outline-none focus:border-[#5517C8]"
+                    >
+                      <option value="112">112 (National Emergency Helpline • India All-in-One)</option>
+                      <option value="1091">1091 (Women's Safety & Distress Helpline)</option>
+                      <option value="100">100 (Police Direct Control Room)</option>
+                      <option value="custom">Custom Phone Number...</option>
+                    </select>
                   </div>
 
                   {emergencyPhoneOption === 'custom' && (
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-brand-border space-y-2 animate-fadeIn">
-                      <label className="block text-xs font-bold text-brand-text">
+                    <div className="p-3.5 rounded-2xl bg-[#FAF9FF] border border-[#E8E1F3] space-y-2 animate-fadeIn max-w-md">
+                      <label className="block text-xs font-bold text-[#211638]">
                         Enter Emergency Phone Number
                       </label>
                       <input
@@ -829,7 +801,7 @@ export const JourneyScreen: React.FC = () => {
                         value={customEmergencyPhone}
                         onChange={(e) => setCustomEmergencyPhone(e.target.value)}
                         placeholder="e.g. +91 98765 43210 or emergency service"
-                        className="w-full sm:w-72 px-3.5 py-2.5 rounded-xl border border-brand-border text-xs font-bold"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-[#E8E1F3] text-xs font-bold text-[#211638]"
                         required
                       />
                     </div>
@@ -837,12 +809,12 @@ export const JourneyScreen: React.FC = () => {
                 </div>
 
                 {/* 6. Missed Check-in Behavior */}
-                <div className="space-y-3 pt-2 border-t border-brand-border/60">
+                <div className="space-y-3 pt-3 border-t border-[#E8E1F3]">
                   <div>
-                    <h3 className="text-xs font-black uppercase text-brand-deepTeal tracking-wider">
-                      6. Missed Check-in Rule
+                    <h3 className="text-xs font-black uppercase text-[#351078] tracking-wider">
+                      5. Missed Check-in Rule
                     </h3>
-                    <p className="text-[11px] text-brand-muted">
+                    <p className="text-[11px] text-[#716B80]">
                       What should happen if the response countdown window elapses without your confirmation?
                     </p>
                   </div>
@@ -851,8 +823,8 @@ export const JourneyScreen: React.FC = () => {
                     <label
                       className={`p-3.5 rounded-2xl border flex items-start gap-3 cursor-pointer transition-colors ${
                         missedAction === 'reminder'
-                          ? 'bg-brand-aqua/30 border-teal-300 text-brand-deepTeal font-bold'
-                          : 'bg-white border-brand-border text-brand-muted'
+                          ? 'bg-[#F2EDFF] border-[#5517C8]/40 text-[#351078] font-bold'
+                          : 'bg-white border-[#E8E1F3] text-[#716B80]'
                       }`}
                     >
                       <input
@@ -860,13 +832,13 @@ export const JourneyScreen: React.FC = () => {
                         name="missedAction"
                         checked={missedAction === 'reminder'}
                         onChange={() => setMissedAction('reminder')}
-                        className="mt-0.5 accent-brand-teal"
+                        className="mt-0.5 accent-[#5517C8]"
                       />
                       <div>
-                        <span className="font-bold text-brand-text block text-xs">
+                        <span className="font-bold text-[#211638] block text-xs">
                           Persistent In-App Reminder Only
                         </span>
-                        <span className="text-[11px] text-brand-muted font-normal">
+                        <span className="text-[11px] text-[#716B80] font-normal">
                           Shows prominent warning with the 3 actions; does not alert contacts until you choose to.
                         </span>
                       </div>
@@ -875,8 +847,8 @@ export const JourneyScreen: React.FC = () => {
                     <label
                       className={`p-3.5 rounded-2xl border flex items-start gap-3 cursor-pointer transition-colors ${
                         missedAction === 'escalate'
-                          ? 'bg-brand-aqua/30 border-teal-300 text-brand-deepTeal font-bold'
-                          : 'bg-white border-brand-border text-brand-muted'
+                          ? 'bg-[#F2EDFF] border-[#5517C8]/40 text-[#351078] font-bold'
+                          : 'bg-white border-[#E8E1F3] text-[#716B80]'
                       }`}
                     >
                       <input
@@ -884,13 +856,13 @@ export const JourneyScreen: React.FC = () => {
                         name="missedAction"
                         checked={missedAction === 'escalate'}
                         onChange={() => setMissedAction('escalate')}
-                        className="mt-0.5 accent-brand-teal"
+                        className="mt-0.5 accent-[#5517C8]"
                       />
                       <div>
-                        <span className="font-bold text-brand-text block text-xs">
+                        <span className="font-bold text-[#211638] block text-xs">
                           Escalate to Tier 1 Responder
                         </span>
-                        <span className="text-[11px] text-brand-muted font-normal">
+                        <span className="text-[11px] text-[#716B80] font-normal">
                           Sends automated notification to Tier 1 contact stating check-in deadline elapsed.
                         </span>
                       </div>
@@ -899,15 +871,15 @@ export const JourneyScreen: React.FC = () => {
                 </div>
 
                 {/* Submit & Start Button */}
-                <div className="pt-4 border-t border-brand-border flex items-center justify-between">
-                  <span className="text-xs text-brand-muted">
+                <div className="pt-4 border-t border-[#E8E1F3] flex items-center justify-between">
+                  <span className="text-xs text-[#716B80]">
                     Safety session begins immediately upon confirmation.
                   </span>
 
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-black shadow-teal transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
+                    className="px-6 py-3.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-black shadow-md transition-all flex items-center gap-2 active:scale-95 disabled:opacity-50 cursor-pointer"
                   >
                     <Compass className="w-4 h-4" />
                     <span>{isSubmitting ? 'Starting Journey...' : 'Start Custom Safety Journey 🚀'}</span>
@@ -972,33 +944,30 @@ export const JourneyScreen: React.FC = () => {
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-brand-text mb-1">
-                        Presets
+                      <label className="block text-xs font-bold text-[#211638] mb-1">
+                        Select Destination Preset
                       </label>
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                      <select
+                        value={presetDestination}
+                        onChange={(e) => {
+                          const p = presets.find((item) => item.name === e.target.value);
+                          if (p) handleSelectPreset(p);
+                        }}
+                        className="w-full bg-white border border-[#E8E1F3] rounded-xl px-3.5 py-2.5 text-xs text-[#211638] font-medium"
+                      >
                         {presets.map((p) => (
-                          <button
-                            key={p.name}
-                            type="button"
-                            onClick={() => handleSelectPreset(p)}
-                            className={`p-3 rounded-xl border text-left text-xs transition-all ${
-                              presetDestination === p.name
-                                ? 'bg-brand-lavender text-brand-violet border-violet-300 font-bold'
-                                : 'bg-slate-50 text-brand-muted border-brand-border hover:bg-slate-100'
-                            }`}
-                          >
-                            <div className="font-bold text-brand-text">{p.name}</div>
-                            <div className="text-[11px] text-brand-muted mt-0.5">~{p.mins} mins</div>
-                          </button>
+                          <option key={p.name} value={p.name}>
+                            {p.name} (~{p.mins} mins)
+                          </option>
                         ))}
-                      </div>
+                      </select>
                     </div>
 
-                    <div className="flex justify-end pt-4 border-t border-brand-border">
+                    <div className="flex justify-end pt-4 border-t border-[#E8E1F3]">
                       <button
                         type="button"
                         onClick={() => setPresetStep(2)}
-                        className="px-5 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-xs font-bold shadow-teal flex items-center gap-1.5"
+                        className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
                       >
                         <span>Next: Settings</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -1011,7 +980,7 @@ export const JourneyScreen: React.FC = () => {
                 {presetStep === 2 && (
                   <div className="space-y-4 animate-fadeIn">
                     <div>
-                      <label className="block text-xs font-bold text-brand-text mb-1">
+                      <label className="block text-xs font-bold text-[#211638] mb-1">
                         Estimated Duration ({presetDuration} mins)
                       </label>
                       <input
@@ -1021,44 +990,40 @@ export const JourneyScreen: React.FC = () => {
                         step={5}
                         value={presetDuration}
                         onChange={(e) => setPresetDuration(Number(e.target.value))}
-                        className="w-full accent-brand-teal"
+                        className="w-full accent-[#5517C8]"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-xs font-bold text-brand-text mb-1">
-                        Safe Radius ({presetSafeRadius}m)
+                      <label className="block text-xs font-bold text-[#211638] mb-1">
+                        Safe Radius Perimeter
                       </label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {[100, 200, 500].map((r) => (
-                          <button
-                            key={r}
-                            type="button"
-                            onClick={() => setPresetSafeRadius(r)}
-                            className={`p-3 rounded-xl border text-center text-xs font-bold ${
-                              presetSafeRadius === r
-                                ? 'bg-brand-aqua text-brand-deepTeal border-teal-300 font-black'
-                                : 'bg-slate-50 text-brand-muted border-brand-border'
-                            }`}
-                          >
-                            {r}m
-                          </button>
-                        ))}
-                      </div>
+                      <select
+                        value={presetSafeRadius}
+                        onChange={(e) => setPresetSafeRadius(Number(e.target.value))}
+                        className="w-full bg-white border border-[#E8E1F3] rounded-xl px-3.5 py-2.5 text-xs text-[#211638] font-medium"
+                      >
+                        <option value={100}>100 meters (Tight Perimeter)</option>
+                        <option value={200}>200 meters (Standard Perimeter • Recommended)</option>
+                        <option value={500}>500 meters (Broad Perimeter)</option>
+                      </select>
+                      <p className="text-[10px] text-[#716B80] mt-1">
+                        DigiSakhi prompts safe arrival confirmation once you enter this geofenced radius.
+                      </p>
                     </div>
 
-                    <div className="flex justify-between pt-4 border-t border-brand-border">
+                    <div className="flex justify-between pt-4 border-t border-[#E8E1F3]">
                       <button
                         type="button"
                         onClick={() => setPresetStep(1)}
-                        className="px-4 py-2 bg-slate-100 text-brand-text rounded-xl text-xs font-bold"
+                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-[#211638] rounded-xl text-xs font-bold transition-colors cursor-pointer"
                       >
                         Back
                       </button>
                       <button
                         type="button"
                         onClick={() => setPresetStep(3)}
-                        className="px-5 py-2.5 bg-brand-teal text-white rounded-xl text-xs font-bold shadow-teal flex items-center gap-1.5"
+                        className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
                       >
                         <span>Next: Permissions</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -1070,31 +1035,31 @@ export const JourneyScreen: React.FC = () => {
                 {/* Step 3: Permissions */}
                 {presetStep === 3 && (
                   <div className="space-y-4 animate-fadeIn">
-                    <div className="p-4 rounded-xl border border-brand-border bg-slate-50 flex items-center justify-between">
+                    <div className="p-4 rounded-xl border border-[#E8E1F3] bg-slate-50 flex items-center justify-between">
                       <div>
-                        <strong className="text-brand-text text-xs block">Live GPS Location Sharing</strong>
-                        <p className="text-[11px] text-brand-muted">Allow authorized responders to view map coordinates.</p>
+                        <strong className="text-[#211638] text-xs block">Live GPS Location Sharing</strong>
+                        <p className="text-[11px] text-[#716B80]">Allow authorized responders to view map coordinates.</p>
                       </div>
                       <input
                         type="checkbox"
                         checked={presetShareLocation}
                         onChange={(e) => setPresetShareLocation(e.target.checked)}
-                        className="w-5 h-5 rounded accent-brand-teal"
+                        className="w-5 h-5 rounded accent-[#5517C8]"
                       />
                     </div>
 
-                    <div className="flex justify-between pt-4 border-t border-brand-border">
+                    <div className="flex justify-between pt-4 border-t border-[#E8E1F3]">
                       <button
                         type="button"
                         onClick={() => setPresetStep(2)}
-                        className="px-4 py-2 bg-slate-100 text-brand-text rounded-xl text-xs font-bold"
+                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-[#211638] rounded-xl text-xs font-bold transition-colors cursor-pointer"
                       >
                         Back
                       </button>
                       <button
                         type="button"
                         onClick={() => setPresetStep(4)}
-                        className="px-5 py-2.5 bg-brand-teal text-white rounded-xl text-xs font-bold shadow-teal flex items-center gap-1.5"
+                        className="px-5 py-2.5 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5 transition-all cursor-pointer"
                       >
                         <span>Next: Review</span>
                         <ArrowRight className="w-3.5 h-3.5" />
@@ -1106,25 +1071,25 @@ export const JourneyScreen: React.FC = () => {
                 {/* Step 4: Review & Start */}
                 {presetStep === 4 && (
                   <div className="space-y-4 animate-fadeIn">
-                    <div className="p-4 rounded-2xl bg-slate-50 border border-brand-border space-y-2 text-xs">
-                      <div><strong>Destination:</strong> {presetDestination}</div>
-                      <div><strong>Duration:</strong> {presetDuration} mins</div>
-                      <div><strong>Safe Radius:</strong> {presetSafeRadius}m</div>
-                      <div><strong>Live GPS:</strong> {presetShareLocation ? 'Enabled' : 'Disabled'}</div>
+                    <div className="p-4 rounded-2xl bg-[#FAF9FF] border border-[#E8E1F3] space-y-2 text-xs">
+                      <div><strong className="text-[#211638]">Destination:</strong> <span className="text-[#351078] font-bold">{presetDestination}</span></div>
+                      <div><strong className="text-[#211638]">Duration:</strong> <span className="text-[#351078] font-bold">{presetDuration} mins</span></div>
+                      <div><strong className="text-[#211638]">Safe Radius:</strong> <span className="text-[#351078] font-bold">{presetSafeRadius}m</span></div>
+                      <div><strong className="text-[#211638]">Live GPS:</strong> <span className="text-[#351078] font-bold">{presetShareLocation ? 'Enabled' : 'Disabled'}</span></div>
                     </div>
 
-                    <div className="flex justify-between pt-4 border-t border-brand-border">
+                    <div className="flex justify-between pt-4 border-t border-[#E8E1F3]">
                       <button
                         type="button"
                         onClick={() => setPresetStep(3)}
-                        className="px-4 py-2 bg-slate-100 text-brand-text rounded-xl text-xs font-bold"
+                        className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-[#211638] rounded-xl text-xs font-bold transition-colors cursor-pointer"
                       >
                         Back
                       </button>
                       <button
                         type="submit"
                         disabled={isSubmitting}
-                        className="px-6 py-3 bg-brand-teal text-white rounded-xl text-xs font-black shadow-teal flex items-center gap-2"
+                        className="px-6 py-3 bg-gradient-to-r from-[#5517C8] to-[#365BFF] hover:from-[#4510AB] hover:to-[#2A48D9] text-white rounded-xl text-xs font-black shadow-md flex items-center gap-2 cursor-pointer disabled:opacity-50"
                       >
                         <span>Start Preset Journey</span>
                       </button>
@@ -1138,21 +1103,21 @@ export const JourneyScreen: React.FC = () => {
       )}
 
       {/* 4. PAST JOURNEYS TABLE */}
-      <div className="bg-white rounded-3xl p-6 border border-brand-border shadow-card">
-        <div className="flex items-center justify-between pb-3 border-b border-brand-border mb-4">
-          <h3 className="font-extrabold text-brand-text text-base flex items-center gap-2">
-            <Calendar className="w-4 h-4 text-brand-muted" />
+      <div className="bg-white rounded-3xl p-6 border border-[#E8E1F3] shadow-card">
+        <div className="flex items-center justify-between pb-3 border-b border-[#E8E1F3] mb-4">
+          <h3 className="font-extrabold text-[#211638] text-base flex items-center gap-2">
+            <Calendar className="w-4 h-4 text-[#716B80]" />
             <span>Previous Journeys</span>
           </h3>
-          <span className="text-xs text-brand-muted font-mono">{journeys.length} Logged</span>
+          <span className="text-xs text-[#716B80] font-mono">{journeys.length} Logged</span>
         </div>
 
         {journeys.length === 0 ? (
-          <div className="py-8 text-center text-xs text-brand-muted">
+          <div className="py-8 text-center text-xs text-[#716B80]">
             No previous journeys recorded yet. Configure and launch your first journey above.
           </div>
         ) : (
-          <div className="divide-y divide-brand-border">
+          <div className="divide-y divide-[#E8E1F3]">
             {journeys.map((jny) => (
               <div
                 key={jny.id}
@@ -1160,22 +1125,22 @@ export const JourneyScreen: React.FC = () => {
               >
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="font-bold text-brand-text">
+                    <span className="font-bold text-[#211638]">
                       {jny.journey_name || `To: ${jny.destination_name}`}
                     </span>
                     <StatusBadge status={jny.status} />
                     {jny.journey_type === 'custom' && (
-                      <span className="text-[10px] bg-brand-lavender text-brand-violet px-2 py-0.2 rounded font-bold">
+                      <span className="text-[10px] bg-[#F2EDFF] text-[#5517C8] px-2 py-0.2 rounded font-bold border border-[#5517C8]/20">
                         Custom ({jny.check_in_interval_minutes}m)
                       </span>
                     )}
                   </div>
-                  <p className="text-brand-muted text-[11px] mt-0.5">
+                  <p className="text-[#716B80] text-[11px] mt-0.5">
                     From: {jny.origin_name} • Destination: {jny.destination_name}
                   </p>
                 </div>
 
-                <div className="text-right text-[11px] text-brand-muted font-mono">
+                <div className="text-right text-[11px] text-[#716B80] font-mono">
                   {formatDateTime(jny.created_at)}
                 </div>
               </div>
@@ -1187,15 +1152,15 @@ export const JourneyScreen: React.FC = () => {
       {/* End Journey Confirmation Modal */}
       {isEndingConfirmOpen && activeJourney && (
         <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-brand-border shadow-elevated space-y-4 animate-fadeIn">
-            <h3 className="font-extrabold text-brand-text text-base">End Safety Journey?</h3>
-            <p className="text-xs text-brand-muted leading-relaxed">
+          <div className="bg-white rounded-3xl p-6 max-w-sm w-full border border-[#E8E1F3] shadow-elevated space-y-4 animate-fadeIn">
+            <h3 className="font-extrabold text-[#211638] text-base">End Safety Journey?</h3>
+            <p className="text-xs text-[#716B80] leading-relaxed">
               Confirming will complete this session and stop all future check-in prompts and location broadcasts.
             </p>
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
                 onClick={() => setIsEndingConfirmOpen(false)}
-                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-brand-text rounded-xl text-xs font-bold"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-[#211638] rounded-xl text-xs font-bold transition-colors cursor-pointer"
               >
                 Keep Active
               </button>
@@ -1204,7 +1169,7 @@ export const JourneyScreen: React.FC = () => {
                   confirmSafeArrival(activeJourney.id);
                   setIsEndingConfirmOpen(false);
                 }}
-                className="px-4 py-2 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-bold shadow-coral"
+                className="px-4 py-2 bg-gradient-to-r from-[#D92D45] to-[#B91C1C] hover:opacity-95 text-white rounded-xl text-xs font-bold shadow-md cursor-pointer"
               >
                 Yes, End Journey
               </button>

@@ -225,19 +225,19 @@ export const AddContactModal: React.FC<{ isOpen: boolean; onClose: () => void }>
         {!inviteResult ? (
           <form onSubmit={handleSubmit}>
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-teal flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center shrink-0 border border-[#5517C8]/20">
                 <UserPlus className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold text-brand-text">Add Trusted Contact</h3>
-                <p className="text-xs text-brand-muted">
+                <h3 className="text-base font-extrabold text-[#211638]">Add Trusted Contact</h3>
+                <p className="text-xs text-[#716B80]">
                   Add a verified responder and send an invite via WhatsApp or SMS.
                 </p>
               </div>
             </div>
 
             {/* Step Indicator */}
-            <StepProgress steps={steps} currentStep={step} accentColor="teal" />
+            <StepProgress steps={steps} currentStep={step} accentColor="violet" />
 
             {/* Validation Error Banner */}
             {validationError && (

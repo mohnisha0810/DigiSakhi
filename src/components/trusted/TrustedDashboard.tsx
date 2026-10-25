@@ -82,28 +82,28 @@ export const TrustedDashboard: React.FC = () => {
   return (
     <div className="space-y-6">
       {/* Header Banner */}
-      <div className="bg-white border border-brand-border rounded-2xl p-6 shadow-card flex flex-wrap items-center justify-between gap-4">
+      <div className="bg-white border border-[#E8E1F3] rounded-2xl p-6 shadow-card flex flex-wrap items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-brand-teal bg-brand-aqua/60 px-2.5 py-0.5 rounded-full border border-brand-teal/20">
+            <span className="text-[11px] font-semibold uppercase tracking-wider text-[#351078] bg-[#F2EDFF] px-2.5 py-0.5 rounded-full border border-[#5517C8]/20">
               Trusted Responder Console
             </span>
-            <span className="text-xs text-brand-muted">
-              Logged in as: <strong className="text-brand-text font-semibold">{currentUser.full_name}</strong>
+            <span className="text-xs text-[#716B80]">
+              Logged in as: <strong className="text-[#211638] font-semibold">{currentUser.full_name}</strong>
             </span>
           </div>
-          <h1 className="text-2xl font-bold text-brand-text mt-1.5 flex items-center gap-2">
+          <h1 className="text-2xl font-bold text-[#211638] mt-1.5 flex items-center gap-2">
             Emergency & Distress Circle Console
           </h1>
-          <p className="text-xs text-brand-muted mt-1 max-w-2xl leading-relaxed">
+          <p className="text-xs text-[#716B80] mt-1 max-w-2xl leading-relaxed">
             You are authorized in this personal safety circle to receive distress alerts, acknowledge receipt, coordinate response with other circle members, and view privacy-controlled location data.
           </p>
         </div>
 
         <div className="flex items-center gap-3">
-          <div className="bg-brand-bg px-4 py-2.5 rounded-xl border border-brand-border text-center shadow-xs">
-            <p className="text-[10px] uppercase text-brand-muted font-bold tracking-wider">Active Alerts</p>
-            <p className={`text-2xl font-bold ${activeIncidents.length > 0 ? 'text-brand-coral animate-pulse' : 'text-brand-text'}`}>
+          <div className="bg-slate-50 px-4 py-2.5 rounded-xl border border-[#E8E1F3] text-center shadow-xs">
+            <p className="text-[10px] uppercase text-[#716B80] font-bold tracking-wider">Active Alerts</p>
+            <p className={`text-2xl font-bold ${activeIncidents.length > 0 ? 'text-[#D92D45] animate-pulse' : 'text-[#211638]'}`}>
               {activeIncidents.length}
             </p>
           </div>
@@ -112,44 +112,44 @@ export const TrustedDashboard: React.FC = () => {
 
       {/* Monitored Journey in Progress in Circle */}
       {circleActiveJourney && (
-        <div className="bg-gradient-to-r from-brand-lavender/40 via-white to-white border border-brand-violet/25 rounded-2xl p-5 shadow-card space-y-3">
+        <div className="bg-gradient-to-r from-[#F2EDFF]/40 via-white to-white border border-[#5517C8]/20 rounded-2xl p-5 shadow-card space-y-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-brand-violet/10 text-brand-violet flex items-center justify-center shadow-xs">
+              <div className="w-10 h-10 rounded-xl bg-[#F2EDFF] text-[#5517C8] flex items-center justify-center shadow-xs">
                 <Compass className="w-5 h-5 animate-spin-slow" />
               </div>
               <div>
                 <div className="flex items-center gap-2">
-                  <h3 className="font-bold text-brand-text text-sm">Monitored Journey in Progress</h3>
-                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-brand-violet/10 text-brand-violet border border-brand-violet/20">
+                  <h3 className="font-bold text-[#211638] text-sm">Monitored Journey in Progress</h3>
+                  <span className="text-[10px] font-semibold uppercase px-2 py-0.5 rounded-full bg-[#F2EDFF] text-[#5517C8] border border-[#5517C8]/20">
                     Safe Arrival Monitored
                   </span>
                 </div>
-                <p className="text-xs text-brand-muted mt-0.5">
-                  {primaryContactName} is en route to: <strong className="text-brand-text">{circleActiveJourney.destination_name}</strong>
+                <p className="text-xs text-[#716B80] mt-0.5">
+                  {primaryContactName} is en route to: <strong className="text-[#211638]">{circleActiveJourney.destination_name}</strong>
                 </p>
               </div>
             </div>
 
             <div className="text-right">
-              <p className="text-[10px] uppercase text-brand-muted font-bold tracking-wider">Expected Arrival</p>
-              <p className="text-sm font-mono font-bold text-brand-text">
+              <p className="text-[10px] uppercase text-[#716B80] font-bold tracking-wider">Expected Arrival</p>
+              <p className="text-sm font-mono font-bold text-[#211638]">
                 {formatTimeOnly(circleActiveJourney.expected_arrival_time)}
               </p>
             </div>
           </div>
 
           {/* Location & Authorization state */}
-          <div className="p-3.5 bg-brand-bg border border-brand-border rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div className="p-3.5 bg-slate-50 border border-[#E8E1F3] rounded-xl flex flex-wrap items-center justify-between gap-3 text-xs">
             {isAuthorizedForLocation ? (
-              <div className="flex items-center gap-2 text-brand-text">
-                <span className="w-2 h-2 rounded-full bg-brand-teal animate-ping" />
+              <div className="flex items-center gap-2 text-[#211638]">
+                <span className="w-2 h-2 rounded-full bg-[#5517C8] animate-ping" />
                 <span>
                   Live GPS Shared • Safe Radius:{' '}
-                  <strong className="text-brand-teal">{circleActiveJourney.safe_radius_meters}m</strong>
+                  <strong className="text-[#5517C8]">{circleActiveJourney.safe_radius_meters}m</strong>
                 </span>
                 {circleActiveJourney.current_lat && circleActiveJourney.current_lng && (
-                  <span className="text-brand-muted">
+                  <span className="text-[#716B80]">
                     (Distance: ~{calculateDistanceMeters(
                       circleActiveJourney.current_lat,
                       circleActiveJourney.current_lng,
@@ -163,8 +163,8 @@ export const TrustedDashboard: React.FC = () => {
                 )}
               </div>
             ) : (
-              <div className="flex items-center gap-2 text-brand-muted">
-                <Lock className="w-3.5 h-3.5 text-brand-muted" />
+              <div className="flex items-center gap-2 text-[#716B80]">
+                <Lock className="w-3.5 h-3.5 text-[#716B80]" />
                 <span>
                   {circleActiveJourney.share_location
                     ? 'Coordinates hidden by user privacy protocol for this session.'
@@ -175,7 +175,7 @@ export const TrustedDashboard: React.FC = () => {
 
             <button
               onClick={() => setCurrentScreen('journeys')}
-              className="text-xs text-brand-violet hover:text-brand-violet/80 font-semibold px-3 py-1.5 rounded-lg bg-white border border-brand-border flex items-center gap-1 shadow-xs transition-colors"
+              className="text-xs text-[#5517C8] hover:text-[#351078] font-semibold px-3 py-1.5 rounded-lg bg-white border border-[#E8E1F3] flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
             >
               <span>View Map</span>
               <ChevronRight className="w-3.5 h-3.5" />
@@ -185,30 +185,30 @@ export const TrustedDashboard: React.FC = () => {
       )}
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-brand-border pb-2">
+      <div className="flex items-center gap-2 border-b border-[#E8E1F3] pb-2">
         <button
           onClick={() => setActiveTab('active')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'active'
-              ? 'bg-brand-teal text-white shadow-teal'
-              : 'text-brand-muted hover:text-brand-text bg-white border border-brand-border'
+              ? 'bg-gradient-to-r from-[#5517C8] to-[#365BFF] text-white shadow-md'
+              : 'text-[#716B80] hover:text-[#211638] bg-white border border-[#E8E1F3]'
           }`}
         >
           <span>Active Alerts</span>
-          <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${activeTab === 'active' ? 'bg-white/20 text-white' : 'bg-brand-bg text-brand-muted'}`}>
+          <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${activeTab === 'active' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#716B80]'}`}>
             {activeIncidents.length}
           </span>
         </button>
         <button
           onClick={() => setActiveTab('resolved')}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
             activeTab === 'resolved'
-              ? 'bg-brand-teal text-white shadow-teal'
-              : 'text-brand-muted hover:text-brand-text bg-white border border-brand-border'
+              ? 'bg-gradient-to-r from-[#5517C8] to-[#365BFF] text-white shadow-md'
+              : 'text-[#716B80] hover:text-[#211638] bg-white border border-[#E8E1F3]'
           }`}
         >
           <span>Past Resolved</span>
-          <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${activeTab === 'resolved' ? 'bg-white/20 text-white' : 'bg-brand-bg text-brand-muted'}`}>
+          <span className={`px-1.5 py-0.2 rounded-full text-[10px] font-mono ${activeTab === 'resolved' ? 'bg-white/20 text-white' : 'bg-slate-100 text-[#716B80]'}`}>
             {resolvedIncidents.length}
           </span>
         </button>
