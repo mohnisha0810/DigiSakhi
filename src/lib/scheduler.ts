@@ -420,6 +420,88 @@ class SafetySchedulerService {
           actionsTaken.push(`Journey to ${journey.destination_name} is overdue.`);
         }
       }
+
+      // Custom Safety Journey Check-in Processing
+      if (journey.journey_type === 'custom' && journey.next_check_in_at) {
+        const nextCheckIn = new Date(journey.next_check_in_at);
+        const countdownSecs = journey.response_countdown_seconds || 120;
+        const missedAt = new Date(nextCheckIn.getTime() + countdownSecs * 1000);
+
+        // A. Check-in is due: now >= nextCheckIn && now < missedAt
+        if (
+          now >= nextCheckIn &&
+          now < missedAt &&
+          journey.check_in_status !== 'prompt_due' &&
+          journey.check_in_status !== 'missed'
+        ) {
+          journey.check_in_status = 'prompt_due';
+          journeysUpdated = true;
+
+          const actionKey = `custom_prompt_${journey.id}_${journey.next_check_in_at}`;
+          if (!this.getProcessedActions().has(actionKey)) {
+            this.markActionProcessed(actionKey);
+            actionsTaken.push(
+              `Custom check-in prompt triggered for journey "${journey.journey_name || journey.destination_name}"`
+            );
+
+            notificationService
+              .sendNotification({
+                userId: journey.owner_user_id,
+                recipientId: journey.owner_user_id,
+                recipientName: 'You',
+                recipientEmail: 'user@digisakhi.org',
+                subject: 'Safety Check-in Due',
+                message: 'Are you okay? Please confirm your safety on DigiSakhi.',
+                isDiscreetMasked: true,
+              })
+              .then((notif) => {
+                const cur = LocalStorageDB.getItem<NotificationRecord[]>('notification_records', []);
+                LocalStorageDB.setItem('notification_records', [notif, ...cur]);
+              });
+          }
+        }
+
+        // B. Missed check-in: now >= missedAt
+        if (now >= missedAt && journey.check_in_status !== 'missed') {
+          journey.check_in_status = 'missed';
+          journey.missed_count = (journey.missed_count || 0) + 1;
+          journeysUpdated = true;
+
+          const actionKey = `custom_missed_${journey.id}_${journey.next_check_in_at}`;
+          if (!this.getProcessedActions().has(actionKey)) {
+            this.markActionProcessed(actionKey);
+            actionsTaken.push(
+              `Custom check-in missed for journey "${journey.journey_name || journey.destination_name}"`
+            );
+
+            // If configured to escalate on missed check-in
+            if (
+              journey.missed_checkin_action === 'escalate' &&
+              journey.tier1_contact_ids &&
+              journey.tier1_contact_ids.length > 0
+            ) {
+              const tier1Id = journey.tier1_contact_ids[0];
+              const t1Contact = contacts.find((c) => c.id === tier1Id);
+              if (t1Contact) {
+                notificationService
+                  .sendNotification({
+                    userId: journey.owner_user_id,
+                    recipientId: t1Contact.id,
+                    recipientName: t1Contact.full_name,
+                    recipientEmail: t1Contact.email,
+                    subject: `Safety Alert: Missed Check-in`,
+                    message: `A scheduled safety check-in was missed on DigiSakhi during a monitored journey.`,
+                    isDiscreetMasked: false,
+                  })
+                  .then((notif) => {
+                    const cur = LocalStorageDB.getItem<NotificationRecord[]>('notification_records', []);
+                    LocalStorageDB.setItem('notification_records', [notif, ...cur]);
+                  });
+              }
+            }
+          }
+        }
+      }
     }
 
     // 3. Process Location Share Expiry

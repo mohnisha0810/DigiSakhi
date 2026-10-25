@@ -6,6 +6,7 @@ import {
   SafetyProtocol,
   CheckIn,
   Journey,
+  JourneyCallAction,
   Incident,
   IncidentRecipient,
   IncidentEvent,
@@ -144,6 +145,33 @@ interface SafeSphereContextType {
     allowedContactIds?: string[];
     protocolId?: string;
   }) => Promise<string>;
+  createCustomJourney: (data: {
+    journeyName?: string;
+    originName?: string;
+    destinationName?: string;
+    checkInIntervalMinutes: number;
+    responseCountdownSeconds: number;
+    tier1ContactIds: string[];
+    tier2ContactIds: string[];
+    emergencyPhoneNumber: string;
+    missedCheckinAction: 'reminder' | 'escalate';
+    shareLocation?: boolean;
+  }) => Promise<string>;
+  respondCustomJourneyCheckIn: (
+    journeyId: string,
+    response: 'im_okay' | 'need_help' | 'urgent_help',
+    note?: string
+  ) => Promise<void>;
+  recordJourneyCallAction: (
+    journeyId: string,
+    action: {
+      action_type: 'tier1_call' | 'tier2_call' | 'emergency_call';
+      recipient_name: string;
+      phone_number: string;
+      status: 'initiated' | 'opened_dialer' | 'manual_fallback';
+      note?: string;
+    }
+  ) => Promise<void>;
   confirmSafeArrival: (journeyId: string) => Promise<void>;
   cancelJourney: (journeyId: string) => Promise<void>;
 
@@ -899,6 +927,274 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return journey.id;
   };
 
+  const createCustomJourney = async (data: {
+    journeyName?: string;
+    originName?: string;
+    destinationName?: string;
+    checkInIntervalMinutes: number;
+    responseCountdownSeconds: number;
+    tier1ContactIds: string[];
+    tier2ContactIds: string[];
+    emergencyPhoneNumber: string;
+    missedCheckinAction: 'reminder' | 'escalate';
+    shareLocation?: boolean;
+  }): Promise<string> => {
+    const now = schedulerService.getVirtualNow();
+    const intervalMins = Math.max(1, data.checkInIntervalMinutes || 10);
+    const countdownSecs = Math.max(30, data.responseCountdownSeconds || 120);
+    const nextCheckIn = new Date(now.getTime() + intervalMins * 60000);
+    const expectedArrival = new Date(now.getTime() + intervalMins * 3 * 60000);
+
+    const journeyName = (data.journeyName && data.journeyName.trim()) || 'Custom Safety Journey';
+    const originName = (data.originName && data.originName.trim()) || 'Current Location';
+    const destinationName = (data.destinationName && data.destinationName.trim()) || 'Safety Destination';
+
+    const geo = await refreshLocation(false);
+    const hasCoordinates = geo.latitude !== null && geo.longitude !== null;
+    const isSharing = Boolean(data.shareLocation && hasCoordinates);
+
+    const checkIn = await backendService.createCheckIn({
+      owner_user_id: currentUser.id,
+      title: `Check-in: ${journeyName}`,
+      deadline_at: nextCheckIn.toISOString(),
+      reminder_at: new Date(nextCheckIn.getTime() - 60000).toISOString(),
+      grace_period_seconds: countdownSecs,
+      contact_wait_seconds: 180,
+      status: 'active',
+      current_escalation_tier: 0,
+    });
+
+    const journey = await backendService.createJourney({
+      owner_user_id: currentUser.id,
+      check_in_id: checkIn.id,
+      origin_name: originName,
+      origin_lat: geo.latitude ?? undefined,
+      origin_lng: geo.longitude ?? undefined,
+      destination_name: destinationName,
+      dest_lat: geo.latitude ?? 37.7897,
+      dest_lng: geo.longitude ?? -122.4011,
+      safe_radius_meters: 200,
+      start_time: now.toISOString(),
+      expected_arrival_time: expectedArrival.toISOString(),
+      current_lat: geo.latitude ?? undefined,
+      current_lng: geo.longitude ?? undefined,
+      status: 'in_progress',
+      share_location: isSharing,
+
+      // Custom Plan Configuration
+      journey_type: 'custom',
+      journey_name: journeyName,
+      check_in_interval_minutes: intervalMins,
+      response_countdown_seconds: countdownSecs,
+      tier1_contact_ids: data.tier1ContactIds,
+      tier2_contact_ids: data.tier2ContactIds,
+      emergency_phone_number: data.emergencyPhoneNumber || '112',
+      missed_checkin_action: data.missedCheckinAction,
+      last_check_in_at: now.toISOString(),
+      next_check_in_at: nextCheckIn.toISOString(),
+      check_in_status: 'ok',
+      missed_count: 0,
+      call_actions: [],
+    });
+
+    await backendService.updateCheckIn(checkIn.id, { related_journey_id: journey.id });
+
+    if (isSharing && geo.latitude !== null && geo.longitude !== null) {
+      const allContactIds = Array.from(new Set([...data.tier1ContactIds, ...data.tier2ContactIds]));
+      await backendService.createLocationShare({
+        user_id: currentUser.id,
+        session_type: 'journey',
+        session_id: journey.id,
+        allowed_contact_ids: allContactIds,
+        is_active: true,
+        expires_at: new Date(expectedArrival.getTime() + 60 * 60000).toISOString(),
+      });
+    }
+
+    const incidentEvents = LocalStorageDB.getItem<IncidentEvent[]>('incident_events', []);
+    const newEvent: IncidentEvent = {
+      id: 'ev_' + Math.random().toString(36).substring(2, 9),
+      incident_id: 'jny_' + journey.id,
+      event_type: 'incident_created',
+      actor_name: currentUser.full_name,
+      actor_role: 'user',
+      description: `Custom Safety Journey "${journeyName}" started. Interval: ${intervalMins}m, Response window: ${countdownSecs}s, Next check-in at ${nextCheckIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+      created_at: now.toISOString(),
+    };
+    LocalStorageDB.setItem('incident_events', [newEvent, ...incidentEvents]);
+
+    await loadUserData(currentUser);
+    setSuccessMessage(`Custom Safety Journey "${journeyName}" started! Next check-in in ${intervalMins} minutes.`);
+    setCurrentScreen('journeys');
+    return journey.id;
+  };
+
+  const respondCustomJourneyCheckIn = async (
+    journeyId: string,
+    response: 'im_okay' | 'need_help' | 'urgent_help',
+    note?: string
+  ) => {
+    const now = schedulerService.getVirtualNow();
+    const journey = journeys.find((j) => j.id === journeyId);
+    if (!journey) return;
+
+    const intervalMins = journey.check_in_interval_minutes || 10;
+    const nextCheckIn = new Date(now.getTime() + intervalMins * 60000);
+
+    if (response === 'im_okay') {
+      // BUTTON 1: "I'M OKAY 💚"
+      await backendService.updateJourney(journeyId, {
+        last_check_in_at: now.toISOString(),
+        next_check_in_at: nextCheckIn.toISOString(),
+        check_in_status: 'ok',
+      });
+
+      if (journey.check_in_id) {
+        await backendService.updateCheckIn(journey.check_in_id, {
+          status: 'active',
+          deadline_at: nextCheckIn.toISOString(),
+          reminder_at: new Date(nextCheckIn.getTime() - 60000).toISOString(),
+        });
+      }
+
+      const incidentEvents = LocalStorageDB.getItem<IncidentEvent[]>('incident_events', []);
+      const newEvent: IncidentEvent = {
+        id: 'ev_' + Math.random().toString(36).substring(2, 9),
+        incident_id: 'jny_' + journey.id,
+        event_type: 'safe_confirmed_by_user',
+        actor_name: currentUser.full_name,
+        actor_role: 'user',
+        description: `Safety Check-in Confirmed: User confirmed "I'm Okay 💚". Next check-in at ${nextCheckIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`,
+        created_at: now.toISOString(),
+      };
+      LocalStorageDB.setItem('incident_events', [newEvent, ...incidentEvents]);
+
+      await loadUserData(currentUser);
+      setSuccessMessage(`Safety confirmed! Next check-in scheduled for ${nextCheckIn.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}.`);
+    } else if (response === 'need_help') {
+      // BUTTON 2: "I NEED HELP 🟠"
+      const tier1Ids = journey.tier1_contact_ids || [];
+      const tier1Contact =
+        contacts.find((c) => tier1Ids.includes(c.id) && c.status === 'accepted') ||
+        contacts.find((c) => c.status === 'accepted');
+
+      const actionRecord: JourneyCallAction = {
+        id: 'act_' + Math.random().toString(36).substring(2, 9),
+        journey_id: journeyId,
+        timestamp: now.toISOString(),
+        action_type: 'tier1_call',
+        recipient_name: tier1Contact ? tier1Contact.full_name : 'Tier 1 Contact',
+        phone_number: tier1Contact ? tier1Contact.phone_number : 'Not configured',
+        status: tier1Contact ? 'opened_dialer' : 'manual_fallback',
+        note: note || 'User pressed "I Need Help" during safety journey check-in.',
+      };
+
+      const existingActions = journey.call_actions || [];
+      await backendService.updateJourney(journeyId, {
+        call_actions: [actionRecord, ...existingActions],
+      });
+
+      const incidentEvents = LocalStorageDB.getItem<IncidentEvent[]>('incident_events', []);
+      const newEvent: IncidentEvent = {
+        id: 'ev_' + Math.random().toString(36).substring(2, 9),
+        incident_id: 'jny_' + journey.id,
+        event_type: 'escalation_triggered',
+        actor_name: currentUser.full_name,
+        actor_role: 'user',
+        description: `Help requested: User pressed "I Need Help 🟠". Calling Tier 1 responder ${tier1Contact?.full_name || 'contact'} (${tier1Contact?.phone_number || 'N/A'}).`,
+        created_at: now.toISOString(),
+      };
+      LocalStorageDB.setItem('incident_events', [newEvent, ...incidentEvents]);
+
+      // Native dialer handoff
+      if (tier1Contact?.phone_number) {
+        const cleanPhone = tier1Contact.phone_number.replace(/\s+/g, '');
+        window.location.href = `tel:${encodeURIComponent(cleanPhone)}`;
+      }
+
+      await loadUserData(currentUser);
+      setSuccessMessage(`Initiating call to Tier 1 responder: ${tier1Contact?.full_name || 'contact'}...`);
+    } else if (response === 'urgent_help') {
+      // BUTTON 3: "URGENT HELP 🚨"
+      const emergencyNum = journey.emergency_phone_number || '112';
+
+      const actionRecord: JourneyCallAction = {
+        id: 'act_' + Math.random().toString(36).substring(2, 9),
+        journey_id: journeyId,
+        timestamp: now.toISOString(),
+        action_type: 'emergency_call',
+        recipient_name: `Emergency Helpline (${emergencyNum})`,
+        phone_number: emergencyNum,
+        status: 'opened_dialer',
+        note: 'Urgent Help triggered from safety journey check-in prompt.',
+      };
+
+      const existingActions = journey.call_actions || [];
+      await backendService.updateJourney(journeyId, {
+        call_actions: [actionRecord, ...existingActions],
+      });
+
+      const incidentEvents = LocalStorageDB.getItem<IncidentEvent[]>('incident_events', []);
+      const newEvent: IncidentEvent = {
+        id: 'ev_' + Math.random().toString(36).substring(2, 9),
+        incident_id: 'jny_' + journey.id,
+        event_type: 'response_initiated',
+        actor_name: currentUser.full_name,
+        actor_role: 'user',
+        description: `URGENT HELP ACTIVATED! User pressed "Urgent Help 🚨". Opening dialer for emergency service: ${emergencyNum}.`,
+        created_at: now.toISOString(),
+      };
+      LocalStorageDB.setItem('incident_events', [newEvent, ...incidentEvents]);
+
+      const cleanPhone = emergencyNum.replace(/\s+/g, '');
+      window.location.href = `tel:${encodeURIComponent(cleanPhone)}`;
+
+      await loadUserData(currentUser);
+      setSuccessMessage(`Opening emergency phone dialer for ${emergencyNum}...`);
+    }
+  };
+
+  const recordJourneyCallAction = async (
+    journeyId: string,
+    action: {
+      action_type: 'tier1_call' | 'tier2_call' | 'emergency_call';
+      recipient_name: string;
+      phone_number: string;
+      status: 'initiated' | 'opened_dialer' | 'manual_fallback';
+      note?: string;
+    }
+  ) => {
+    const journey = journeys.find((j) => j.id === journeyId);
+    if (!journey) return;
+    const now = schedulerService.getVirtualNow();
+
+    const newAction: JourneyCallAction = {
+      id: 'act_' + Math.random().toString(36).substring(2, 9),
+      journey_id: journeyId,
+      timestamp: now.toISOString(),
+      ...action,
+    };
+
+    const existingActions = journey.call_actions || [];
+    await backendService.updateJourney(journeyId, {
+      call_actions: [newAction, ...existingActions],
+    });
+
+    const incidentEvents = LocalStorageDB.getItem<IncidentEvent[]>('incident_events', []);
+    const newEvent: IncidentEvent = {
+      id: 'ev_' + Math.random().toString(36).substring(2, 9),
+      incident_id: 'jny_' + journey.id,
+      event_type: 'response_initiated',
+      actor_name: currentUser.full_name,
+      actor_role: 'user',
+      description: `Call initiated: ${action.action_type.replace('_', ' ')} to ${action.recipient_name} (${action.phone_number}). Status: ${action.status}.`,
+      created_at: now.toISOString(),
+    };
+    LocalStorageDB.setItem('incident_events', [newEvent, ...incidentEvents]);
+
+    await loadUserData(currentUser);
+  };
+
   const confirmSafeArrival = async (journeyId: string) => {
     const now = schedulerService.getVirtualNow().toISOString();
     const journey = journeys.find((j) => j.id === journeyId);
@@ -1295,6 +1591,9 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         resolveIncident,
         cancelIncident,
         createJourney,
+        createCustomJourney,
+        respondCustomJourneyCheckIn,
+        recordJourneyCallAction,
         confirmSafeArrival,
         cancelJourney,
         currentLocation,

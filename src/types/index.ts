@@ -166,7 +166,8 @@ export type CheckInStatus =
   | 'in_grace_period'
   | 'escalated'
   | 'completed'
-  | 'cancelled';
+  | 'cancelled'
+  | 'missed';
 
 export interface CheckIn {
   id: string;
@@ -194,6 +195,17 @@ export type JourneyStatus =
   | 'overdue_escalated'
   | 'cancelled';
 
+export interface JourneyCallAction {
+  id: string;
+  journey_id: string;
+  timestamp: string;
+  action_type: 'tier1_call' | 'tier2_call' | 'emergency_call';
+  recipient_name: string;
+  phone_number: string;
+  status: 'initiated' | 'opened_dialer' | 'manual_fallback';
+  note?: string;
+}
+
 export interface Journey {
   id: string;
   owner_user_id: string;
@@ -215,6 +227,21 @@ export interface Journey {
   prompted_arrival_at?: string;
   created_at: string;
   completed_at?: string;
+
+  // Custom Safety Journey Configuration & State
+  journey_type?: 'preset' | 'custom';
+  journey_name?: string;
+  check_in_interval_minutes?: number;
+  response_countdown_seconds?: number;
+  tier1_contact_ids?: string[];
+  tier2_contact_ids?: string[];
+  emergency_phone_number?: string;
+  missed_checkin_action?: 'reminder' | 'escalate';
+  next_check_in_at?: string;
+  last_check_in_at?: string;
+  check_in_status?: 'ok' | 'prompt_due' | 'missed';
+  missed_count?: number;
+  call_actions?: JourneyCallAction[];
 }
 
 export interface SafetyProtocol {

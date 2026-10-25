@@ -1454,4 +1454,294 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal(updatedJourney?.status, 'completed', 'Journey must transition to completed on safe arrival');
     });
   });
+
+  // =========================================================================
+  // 16. FULLY FUNCTIONAL CUSTOM SAFETY JOURNEY & 3-BUTTON CHECK-IN ENGINE
+  // =========================================================================
+  describe('16. Custom Safety Journey & 3-Button Check-in Engine', () => {
+    it('creates a custom journey with 10-minute interval and schedules next check-in correctly', async () => {
+      const now = schedulerService.getVirtualNow();
+      const intervalMinutes = 10;
+      const countdownSeconds = 120;
+      const nextCheckIn = new Date(now.getTime() + intervalMinutes * 60000).toISOString();
+
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: 'Office Building',
+        destination_name: 'Mission Bay Home',
+        dest_lat: 37.7712,
+        dest_lng: -122.3925,
+        safe_radius_meters: 200,
+        start_time: now.toISOString(),
+        expected_arrival_time: new Date(now.getTime() + 30 * 60000).toISOString(),
+        status: 'in_progress',
+        share_location: true,
+        journey_type: 'custom',
+        journey_name: 'Late Evening Solo Commute',
+        check_in_interval_minutes: intervalMinutes,
+        response_countdown_seconds: countdownSeconds,
+        tier1_contact_ids: ['tc_maya_01'],
+        tier2_contact_ids: ['tc_sarah_01'],
+        emergency_phone_number: '112',
+        missed_checkin_action: 'reminder',
+        last_check_in_at: now.toISOString(),
+        next_check_in_at: nextCheckIn,
+        check_in_status: 'ok',
+        missed_count: 0,
+        call_actions: [],
+      });
+
+      assert.ok(journey.id.startsWith('jny_'));
+      assert.equal(journey.journey_type, 'custom');
+      assert.equal(journey.check_in_interval_minutes, 10);
+      assert.equal(journey.response_countdown_seconds, 120);
+      assert.equal(journey.emergency_phone_number, '112');
+      assert.equal(journey.next_check_in_at, nextCheckIn);
+      assert.equal(journey.check_in_status, 'ok');
+    });
+
+    it('triggers check-in prompt when scheduled time is reached and handles "I\'m Okay 💚"', async () => {
+      const now = schedulerService.getVirtualNow();
+      const nextCheckIn = new Date(now.getTime() + 60000); // 1 minute ahead
+
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: 'Downtown Office',
+        destination_name: 'Home',
+        dest_lat: 37.7712,
+        dest_lng: -122.3925,
+        safe_radius_meters: 200,
+        start_time: now.toISOString(),
+        expected_arrival_time: new Date(now.getTime() + 1800000).toISOString(),
+        status: 'in_progress',
+        share_location: false,
+        journey_type: 'custom',
+        journey_name: 'Evening Transit',
+        check_in_interval_minutes: 10,
+        response_countdown_seconds: 120,
+        tier1_contact_ids: ['tc_maya_01'],
+        emergency_phone_number: '112',
+        next_check_in_at: nextCheckIn.toISOString(),
+        last_check_in_at: now.toISOString(),
+        check_in_status: 'ok',
+      });
+
+      // 1. Advance virtual time past next_check_in_at
+      schedulerService.advanceVirtualTimeSeconds(65);
+      schedulerService.executeSchedulerCycle();
+
+      const activeJourneys = await backend.getJourneys('usr_elena_01');
+      const prompted = activeJourneys.find((j) => j.id === journey.id);
+      assert.equal(prompted?.check_in_status, 'prompt_due', 'Check-in status must transition to prompt_due when time arrives');
+
+      // 2. User confirms: "I'M OKAY 💚"
+      const confirmedNow = schedulerService.getVirtualNow();
+      const futureCheckIn = new Date(confirmedNow.getTime() + 10 * 60000).toISOString();
+
+      await backend.updateJourney(journey.id, {
+        last_check_in_at: confirmedNow.toISOString(),
+        next_check_in_at: futureCheckIn,
+        check_in_status: 'ok',
+      });
+
+      const updated = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(updated?.check_in_status, 'ok', 'Status must reset to ok after safe confirmation');
+      assert.equal(updated?.last_check_in_at, confirmedNow.toISOString());
+      assert.equal(updated?.next_check_in_at, futureCheckIn);
+    });
+
+    it('handles "I Need Help 🟠", records Tier 1 call action, and enables Tier 2 escalation', async () => {
+      const now = schedulerService.getVirtualNow();
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: 'Market St',
+        destination_name: 'Home',
+        dest_lat: 37.7712,
+        dest_lng: -122.3925,
+        safe_radius_meters: 200,
+        start_time: now.toISOString(),
+        expected_arrival_time: new Date(now.getTime() + 1800000).toISOString(),
+        status: 'in_progress',
+        share_location: true,
+        journey_type: 'custom',
+        journey_name: 'Walk Home',
+        check_in_interval_minutes: 10,
+        response_countdown_seconds: 120,
+        tier1_contact_ids: ['tc_maya_01'],
+        tier2_contact_ids: ['tc_sarah_01'],
+        emergency_phone_number: '112',
+        next_check_in_at: now.toISOString(),
+        check_in_status: 'prompt_due',
+        call_actions: [],
+      });
+
+      // User presses "I NEED HELP 🟠"
+      const tier1Action = {
+        id: 'act_t1_01',
+        journey_id: journey.id,
+        timestamp: now.toISOString(),
+        action_type: 'tier1_call' as const,
+        recipient_name: 'Maya Lin',
+        phone_number: '+1 (555) 234-5678',
+        status: 'opened_dialer' as const,
+        note: 'User pressed I Need Help during check-in',
+      };
+
+      await backend.updateJourney(journey.id, {
+        call_actions: [tier1Action],
+      });
+
+      let updated = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(updated?.call_actions?.length, 1);
+      assert.equal(updated?.call_actions?.[0].action_type, 'tier1_call');
+      assert.equal(updated?.call_actions?.[0].recipient_name, 'Maya Lin');
+
+      // Next escalation: Tier 2 call action
+      const tier2Action = {
+        id: 'act_t2_01',
+        journey_id: journey.id,
+        timestamp: new Date(now.getTime() + 30000).toISOString(),
+        action_type: 'tier2_call' as const,
+        recipient_name: 'Sarah Chen',
+        phone_number: '+1 (555) 876-5432',
+        status: 'opened_dialer' as const,
+        note: 'Escalated to Tier 2 backup contact',
+      };
+
+      await backend.updateJourney(journey.id, {
+        call_actions: [tier2Action, tier1Action],
+      });
+
+      updated = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(updated?.call_actions?.length, 2);
+      assert.equal(updated?.call_actions?.[0].action_type, 'tier2_call');
+    });
+
+    it('handles "Urgent Help 🚨", records emergency call action with verified phone number', async () => {
+      const now = schedulerService.getVirtualNow();
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: 'Subway Station',
+        destination_name: 'Apartment',
+        dest_lat: 37.7712,
+        dest_lng: -122.3925,
+        safe_radius_meters: 200,
+        start_time: now.toISOString(),
+        expected_arrival_time: new Date(now.getTime() + 1800000).toISOString(),
+        status: 'in_progress',
+        share_location: true,
+        journey_type: 'custom',
+        emergency_phone_number: '112',
+        check_in_status: 'prompt_due',
+      });
+
+      const urgentAction = {
+        id: 'act_urg_01',
+        journey_id: journey.id,
+        timestamp: now.toISOString(),
+        action_type: 'emergency_call' as const,
+        recipient_name: 'National Emergency Helpline (112)',
+        phone_number: '112',
+        status: 'opened_dialer' as const,
+      };
+
+      await backend.updateJourney(journey.id, {
+        call_actions: [urgentAction],
+      });
+
+      const updated = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(updated?.call_actions?.[0].action_type, 'emergency_call');
+      assert.equal(updated?.call_actions?.[0].phone_number, '112');
+    });
+
+    it('records missed check-in when countdown elapses and late "I\'m Okay" resolves it', async () => {
+      const now = schedulerService.getVirtualNow();
+      const checkInTime = new Date(now.getTime() - 10000); // 10s in past
+
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: 'Metro',
+        destination_name: 'Home',
+        dest_lat: 37.7712,
+        dest_lng: -122.3925,
+        safe_radius_meters: 200,
+        start_time: new Date(now.getTime() - 600000).toISOString(),
+        expected_arrival_time: new Date(now.getTime() + 1800000).toISOString(),
+        status: 'in_progress',
+        share_location: true,
+        journey_type: 'custom',
+        check_in_interval_minutes: 10,
+        response_countdown_seconds: 60,
+        next_check_in_at: checkInTime.toISOString(),
+        check_in_status: 'prompt_due',
+        missed_count: 0,
+      });
+
+      // Advance past countdown window (65 seconds)
+      schedulerService.advanceVirtualTimeSeconds(65);
+      schedulerService.executeSchedulerCycle();
+
+      let current = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(current?.check_in_status, 'missed', 'Check-in must be marked as missed after countdown expires');
+      assert.ok((current?.missed_count || 0) >= 1, 'Missed count must be incremented');
+
+      // Late "I'M OKAY 💚" confirmation resolves missed check-in
+      const resolvedNow = schedulerService.getVirtualNow();
+      const newNext = new Date(resolvedNow.getTime() + 10 * 60000).toISOString();
+
+      await backend.updateJourney(journey.id, {
+        check_in_status: 'ok',
+        last_check_in_at: resolvedNow.toISOString(),
+        next_check_in_at: newNext,
+      });
+
+      current = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(current?.check_in_status, 'ok', 'Late response must resolve missed check-in');
+      assert.equal(current?.next_check_in_at, newNext);
+    });
+
+    it('persists journey configuration across adapter reloads and stops prompts when ended', async () => {
+      const now = schedulerService.getVirtualNow();
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: 'Library',
+        destination_name: 'Home',
+        dest_lat: 37.7712,
+        dest_lng: -122.3925,
+        safe_radius_meters: 200,
+        start_time: now.toISOString(),
+        expected_arrival_time: new Date(now.getTime() + 1800000).toISOString(),
+        status: 'in_progress',
+        share_location: true,
+        journey_type: 'custom',
+        journey_name: 'Late Study Commute',
+        check_in_interval_minutes: 15,
+        response_countdown_seconds: 180,
+        tier1_contact_ids: ['tc_maya_01'],
+        emergency_phone_number: '112',
+        next_check_in_at: new Date(now.getTime() + 15 * 60000).toISOString(),
+        check_in_status: 'ok',
+      });
+
+      // Simulate page refresh: re-instantiate adapter
+      const reloadedBackend = new LocalDevelopmentAdapter();
+      const reloadedJourneys = await reloadedBackend.getJourneys('usr_elena_01');
+      const found = reloadedJourneys.find((j) => j.id === journey.id);
+
+      assert.ok(found, 'Active custom journey must survive browser reload');
+      assert.equal(found?.journey_name, 'Late Study Commute');
+      assert.equal(found?.check_in_interval_minutes, 15);
+      assert.equal(found?.response_countdown_seconds, 180);
+
+      // User ends journey
+      await reloadedBackend.updateJourney(journey.id, {
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      });
+
+      const endedJourneys = await reloadedBackend.getJourneys('usr_elena_01');
+      const endedJourney = endedJourneys.find((j) => j.id === journey.id);
+      assert.equal(endedJourney?.status, 'completed', 'Journey must be completed and stop all future prompts');
+    });
+  });
 });

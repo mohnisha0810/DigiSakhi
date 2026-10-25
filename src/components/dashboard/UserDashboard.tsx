@@ -4,6 +4,7 @@ import { CheckInSetupModal } from '../checkin/CheckInSetupModal';
 import { EmergencyMessageModal } from '../safety/EmergencyMessageModal';
 import { EmergencyCallModal } from '../safety/EmergencyCallModal';
 import { ActiveIncidentsBanner } from './ActiveIncidentsBanner';
+import { CustomJourneyCheckInPrompt } from '../journey/CustomJourneyCheckInPrompt';
 import {
   Shield,
   ShieldCheck,
@@ -41,6 +42,7 @@ export const UserDashboard: React.FC = () => {
     openIncidentDetails,
     confirmCheckInSafe,
     confirmSafeArrival,
+    virtualTime,
   } = useSafeSphere();
 
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
@@ -63,6 +65,17 @@ export const UserDashboard: React.FC = () => {
   const isCheckInOverdue =
     activeCheckIn &&
     (activeCheckIn.status === 'in_grace_period' || activeCheckIn.status === 'escalated');
+
+  const now = virtualTime || new Date();
+  const nextCheckInTime = activeJourney?.next_check_in_at
+    ? new Date(activeJourney.next_check_in_at)
+    : null;
+  const isCustomJourneyPromptDue =
+    activeJourney &&
+    nextCheckInTime &&
+    (now >= nextCheckInTime ||
+      activeJourney.check_in_status === 'prompt_due' ||
+      activeJourney.check_in_status === 'missed');
 
   // Real-data completion checks for first-time onboarding flow
   const isProfileComplete = Boolean(
@@ -215,6 +228,8 @@ export const UserDashboard: React.FC = () => {
             <span>Confirm Safe Now</span>
           </button>
         </div>
+      ) : isCustomJourneyPromptDue && activeJourney ? (
+        <CustomJourneyCheckInPrompt journey={activeJourney} />
       ) : activeJourney ? (
         <div className="p-4 sm:p-5 bg-brand-lavender/50 border border-violet-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-card">
           <div className="flex items-center gap-3">
