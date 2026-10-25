@@ -5,6 +5,7 @@ import { EmergencyMessageModal } from '../safety/EmergencyMessageModal';
 import { EmergencyCallModal } from '../safety/EmergencyCallModal';
 import { ActiveIncidentsBanner } from './ActiveIncidentsBanner';
 import { CustomJourneyCheckInPrompt } from '../journey/CustomJourneyCheckInPrompt';
+import { HowDigiSakhiWorks } from './HowDigiSakhiWorks';
 import {
   ShieldAlert,
   Compass,
@@ -377,7 +378,13 @@ export const UserDashboard: React.FC = () => {
       </div>
 
       {/* =========================================================================
-          4. COMPACT SAFETY READINESS SNAPSHOT
+          4. HOW DIGISAKHI WORKS (Numbered Workflow Guide)
+          Visual 6-stage connected stepper explaining the complete user journey.
+      ========================================================================= */}
+      <HowDigiSakhiWorks onExplore={() => setCurrentScreen('journeys')} />
+
+      {/* =========================================================================
+          5. COMPACT SAFETY READINESS SNAPSHOT
           A single minimal, reassuring overview card at the bottom of the homepage.
       ========================================================================= */}
       <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#E8E1F3] shadow-card">
