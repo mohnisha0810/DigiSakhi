@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
+import { EmergencyMessageModal } from '@/components/safety/EmergencyMessageModal';
 import {
   LayoutDashboard,
   ShieldAlert,
@@ -10,20 +11,30 @@ import {
   MoreHorizontal,
   X,
   Radio,
+  Settings,
 } from 'lucide-react';
 
 export const MobileNav: React.FC = () => {
-  const { currentScreen, setCurrentScreen, currentRole, activeIncident, activeCheckIn, activeJourney } = useSafeSphere();
+  const { currentScreen, setCurrentScreen, currentRole, activeIncident, activeCheckIn, activeJourney, openIncidentDetails } = useSafeSphere();
   const [isMoreOpen, setIsMoreOpen] = useState(false);
+  const [isEmergencyOpen, setIsEmergencyOpen] = useState(false);
 
   const isActive = (screenName: string) => {
     if (screenName === 'home' && (currentScreen === 'home' || currentScreen === 'dashboard')) return true;
-    if (screenName === 'my_safety' && (currentScreen === 'my_safety' || currentScreen === 'distress_panel' || currentScreen === 'checkin_active')) return true;
     if (screenName === 'journeys' && (currentScreen === 'journeys' || currentScreen === 'journey_active' || currentScreen === 'map_view')) return true;
     if (screenName === 'circle' && (currentScreen === 'circle' || currentScreen === 'contacts')) return true;
-    if (screenName === 'protocols' && (currentScreen === 'protocols' || currentScreen === 'protocol_builder')) return true;
+    if (screenName === 'safety_setup' && (currentScreen === 'safety_setup' || currentScreen === 'protocols' || currentScreen === 'protocol_builder' || currentScreen === 'my_safety' || currentScreen === 'distress_panel' || currentScreen === 'checkin_active')) return true;
     if (screenName === 'history' && (currentScreen === 'history' || currentScreen === 'incident_details')) return true;
+    if (screenName === 'settings' && (currentScreen === 'settings' || currentScreen === 'privacy_settings' || currentScreen === 'account_settings' || currentScreen === 'notifications_inbox')) return true;
     return currentScreen === screenName;
+  };
+
+  const handleCenterAction = () => {
+    if (activeIncident) {
+      openIncidentDetails(activeIncident.id);
+    } else {
+      setIsEmergencyOpen(true);
+    }
   };
 
   return (
@@ -58,22 +69,22 @@ export const MobileNav: React.FC = () => {
           )}
         </button>
 
-        {/* 3. Center Prominent Safety Action */}
+        {/* 3. Center Prominent Emergency SOS Action */}
         <button
-          onClick={() => setCurrentScreen('my_safety')}
+          onClick={handleCenterAction}
           className="flex flex-col items-center justify-center -mt-6 group"
         >
           <div
             className={`w-13 h-13 rounded-2xl flex items-center justify-center shadow-lg border-2 border-white active:scale-95 transition-transform ${
               activeIncident
                 ? 'bg-brand-coral text-white shadow-coral animate-pulse'
-                : 'bg-brand-teal text-white shadow-teal'
+                : 'bg-brand-coral text-white shadow-coral'
             }`}
           >
             <ShieldAlert className="w-7 h-7 stroke-[2.3]" />
           </div>
-          <span className="text-[10px] font-extrabold text-brand-deepTeal mt-1">
-            {activeIncident ? 'Distress!' : 'My Safety'}
+          <span className="text-[10px] font-extrabold text-brand-coral mt-1">
+            {activeIncident ? 'Alert Active' : 'SOS Alert'}
           </span>
         </button>
 
@@ -94,7 +105,7 @@ export const MobileNav: React.FC = () => {
         <button
           onClick={() => setIsMoreOpen(true)}
           className={`flex flex-col items-center gap-1 text-[11px] font-bold transition-colors ${
-            isActive('protocols') || isActive('history')
+            isActive('safety_setup') || isActive('history') || isActive('settings')
               ? 'text-brand-violet'
               : 'text-brand-muted hover:text-brand-text'
           }`}
@@ -120,7 +131,7 @@ export const MobileNav: React.FC = () => {
 
             <button
               onClick={() => {
-                setCurrentScreen('protocols');
+                setCurrentScreen('safety_setup');
                 setIsMoreOpen(false);
               }}
               className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left text-xs font-bold text-brand-text flex items-center gap-3"
@@ -129,8 +140,8 @@ export const MobileNav: React.FC = () => {
                 <Sliders className="w-4 h-4" />
               </div>
               <div>
-                <p>Safety Protocols</p>
-                <p className="text-[11px] text-brand-muted font-normal">Escalation timeouts and contact order</p>
+                <p>Safety Setup</p>
+                <p className="text-[11px] text-brand-muted font-normal">Check-ins, protocols & emergency preferences</p>
               </div>
             </button>
 
@@ -152,6 +163,22 @@ export const MobileNav: React.FC = () => {
 
             <button
               onClick={() => {
+                setCurrentScreen('settings');
+                setIsMoreOpen(false);
+              }}
+              className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left text-xs font-bold text-brand-text flex items-center gap-3"
+            >
+              <div className="w-8 h-8 rounded-lg bg-teal-100 text-brand-teal flex items-center justify-center">
+                <Settings className="w-4 h-4" />
+              </div>
+              <div>
+                <p>Profile & Settings</p>
+                <p className="text-[11px] text-brand-muted font-normal">Account, discreet mode, PIN & permissions</p>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
                 setCurrentScreen('trusted_dashboard');
                 setIsMoreOpen(false);
               }}
@@ -168,6 +195,11 @@ export const MobileNav: React.FC = () => {
           </div>
         </div>
       )}
+
+      <EmergencyMessageModal
+        isOpen={isEmergencyOpen}
+        onClose={() => setIsEmergencyOpen(false)}
+      />
     </>
   );
 };

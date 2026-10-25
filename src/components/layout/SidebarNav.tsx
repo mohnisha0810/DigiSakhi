@@ -69,23 +69,13 @@ export const SidebarNav: React.FC = () => {
       iconColor: 'text-brand-teal',
     },
     {
-      id: 'my_safety',
-      screen: 'my_safety',
-      label: 'My Safety',
-      icon: ShieldAlert,
-      activeColor: 'bg-brand-peach text-brand-coral border-coral-200',
-      iconColor: 'text-brand-coral',
-      badge: activeIncident ? 'Alert' : activeCheckIn ? 'Active' : undefined,
-      badgeColor: activeIncident ? 'bg-brand-coral text-white' : 'bg-brand-aqua text-brand-teal',
-    },
-    {
       id: 'journeys',
       screen: 'journeys',
-      label: 'Journeys',
+      label: 'My Journeys',
       icon: Compass,
       activeColor: 'bg-brand-lavender text-brand-violet border-violet-200',
       iconColor: 'text-brand-violet',
-      badge: activeJourney ? 'Transit' : undefined,
+      badge: activeJourney ? 'Active' : undefined,
       badgeColor: 'bg-brand-lavender text-brand-violet',
     },
     {
@@ -99,12 +89,14 @@ export const SidebarNav: React.FC = () => {
       badgeColor: 'bg-slate-100 text-brand-muted',
     },
     {
-      id: 'protocols',
-      screen: 'protocols',
-      label: 'Safety Protocols',
+      id: 'safety_setup',
+      screen: 'safety_setup',
+      label: 'Safety Setup',
       icon: Sliders,
       activeColor: 'bg-brand-lavender text-brand-violet border-violet-200',
       iconColor: 'text-brand-violet',
+      badge: activeCheckIn ? 'Active' : undefined,
+      badgeColor: 'bg-brand-aqua text-brand-teal',
     },
     {
       id: 'history',
@@ -114,15 +106,23 @@ export const SidebarNav: React.FC = () => {
       activeColor: 'bg-slate-100 text-brand-text border-slate-200',
       iconColor: 'text-slate-600',
     },
+    {
+      id: 'settings',
+      screen: 'settings',
+      label: 'Profile & Settings',
+      icon: Settings,
+      activeColor: 'bg-slate-100 text-brand-text border-slate-200',
+      iconColor: 'text-slate-600',
+    },
   ];
 
   const isCurrentActive = (itemScreen: string) => {
     if (itemScreen === 'home' && (currentScreen === 'home' || currentScreen === 'dashboard')) return true;
-    if (itemScreen === 'my_safety' && (currentScreen === 'my_safety' || currentScreen === 'distress_panel' || currentScreen === 'checkin_active')) return true;
     if (itemScreen === 'journeys' && (currentScreen === 'journeys' || currentScreen === 'journey_active' || currentScreen === 'map_view')) return true;
     if (itemScreen === 'circle' && (currentScreen === 'circle' || currentScreen === 'contacts')) return true;
-    if (itemScreen === 'protocols' && (currentScreen === 'protocols' || currentScreen === 'protocol_builder')) return true;
-    if (itemScreen === 'history' && (currentScreen === 'history' || currentScreen === 'incident_details' || currentScreen === 'notifications_inbox')) return true;
+    if (itemScreen === 'safety_setup' && (currentScreen === 'safety_setup' || currentScreen === 'protocols' || currentScreen === 'protocol_builder' || currentScreen === 'my_safety' || currentScreen === 'distress_panel' || currentScreen === 'checkin_active')) return true;
+    if (itemScreen === 'history' && (currentScreen === 'history' || currentScreen === 'incident_details')) return true;
+    if (itemScreen === 'settings' && (currentScreen === 'settings' || currentScreen === 'privacy_settings' || currentScreen === 'account_settings' || currentScreen === 'notifications_inbox')) return true;
     return currentScreen === itemScreen;
   };
 

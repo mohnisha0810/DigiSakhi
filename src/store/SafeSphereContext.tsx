@@ -37,6 +37,7 @@ export type NavigationScreen =
   | 'journey_active'
   | 'circle'
   | 'contacts'
+  | 'safety_setup'
   | 'protocols'
   | 'protocol_builder'
   | 'history'
@@ -44,6 +45,7 @@ export type NavigationScreen =
   | 'incident_details'
   | 'checkin_active'
   | 'map_view'
+  | 'settings'
   | 'privacy_settings'
   | 'notifications_inbox'
   | 'account_settings';

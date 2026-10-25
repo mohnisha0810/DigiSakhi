@@ -4,17 +4,14 @@ import { SidebarNav } from '@/components/layout/SidebarNav';
 import { MobileHeader } from '@/components/layout/MobileHeader';
 import { MobileNav } from '@/components/layout/MobileNav';
 import { QuickExitModal } from '@/components/layout/QuickExitModal';
+import { SafetySetupScreen } from '@/components/safety/SafetySetupScreen';
+import { ProfileAndSettingsScreen } from '@/components/settings/ProfileAndSettingsScreen';
 import { UserDashboard } from '@/components/dashboard/UserDashboard';
-import { MySafetyScreen } from '@/components/safety/MySafetyScreen';
 import { JourneyScreen } from '@/components/journey/JourneyScreen';
 import { ContactList } from '@/components/contacts/ContactList';
-import { ProtocolBuilder } from '@/components/protocol/ProtocolBuilder';
 import { ActivityHistoryScreen } from '@/components/history/ActivityHistoryScreen';
 import { TrustedDashboard } from '@/components/trusted/TrustedDashboard';
 import { IncidentDetails } from '@/components/incidents/IncidentDetails';
-import { PrivacyDiscreetSettings } from '@/components/settings/PrivacyDiscreetSettings';
-import { NotificationInbox } from '@/components/notifications/NotificationInbox';
-import { AccountDataSettings } from '@/components/settings/AccountDataSettings';
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton';
 import { ToastContainer } from '@/components/common/ToastContainer';
 import { InvitationResponseScreen } from '@/components/contacts/InvitationResponseScreen';
@@ -36,10 +33,6 @@ const MainScreenRouter: React.FC = () => {
       case 'home':
       case 'dashboard':
         return <UserDashboard />;
-      case 'my_safety':
-      case 'distress_panel':
-      case 'checkin_active':
-        return <MySafetyScreen />;
       case 'journeys':
       case 'journey_active':
       case 'map_view':
@@ -47,21 +40,24 @@ const MainScreenRouter: React.FC = () => {
       case 'circle':
       case 'contacts':
         return <ContactList />;
+      case 'safety_setup':
       case 'protocols':
       case 'protocol_builder':
-        return <ProtocolBuilder />;
+      case 'my_safety':
+      case 'distress_panel':
+      case 'checkin_active':
+        return <SafetySetupScreen />;
       case 'history':
         return <ActivityHistoryScreen />;
-      case 'trusted_dashboard':
-        return <TrustedDashboard />;
       case 'incident_details':
         return <IncidentDetails />;
+      case 'settings':
       case 'privacy_settings':
-        return <PrivacyDiscreetSettings />;
-      case 'notifications_inbox':
-        return <NotificationInbox />;
       case 'account_settings':
-        return <AccountDataSettings />;
+      case 'notifications_inbox':
+        return <ProfileAndSettingsScreen />;
+      case 'trusted_dashboard':
+        return <TrustedDashboard />;
       default:
         return <UserDashboard />;
     }

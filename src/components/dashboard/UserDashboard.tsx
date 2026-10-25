@@ -1,14 +1,9 @@
 import React, { useState } from 'react';
 import { useSafeSphere } from '@/store/SafeSphereContext';
-import { ActiveCheckInCard } from './ActiveCheckInCard';
-import { ActiveJourneyCard } from './ActiveJourneyCard';
-import { ActiveIncidentsBanner } from './ActiveIncidentsBanner';
-import { SetupRoadmap } from './SetupRoadmap';
 import { CheckInSetupModal } from '../checkin/CheckInSetupModal';
-import { JourneySetupModal } from '../journey/JourneySetupModal';
-import { SafetySessionModal } from '../safety/SafetySessionModal';
 import { EmergencyMessageModal } from '../safety/EmergencyMessageModal';
 import { EmergencyCallModal } from '../safety/EmergencyCallModal';
+import { ActiveIncidentsBanner } from './ActiveIncidentsBanner';
 import {
   Shield,
   ShieldCheck,
@@ -23,9 +18,13 @@ import {
   Radio,
   Sparkles,
   PhoneCall,
+  CheckCircle2,
+  Sliders,
+  Settings,
+  X,
+  UserCheck,
 } from 'lucide-react';
-import { formatRelativeTime } from '@/lib/utils';
-import { DistressType } from '@/types';
+import { formatRelativeTime, formatTimeOnly } from '@/lib/utils';
 
 export const UserDashboard: React.FC = () => {
   const {
@@ -37,18 +36,20 @@ export const UserDashboard: React.FC = () => {
     activeIncident,
     locationPermission,
     defaultProtocol,
+    protocols,
     setCurrentScreen,
     openIncidentDetails,
+    confirmCheckInSafe,
+    confirmSafeArrival,
   } = useSafeSphere();
 
   const [isCheckInModalOpen, setIsCheckInModalOpen] = useState(false);
-  const [isJourneyModalOpen, setIsJourneyModalOpen] = useState(false);
-  const [isSafetyModalOpen, setIsSafetyModalOpen] = useState(false);
   const [isEmergencyMessageOpen, setIsEmergencyMessageOpen] = useState(false);
   const [isEmergencyCallOpen, setIsEmergencyCallOpen] = useState(false);
-  const [safetyModalInitialType, setSafetyModalInitialType] = useState<DistressType>('check_on_me');
+  const [isChecklistDismissed, setIsChecklistDismissed] = useState(false);
 
   const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
+  const pendingContacts = contacts.filter((c) => c.status === 'pending');
   const recentEvents = incidentEvents.slice(0, 3);
 
   // Time-based greeting
@@ -59,399 +60,542 @@ export const UserDashboard: React.FC = () => {
     return 'Good evening';
   };
 
-  const handleOpenSafetyModal = (type: DistressType = 'check_on_me') => {
-    setSafetyModalInitialType(type);
-    setIsSafetyModalOpen(true);
-  };
-
   const isCheckInOverdue =
     activeCheckIn &&
     (activeCheckIn.status === 'in_grace_period' || activeCheckIn.status === 'escalated');
 
-  // Determine Dominant Primary Action
-  const renderDominantAction = () => {
-    if (activeIncident) {
-      return (
-        <button
-          onClick={() => openIncidentDetails(activeIncident.id)}
-          className="px-6 py-3.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-sm font-bold shadow-coral hover:shadow-hover transition-all flex items-center gap-2 active:scale-[0.98]"
-        >
-          <ShieldAlert className="w-5 h-5 animate-pulse" />
-          <span>Active Distress Alert • View Status & Timeline</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      );
-    }
+  // Real-data completion checks for first-time onboarding flow
+  const isProfileComplete = Boolean(
+    currentUser.full_name &&
+    (currentUser.emergency_notes || currentUser.medical_info)
+  );
+  const isContactComplete = acceptedContacts.length > 0;
+  const isCheckInComplete = Boolean(protocols.length > 0 || defaultProtocol);
+  const isEmergencyComplete = Boolean(
+    currentUser.emergency_notes || currentUser.discreet_exit_pin || currentUser.medical_info
+  );
 
-    if (activeCheckIn) {
-      return (
-        <button
-          onClick={() => setCurrentScreen('my_safety')}
-          className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-sm font-bold shadow-teal hover:shadow-hover transition-all flex items-center gap-2 active:scale-[0.98]"
-        >
-          <Clock className="w-5 h-5 animate-spin-slow" />
-          <span>Active Check-in • Confirm Safety</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      );
-    }
+  const checklistItems = [
+    {
+      id: 'profile',
+      label: 'Complete your basic profile',
+      description: 'Add your contact number and emergency medical notes.',
+      completed: isProfileComplete,
+      actionLabel: 'Edit Profile',
+      onAction: () => setCurrentScreen('settings'),
+    },
+    {
+      id: 'contact',
+      label: 'Add at least one trusted contact',
+      description: 'Your circle receives automated check-in and distress alerts.',
+      completed: isContactComplete,
+      actionLabel: 'Add Contact',
+      onAction: () => setCurrentScreen('circle'),
+    },
+    {
+      id: 'checkins',
+      label: 'Configure safety check-ins',
+      description: 'Choose intervals and escalation grace periods.',
+      completed: isCheckInComplete,
+      actionLabel: 'Setup Check-ins',
+      onAction: () => setCurrentScreen('safety_setup'),
+    },
+    {
+      id: 'emergency',
+      label: 'Review emergency & privacy preferences',
+      description: 'Configure discreet exit PIN and emergency phone numbers.',
+      completed: isEmergencyComplete,
+      actionLabel: 'Review Settings',
+      onAction: () => setCurrentScreen('settings'),
+    },
+  ];
 
-    if (activeJourney) {
-      return (
-        <button
-          onClick={() => setCurrentScreen('journeys')}
-          className="px-6 py-3.5 bg-brand-violet hover:bg-violet-700 text-white rounded-xl text-sm font-bold shadow-violet hover:shadow-hover transition-all flex items-center gap-2 active:scale-[0.98]"
-        >
-          <Compass className="w-5 h-5" />
-          <span>Active Journey • View Transit & Map</span>
-          <ArrowRight className="w-4 h-4" />
-        </button>
-      );
-    }
-
-    return (
-      <button
-        onClick={() => handleOpenSafetyModal('check_on_me')}
-        className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-sm font-bold shadow-teal hover:shadow-hover transition-all flex items-center gap-2 active:scale-[0.98]"
-      >
-        <Shield className="w-5 h-5" />
-        <span>Start a Safety Session</span>
-        <ArrowRight className="w-4 h-4" />
-      </button>
-    );
-  };
+  const completedCount = checklistItems.filter((item) => item.completed).length;
+  const isSetupIncomplete = completedCount < checklistItems.length && !isChecklistDismissed;
 
   return (
     <div className="space-y-6 animate-fadeIn">
-      {/* 1. Contextual Alert: No Trusted Contacts Added */}
-      {acceptedContacts.length === 0 && (
-        <div className="p-4 bg-amber-50 border border-amber-300 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs animate-fadeIn">
-          <div className="flex items-center gap-2.5">
-            <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />
-            <div>
-              <strong className="text-amber-900 font-bold block text-sm">
-                No Verified Trusted Responders in Circle
-              </strong>
-              <span className="text-amber-800">
-                DigiSakhi escalation requires at least one verified contact to alert during overdue check-ins or distress.
-              </span>
-            </div>
+      {/* 1. TOP HEADER: Greeting, Status & Direct Emergency Controls */}
+      <div className="bg-white rounded-3xl p-6 sm:p-7 border border-brand-border shadow-card flex flex-col md:flex-row md:items-center justify-between gap-5 relative overflow-hidden">
+        {/* Soft background glow */}
+        <div className="absolute -right-10 -top-10 w-52 h-52 rounded-full bg-gradient-to-br from-teal-100/50 to-violet-100/40 blur-2xl pointer-events-none" />
+
+        <div className="space-y-1.5 relative z-10">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-aqua/50 border border-teal-200/80 shadow-2xs mb-1">
+            <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
+            <span className="text-xs font-extrabold text-brand-deepTeal">
+              DigiSakhi Protection
+            </span>
           </div>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight">
+            {getGreeting()}, {currentUser.full_name.split(' ')[0]}
+          </h1>
+          <p className="text-xs sm:text-sm text-brand-muted max-w-xl leading-relaxed">
+            Your personal safety command center. Monitor journeys, manage automated check-ins, and alert your circle with instant discreet dispatches.
+          </p>
+        </div>
+
+        {/* Top Emergency Buttons & Quick Profile Link */}
+        <div className="flex items-center gap-2.5 shrink-0 relative z-10">
           <button
-            onClick={() => setCurrentScreen('circle')}
-            className="px-4 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white font-bold rounded-xl text-xs shadow-teal transition-all flex items-center gap-1.5"
+            onClick={() => setIsEmergencyMessageOpen(true)}
+            className="px-4 py-2.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-xs font-black shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
+            title="Dispatch Emergency SOS message with live GPS location"
           >
-            <span>Add Trusted Contacts</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <ShieldAlert className="w-4 h-4 animate-pulse" />
+            <span>Emergency SOS</span>
+          </button>
+
+          <button
+            onClick={() => setIsEmergencyCallOpen(true)}
+            className="px-4 py-2.5 bg-slate-900 hover:bg-black text-white rounded-xl text-xs font-bold shadow-xs transition-all flex items-center gap-1.5 active:scale-95"
+            title="Directly dial 112 National Emergency Helpline or Primary Contact"
+          >
+            <PhoneCall className="w-4 h-4 text-coral-400" />
+            <span>Call 112</span>
+          </button>
+
+          <button
+            onClick={() => setCurrentScreen('settings')}
+            className="p-2.5 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl transition-colors"
+            title="Profile & Settings"
+          >
+            <Settings className="w-4 h-4 text-brand-muted hover:text-brand-text" />
           </button>
         </div>
-      )}
+      </div>
 
-      {/* 2. Contextual Alert: Overdue Check-in */}
-      {isCheckInOverdue && (
-        <div className="p-4 bg-brand-peach/80 border border-brand-coral/40 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-xs animate-pulse-subtle">
-          <div className="flex items-center gap-2.5">
-            <Clock className="w-5 h-5 text-brand-coral shrink-0" />
-            <div>
-              <strong className="text-brand-coral font-bold block text-sm">
-                ⚠️ Safety Check-in Overdue (+Grace Period Buffer Active)
-              </strong>
-              <span className="text-brand-text">
-                Your scheduled deadline has elapsed. Please mark safe or extend duration immediately before secondary escalation alerts your circle.
-              </span>
-            </div>
-          </div>
-          <button
-            onClick={() => setCurrentScreen('my_safety')}
-            className="px-4 py-2 bg-brand-coral hover:bg-red-600 text-white font-bold rounded-xl text-xs shadow-coral transition-all flex items-center gap-1.5"
-          >
-            <span>Resolve or Extend Now</span>
-            <ArrowRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      )}
-
-      {/* Active Incident Urgent Alert Banner if triggered */}
+      {/* 2. ACTIVE DISTRESS ALERT BANNER (Only when emergency incident is active) */}
       <ActiveIncidentsBanner />
 
-      {/* Hero Welcome Section with Tasteful Safety Artwork */}
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-brand-aqua/40 via-white to-brand-lavender/30 border border-brand-border p-6 sm:p-8 shadow-card">
-        {/* Layered decorative gradient artwork */}
-        <div className="absolute -right-16 -top-16 w-72 h-72 rounded-full bg-gradient-to-br from-teal-200/40 to-violet-300/30 blur-2xl pointer-events-none" />
-        <div className="absolute right-32 -bottom-12 w-48 h-48 rounded-full bg-gradient-to-tr from-brand-aqua/60 to-brand-lavender/40 blur-xl pointer-events-none" />
-
-        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/80 backdrop-blur border border-teal-200/80 shadow-xs mb-3">
-              <span className="w-2 h-2 rounded-full bg-brand-teal animate-pulse" />
-              <span className="text-xs font-bold text-brand-deepTeal">
-                {getGreeting()}, {currentUser.full_name.split(' ')[0]}
+      {/* 3. CURRENT SAFETY STATUS (Answers: "Am I currently in a safety session?") */}
+      {activeIncident ? (
+        <div className="p-4 sm:p-5 bg-brand-peach border border-coral-300 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-coral animate-fadeIn">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-coral text-white flex items-center justify-center shrink-0">
+              <ShieldAlert className="w-5 h-5 animate-pulse" />
+            </div>
+            <div>
+              <strong className="text-brand-coral font-black text-sm block">
+                Active Emergency Distress Alert Dispatched
+              </strong>
+              <span className="text-brand-text">
+                Your circle is actively notified. Live GPS broadcast is active.
               </span>
             </div>
-
-            <h1 className="text-3xl sm:text-4xl font-extrabold text-brand-text tracking-tight leading-tight">
-              Your safety, your way.
-            </h1>
-
-            <p className="text-sm sm:text-base text-brand-muted mt-2 leading-relaxed">
-              Everything you need to feel more prepared, connected, and in control. Set personalized check-in deadlines, monitor commutes, and alert your circle with discreet codes.
-            </p>
-
-            {/* Dominant Primary Action & Secondary Actions */}
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              {renderDominantAction()}
-
-              {!activeJourney && (
-                <button
-                  onClick={() => setIsJourneyModalOpen(true)}
-                  className="px-5 py-3.5 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-sm font-bold shadow-xs transition-colors flex items-center gap-2"
-                >
-                  <Compass className="w-4 h-4 text-brand-violet" />
-                  <span>Plan a Journey</span>
-                </button>
-              )}
-
-              {/* Direct Emergency SOS Button */}
-              <button
-                onClick={() => setIsEmergencyMessageOpen(true)}
-                className="px-5 py-3.5 bg-brand-coral hover:bg-red-600 text-white rounded-xl text-sm font-extrabold shadow-coral transition-all flex items-center gap-2 active:scale-[0.98]"
-                title="Send urgent emergency SOS broadcast to trusted circle with live GPS location"
-              >
-                <ShieldAlert className="w-4 h-4 animate-pulse" />
-                <span>Emergency SOS</span>
-              </button>
-
-              {/* Direct Emergency Call Button */}
-              <button
-                onClick={() => setIsEmergencyCallOpen(true)}
-                className="px-5 py-3.5 bg-slate-900 hover:bg-black text-white rounded-xl text-sm font-bold shadow-xs transition-all flex items-center gap-2 active:scale-[0.98]"
-                title="Directly dial 112 National Emergency Helpline or your primary contact"
-              >
-                <PhoneCall className="w-4 h-4 text-coral-400" />
-                <span>Call 112</span>
-              </button>
-            </div>
           </div>
-
-          {/* Refined Abstract Safety Badge Artwork */}
-          <div className="hidden lg:flex flex-col items-center justify-center shrink-0">
-            <div className="relative w-36 h-36 flex items-center justify-center">
-              <div className="absolute inset-0 rounded-3xl bg-gradient-to-tr from-brand-teal/20 to-brand-violet/20 animate-float" />
-              <div className="w-24 h-24 rounded-2xl bg-white shadow-elevated border border-brand-border flex items-center justify-center relative z-10">
-                <ShieldCheck className="w-12 h-12 text-brand-teal stroke-[2.2]" />
-              </div>
-              <div className="absolute -bottom-2 -right-2 px-2.5 py-1 rounded-full bg-brand-lavender text-brand-violet text-[10px] font-extrabold border border-violet-200 shadow-xs z-20 flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-brand-violet" />
-                <span>Protected</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* B. One Attractive Current Safety Status Card driven by real data */}
-      <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-3.5">
-          <div className="w-11 h-11 rounded-2xl bg-brand-aqua text-brand-deepTeal flex items-center justify-center font-bold shrink-0">
-            <Shield className="w-5 h-5 text-brand-teal stroke-[2.5]" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h2 className="font-extrabold text-brand-text text-sm sm:text-base">
-                Current Safety Perimeter
-              </h2>
-              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-brand-aqua text-brand-deepTeal border border-teal-200">
-                Active Protocol
-              </span>
-            </div>
-            <p className="text-xs text-brand-muted mt-0.5">
-              Protocol: <strong className="text-brand-text">{defaultProtocol?.name || 'Standard Protocol'}</strong> • Escalation Chain:{' '}
-              <strong className="text-brand-text">{acceptedContacts.length} Verified Responders</strong>
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-50 border border-brand-border text-brand-muted">
-            <MapPin className="w-3.5 h-3.5 text-brand-teal" />
-            <span>GPS: <strong className="text-brand-text capitalize">{locationPermission}</strong></span>
-          </div>
-
           <button
-            onClick={() => setCurrentScreen('protocols')}
-            className="text-xs font-bold text-brand-violet hover:text-violet-700 flex items-center gap-1 transition-colors"
+            onClick={() => openIncidentDetails(activeIncident.id)}
+            className="px-4 py-2 bg-brand-coral hover:bg-red-600 text-white font-bold rounded-xl text-xs shadow-xs transition-all flex items-center gap-1.5"
           >
-            <span>Review Rules</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-      </div>
-
-      {/* D. Three Quick-Action Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* Card 1: Request a Check-in */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card hover:shadow-hover transition-all flex flex-col justify-between group">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-teal flex items-center justify-center mb-3">
-              <Clock className="w-5 h-5" />
-            </div>
-            <h3 className="font-extrabold text-brand-text text-base group-hover:text-brand-teal transition-colors">
-              Schedule Check-in
-            </h3>
-            <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-              Set a timed safety session before heading out. If unconfirmed before deadline + grace buffer, your circle escalates automatically.
-            </p>
-          </div>
-
-          <button
-            onClick={() => setIsCheckInModalOpen(true)}
-            className="mt-4 w-full py-2.5 rounded-xl bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
-          >
-            <span>Configure Check-in</span>
+            <span>View Distress Details & Timeline</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
-
-        {/* Card 2: Plan a Journey */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card hover:shadow-hover transition-all flex flex-col justify-between group">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-violet flex items-center justify-center mb-3">
-              <Compass className="w-5 h-5" />
+      ) : isCheckInOverdue ? (
+        <div className="p-4 sm:p-5 bg-brand-peach/90 border border-brand-coral/50 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-coral animate-pulse-subtle">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-coral text-white flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5 animate-spin-slow" />
             </div>
-            <h3 className="font-extrabold text-brand-text text-base group-hover:text-brand-violet transition-colors">
-              Plan a Journey
-            </h3>
-            <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-              Real-time transit monitoring. Entering destination radius prompts safe arrival confirmation; overdue arrival triggers check-in escalation.
-            </p>
+            <div>
+              <strong className="text-brand-coral font-black text-sm block">
+                ⚠️ Safety Check-in Overdue (+Grace Period Active)
+              </strong>
+              <span className="text-brand-text">
+                Your scheduled deadline has elapsed. Confirm you are safe now before escalation alerts your circle.
+              </span>
+            </div>
           </div>
-
           <button
-            onClick={() => setIsJourneyModalOpen(true)}
-            className="mt-4 w-full py-2.5 rounded-xl bg-brand-lavender hover:bg-violet-100 text-brand-violet font-bold text-xs transition-colors flex items-center justify-center gap-1.5"
+            onClick={() => activeCheckIn && confirmCheckInSafe(activeCheckIn.id)}
+            className="px-4 py-2 bg-brand-coral hover:bg-red-600 text-white font-bold rounded-xl text-xs shadow-coral transition-all flex items-center gap-1.5 active:scale-95"
           >
-            <span>Plan Monitored Journey</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            <CheckCircle2 className="w-4 h-4" />
+            <span>Confirm Safe Now</span>
           </button>
         </div>
-
-        {/* Card 3: Emergency Assistance */}
-        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card hover:shadow-hover transition-all flex flex-col justify-between group">
-          <div>
-            <div className="w-10 h-10 rounded-xl bg-brand-peach text-brand-coral flex items-center justify-center mb-3">
-              <AlertTriangle className="w-5 h-5" />
+      ) : activeJourney ? (
+        <div className="p-4 sm:p-5 bg-brand-lavender/50 border border-violet-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-card">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-lavender text-brand-violet flex items-center justify-center shrink-0">
+              <Compass className="w-5 h-5 animate-spin-slow" />
             </div>
-            <h3 className="font-extrabold text-brand-text text-base group-hover:text-brand-coral transition-colors">
-              Emergency SOS & Call
-            </h3>
-            <p className="text-xs text-brand-muted mt-1 leading-relaxed">
-              Instant high-priority dispatch with live GPS location via WhatsApp/SMS, or direct 112 emergency phone dialer.
-            </p>
+            <div>
+              <div className="flex items-center gap-2">
+                <strong className="text-brand-violet font-extrabold text-sm">
+                  Safety Journey in Progress
+                </strong>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
+                  ETA: {formatTimeOnly(activeJourney.expected_arrival_time)}
+                </span>
+              </div>
+              <span className="text-brand-muted">
+                Destination: <strong className="text-brand-text">{activeJourney.destination_name}</strong> • Safe Radius: {activeJourney.safe_radius_meters}m
+              </span>
+            </div>
           </div>
-
-          <div className="mt-4 grid grid-cols-2 gap-2">
+          <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsEmergencyMessageOpen(true)}
-              className="py-2.5 rounded-xl bg-brand-coral hover:bg-red-600 text-white font-bold text-xs shadow-coral transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
+              onClick={() => confirmSafeArrival(activeJourney.id)}
+              className="px-3.5 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-bold text-xs shadow-teal transition-all flex items-center gap-1.5 active:scale-95"
             >
-              <ShieldAlert className="w-3.5 h-3.5" />
-              <span>SOS Alert</span>
+              <CheckCircle2 className="w-4 h-4" />
+              <span>Confirm Safe Arrival</span>
             </button>
             <button
-              onClick={() => setIsEmergencyCallOpen(true)}
-              className="py-2.5 rounded-xl bg-slate-900 hover:bg-black text-white font-bold text-xs shadow-xs transition-colors flex items-center justify-center gap-1.5 active:scale-[0.98]"
+              onClick={() => setCurrentScreen('journeys')}
+              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-brand-violet border border-violet-200 rounded-xl font-bold text-xs transition-colors flex items-center gap-1"
             >
-              <PhoneCall className="w-3.5 h-3.5 text-coral-400" />
-              <span>Call 112</span>
+              <span>View Route Map</span>
+              <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
-      </div>
-
-      {/* E. Compact Setup Roadmap */}
-      <SetupRoadmap />
-
-      {/* F. Small Active Sessions Section (only when relevant) */}
-      {(activeCheckIn || activeJourney) && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="font-extrabold text-brand-text text-sm flex items-center gap-2">
-              <Radio className="w-4 h-4 text-brand-teal animate-pulse" />
-              <span>Active Safety Sessions in Progress</span>
-            </h3>
-            {activeJourney && (
-              <button
-                onClick={() => setCurrentScreen('journeys')}
-                className="text-xs font-bold text-brand-violet hover:underline flex items-center gap-1"
-              >
-                <span>View Full Map & Tracking →</span>
-              </button>
-            )}
+      ) : activeCheckIn ? (
+        <div className="p-4 sm:p-5 bg-brand-aqua/40 border border-teal-200 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-card">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-brand-aqua text-brand-deepTeal flex items-center justify-center shrink-0">
+              <Clock className="w-5 h-5 text-brand-teal" />
+            </div>
+            <div>
+              <strong className="text-brand-deepTeal font-extrabold text-sm block">
+                Safety Check-in Session Active
+              </strong>
+              <span className="text-brand-muted">
+                Next response deadline: <strong className="text-brand-text">{formatTimeOnly(activeCheckIn.deadline_at)}</strong>
+              </span>
+            </div>
           </div>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {activeCheckIn && <ActiveCheckInCard />}
-            {activeJourney && <ActiveJourneyCard />}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => confirmCheckInSafe(activeCheckIn.id)}
+              className="px-4 py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-bold text-xs shadow-teal transition-all flex items-center gap-1.5 active:scale-95"
+            >
+              <CheckCircle2 className="w-4 h-4" />
+              <span>I'm Safe</span>
+            </button>
+            <button
+              onClick={() => setCurrentScreen('safety_setup')}
+              className="px-3.5 py-2 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors"
+            >
+              Manage Check-ins
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="p-4 sm:p-5 bg-slate-50 border border-brand-border rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-white border border-brand-border text-brand-teal flex items-center justify-center shrink-0 shadow-2xs">
+              <ShieldCheck className="w-5 h-5 text-brand-teal" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <strong className="text-brand-text font-bold text-sm">
+                  Standby Protection Active
+                </strong>
+                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200/80 text-brand-muted">
+                  Not in active session
+                </span>
+              </div>
+              <span className="text-brand-muted">
+                DigiSakhi is ready. Start a journey or schedule a check-in whenever you need protection.
+              </span>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            <span className="text-brand-muted text-[11px] flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-brand-teal" />
+              GPS: <strong className="text-brand-text capitalize">{locationPermission}</strong>
+            </span>
+            <span className="text-brand-muted text-[11px] flex items-center gap-1">
+              <Users className="w-3.5 h-3.5 text-brand-violet" />
+              Circle: <strong className="text-brand-text">{acceptedContacts.length} Verified</strong>
+            </span>
           </div>
         </div>
       )}
 
-      {/* G. Short Recent Activity List (latest 3 events) */}
-      <div className="bg-white rounded-2xl p-6 border border-brand-border shadow-card space-y-4">
-        <div className="flex items-center justify-between pb-3 border-b border-brand-border">
-          <h3 className="font-extrabold text-brand-text text-base flex items-center gap-2">
-            <Clock className="w-4 h-4 text-brand-teal" />
-            <span>Recent Activity</span>
-          </h3>
-          <button
-            onClick={() => setCurrentScreen('history')}
-            className="text-xs font-bold text-brand-teal hover:text-brand-deepTeal flex items-center gap-1 transition-colors"
-          >
-            <span>View All History</span>
-            <ChevronRight className="w-3.5 h-3.5" />
-          </button>
-        </div>
-
-        {recentEvents.length === 0 ? (
-          <div className="py-6 text-center text-xs text-brand-muted">
-            No recent activity recorded yet. Start a check-in or journey to see real-time events.
-          </div>
-        ) : (
-          <div className="divide-y divide-brand-border">
-            {recentEvents.map((ev) => (
-              <div key={ev.id} className="py-3 flex items-start justify-between gap-3 text-xs">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <span className="font-bold text-brand-text">{ev.actor_name}</span>
-                    <span className="text-[10px] uppercase px-1.5 py-0.2 rounded bg-slate-100 text-brand-muted font-medium">
-                      {ev.actor_role.replace('_', ' ')}
-                    </span>
-                  </div>
-                  <p className="text-brand-muted text-xs mt-0.5 leading-relaxed">
-                    {ev.description}
-                  </p>
-                </div>
-                <span className="text-[11px] text-brand-muted shrink-0 font-mono">
-                  {formatRelativeTime(ev.created_at)}
+      {/* 4. FIRST-TIME USER SETUP CHECKLIST (Guided onboarding based on actual saved state) */}
+      {isSetupIncomplete && (
+        <div className="bg-white rounded-2xl p-5 sm:p-6 border border-brand-border shadow-card space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-brand-border">
+            <div>
+              <div className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-brand-teal" />
+                <h3 className="font-extrabold text-brand-text text-base">
+                  Getting Started with DigiSakhi
+                </h3>
+                <span className="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-brand-aqua text-brand-deepTeal">
+                  {completedCount} of {checklistItems.length} Complete
                 </span>
+              </div>
+              <p className="text-xs text-brand-muted mt-0.5">
+                Complete these initial steps to activate your personal safety circle.
+              </p>
+            </div>
+            <button
+              onClick={() => setIsChecklistDismissed(true)}
+              className="text-xs text-brand-muted hover:text-brand-text p-1 flex items-center gap-1"
+              title="Dismiss checklist"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {checklistItems.map((item) => (
+              <div
+                key={item.id}
+                className={`p-3.5 rounded-xl border transition-all flex items-start justify-between gap-3 text-xs ${
+                  item.completed
+                    ? 'bg-slate-50/70 border-slate-200 text-brand-muted'
+                    : 'bg-white border-brand-border shadow-2xs hover:border-teal-200'
+                }`}
+              >
+                <div className="flex items-start gap-2.5">
+                  <div
+                    className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 mt-0.5 ${
+                      item.completed
+                        ? 'bg-teal-100 text-brand-teal'
+                        : 'border border-slate-300 text-transparent'
+                    }`}
+                  >
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                  </div>
+                  <div>
+                    <h4
+                      className={`font-bold ${
+                        item.completed ? 'text-brand-muted line-through' : 'text-brand-text'
+                      }`}
+                    >
+                      {item.label}
+                    </h4>
+                    <p className="text-[11px] text-brand-muted mt-0.5 leading-relaxed">
+                      {item.description}
+                    </p>
+                  </div>
+                </div>
+
+                {!item.completed && (
+                  <button
+                    onClick={item.onAction}
+                    className="px-3 py-1.5 bg-brand-aqua hover:bg-teal-100 text-brand-deepTeal rounded-lg font-bold text-[11px] shrink-0 transition-colors"
+                  >
+                    {item.actionLabel}
+                  </button>
+                )}
               </div>
             ))}
           </div>
-        )}
+        </div>
+      )}
+
+      {/* 5. ONE LARGE PROMINENT PRIMARY CARD (Answers: "What should I do next?") */}
+      {!activeJourney ? (
+        <div className="bg-gradient-to-br from-brand-aqua/20 via-white to-brand-lavender/25 rounded-3xl p-6 sm:p-8 border border-brand-border shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-xl space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
+              Primary Protection Workflow
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight mt-1">
+              Start a Safety Journey
+            </h2>
+            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+              Going out, commuting, or walking home alone? Launch a monitored journey. DigiSakhi verifies your arrival upon entering your destination safe radius, and escalates to your trusted circle if overdue.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => setCurrentScreen('journeys')}
+                className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-sm font-bold shadow-teal hover:shadow-hover transition-all flex items-center gap-2 active:scale-95"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Start a Safety Journey</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                onClick={() => setIsCheckInModalOpen(true)}
+                className="px-4 py-3 bg-white hover:bg-slate-50 text-brand-text border border-brand-border rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
+              >
+                <Clock className="w-4 h-4 text-brand-teal" />
+                <span>Quick Check-in</span>
+              </button>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center justify-center p-6 shrink-0">
+            <div className="w-28 h-28 rounded-3xl bg-white border border-brand-border shadow-elevated flex items-center justify-center text-brand-teal">
+              <Compass className="w-14 h-14 stroke-[2.2] animate-pulse-subtle" />
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-gradient-to-br from-violet-50 via-white to-brand-aqua/20 rounded-3xl p-6 sm:p-8 border border-violet-200 shadow-card flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="max-w-xl space-y-2">
+            <span className="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 rounded-full bg-brand-lavender text-brand-violet border border-violet-200">
+              Active Transit
+            </span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold text-brand-text tracking-tight mt-1">
+              En Route to {activeJourney.destination_name}
+            </h2>
+            <p className="text-xs sm:text-sm text-brand-muted leading-relaxed">
+              Safe arrival geofencing is active. Expected arrival: <strong className="text-brand-text">{formatTimeOnly(activeJourney.expected_arrival_time)}</strong>. Confirm your safe arrival once you reach your destination.
+            </p>
+            <div className="pt-2 flex flex-wrap items-center gap-3">
+              <button
+                onClick={() => confirmSafeArrival(activeJourney.id)}
+                className="px-6 py-3.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl text-sm font-bold shadow-teal transition-all flex items-center gap-2 active:scale-95"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>Confirm Safe Arrival</span>
+              </button>
+
+              <button
+                onClick={() => setCurrentScreen('journeys')}
+                className="px-4 py-3 bg-white hover:bg-slate-50 text-brand-violet border border-violet-200 rounded-xl text-xs font-bold shadow-2xs transition-colors flex items-center gap-1.5"
+              >
+                <Compass className="w-4 h-4" />
+                <span>Open Journey Map</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
+
+          <div className="hidden lg:flex items-center justify-center p-6 shrink-0">
+            <div className="w-28 h-28 rounded-3xl bg-white border border-violet-200 shadow-elevated flex items-center justify-center text-brand-violet">
+              <Compass className="w-14 h-14 stroke-[2.2] animate-spin-slow" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 6. SECONDARY AREA: 3 Clean Compact Summaries (Check-in, Trusted Circle, Recent Activity) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Card A: Next Check-in Summary */}
+        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-brand-aqua text-brand-teal flex items-center justify-center">
+                <Clock className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-muted">
+                {activeCheckIn ? 'Active' : 'Standby'}
+              </span>
+            </div>
+            <h3 className="font-extrabold text-brand-text text-sm">
+              Safety Check-in
+            </h3>
+            <p className="text-xs text-brand-muted leading-relaxed">
+              {activeCheckIn
+                ? `Response scheduled for ${formatTimeOnly(activeCheckIn.deadline_at)}.`
+                : 'No check-in currently counting down. Set a timer before leaving.'}
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-brand-border/60 mt-4 flex items-center justify-between">
+            {activeCheckIn ? (
+              <button
+                onClick={() => confirmCheckInSafe(activeCheckIn.id)}
+                className="w-full py-2 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-bold text-xs shadow-teal transition-all flex items-center justify-center gap-1.5"
+              >
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>I'm Safe</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => setIsCheckInModalOpen(true)}
+                className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+              >
+                <span>Schedule Check-in</span>
+                <ArrowRight className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Card B: Trusted Circle Status */}
+        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-brand-lavender text-brand-violet flex items-center justify-center">
+                <Users className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-muted font-mono">
+                {acceptedContacts.length} Verified
+              </span>
+            </div>
+            <h3 className="font-extrabold text-brand-text text-sm">
+              Trusted Circle
+            </h3>
+            <p className="text-xs text-brand-muted leading-relaxed">
+              {acceptedContacts.length > 0
+                ? `${acceptedContacts.length} responders authorized for check-ins and emergency alerts.`
+                : 'No verified contacts yet. Add your trusted friends or family members.'}
+            </p>
+          </div>
+
+          <div className="pt-4 border-t border-brand-border/60 mt-4">
+            <button
+              onClick={() => setCurrentScreen('circle')}
+              className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+            >
+              <span>Manage Circle</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
+
+        {/* Card C: Recent Activity Preview */}
+        <div className="bg-white rounded-2xl p-5 border border-brand-border shadow-card flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="w-9 h-9 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center">
+                <Clock className="w-4 h-4" />
+              </div>
+              <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-brand-muted">
+                Audit Trail
+              </span>
+            </div>
+            <h3 className="font-extrabold text-brand-text text-sm">
+              Recent Activity
+            </h3>
+            {recentEvents.length === 0 ? (
+              <p className="text-xs text-brand-muted leading-relaxed">
+                No safety events recorded yet. Recent events will appear here.
+              </p>
+            ) : (
+              <div className="space-y-1.5 pt-1">
+                {recentEvents.slice(0, 2).map((ev) => (
+                  <div key={ev.id} className="text-[11px] leading-tight">
+                    <span className="font-bold text-brand-text truncate block">
+                      {ev.description}
+                    </span>
+                    <span className="text-brand-muted font-mono text-[10px]">
+                      {formatRelativeTime(ev.created_at)}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="pt-4 border-t border-brand-border/60 mt-4">
+            <button
+              onClick={() => setCurrentScreen('history')}
+              className="w-full py-2 bg-slate-50 hover:bg-slate-100 text-brand-text border border-brand-border rounded-xl font-bold text-xs transition-colors flex items-center justify-center gap-1"
+            >
+              <span>View Activity History</span>
+              <ArrowRight className="w-3 h-3" />
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Setup Modals */}
+      {/* Modals */}
       <CheckInSetupModal
         isOpen={isCheckInModalOpen}
         onClose={() => setIsCheckInModalOpen(false)}
-      />
-      <JourneySetupModal
-        isOpen={isJourneyModalOpen}
-        onClose={() => setIsJourneyModalOpen(false)}
-      />
-      <SafetySessionModal
-        isOpen={isSafetyModalOpen}
-        onClose={() => setIsSafetyModalOpen(false)}
-        initialType={safetyModalInitialType}
       />
       <EmergencyMessageModal
         isOpen={isEmergencyMessageOpen}

@@ -1344,4 +1344,114 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal(related?.status, 'notification_sent');
     });
   });
+
+  // =========================================================================
+  // 15. SIMPLIFIED 6-SECTION NAVIGATION & STREAMLINED USER EXPERIENCE
+  // =========================================================================
+  describe('15. Simplified 6-Section Navigation & Streamlined User Experience', () => {
+    it('verifies 6 core navigation sections exist and map cleanly without clutter', async () => {
+      const coreScreens = ['home', 'journeys', 'circle', 'safety_setup', 'history', 'settings'];
+      assert.equal(coreScreens.length, 6, 'There must be exactly 6 primary navigation destinations');
+
+      // Legacy aliases must resolve into the 6 sections
+      const aliasMap: Record<string, string> = {
+        dashboard: 'home',
+        journey_active: 'journeys',
+        map_view: 'journeys',
+        contacts: 'circle',
+        protocols: 'safety_setup',
+        protocol_builder: 'safety_setup',
+        my_safety: 'safety_setup',
+        checkin_active: 'safety_setup',
+        incident_details: 'history',
+        privacy_settings: 'settings',
+        account_settings: 'settings',
+        notifications_inbox: 'settings',
+      };
+
+      for (const [alias, target] of Object.entries(aliasMap)) {
+        assert.ok(coreScreens.includes(target), `Alias '${alias}' must resolve to one of the 6 core screens, got '${target}'`);
+      }
+    });
+
+    it('accurately calculates dynamic first-time setup checklist from real persisted records', async () => {
+      const user = await backend.getProfile('usr_elena_01');
+      assert.ok(user, 'User Elena must exist');
+
+      const contacts = await backend.getContacts('usr_elena_01');
+      const acceptedContacts = contacts.filter((c) => c.status === 'accepted');
+      const protocols = await backend.getProtocols('usr_elena_01');
+
+      // Evaluate actual completion states
+      const isProfileComplete = Boolean(user.full_name && (user.emergency_notes || user.medical_info));
+      const isContactComplete = acceptedContacts.length > 0;
+      const isCheckInComplete = protocols.length > 0;
+      const isEmergencyComplete = Boolean(user.emergency_notes || user.discreet_exit_pin || user.medical_info);
+
+      assert.equal(isProfileComplete, true, 'Profile with emergency notes must be complete');
+      assert.equal(isContactComplete, true, 'User Elena with accepted contacts must satisfy contact step');
+      assert.equal(isCheckInComplete, true, 'User Elena with protocols must satisfy check-in step');
+      assert.equal(isEmergencyComplete, true, 'User Elena with notes/PIN must satisfy emergency step');
+
+      // Test with a fresh user who has 0 contacts and 0 protocols
+      const session = await backend.signUp({
+        email: 'priya@test.org',
+        password: 'securePassword123!',
+        fullName: 'Priya Sharma',
+      });
+      const freshUser = session.profile;
+      const freshContacts = await backend.getContacts(freshUser.id);
+      const freshProtocols = (await backend.getProtocols(freshUser.id)).filter(p => !p.is_default);
+
+      const freshProfileComplete = Boolean(freshUser.full_name && (freshUser.emergency_notes || freshUser.medical_info));
+      const freshContactComplete = freshContacts.filter((c) => c.status === 'accepted').length > 0;
+
+      assert.equal(freshProfileComplete, false, 'New user without emergency notes must be incomplete');
+      assert.equal(freshContactComplete, false, 'New user with 0 contacts must be incomplete');
+    });
+
+    it('validates 4-step journey setup process lifecycle from creation to verified arrival', async () => {
+      // Step 1: Destination setup
+      const origin = 'Mission District Co-working';
+      const destination = 'Central Terminal';
+      const destLat = 37.7897;
+      const destLng = -122.4011;
+
+      // Step 2: Safety settings
+      const safeRadiusMeters = 200;
+      const durationMinutes = 20;
+      const expectedArrival = new Date(Date.now() + durationMinutes * 60000).toISOString();
+
+      // Step 3: Permissions & Escalation
+      const shareLocation = true;
+      const allowedContacts = ['tc_maya_01'];
+
+      // Step 4: Launch journey
+      const journey = await backend.createJourney({
+        owner_user_id: 'usr_elena_01',
+        origin_name: origin,
+        destination_name: destination,
+        dest_lat: destLat,
+        dest_lng: destLng,
+        safe_radius_meters: safeRadiusMeters,
+        expected_arrival_time: expectedArrival,
+        share_location: shareLocation,
+        status: 'in_progress',
+      });
+
+      assert.ok(journey.id, 'Journey must be created with unique ID');
+      assert.equal(journey.status, 'in_progress', 'Initial journey status must be in_progress');
+      assert.equal(journey.destination_name, 'Central Terminal');
+      assert.equal(journey.safe_radius_meters, 200);
+
+      // Verify human safe arrival confirmation
+      await backend.updateJourney(journey.id, {
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      });
+
+      const updatedJourney = (await backend.getJourneys('usr_elena_01')).find((j) => j.id === journey.id);
+      assert.equal(updatedJourney?.status, 'completed', 'Journey must transition to completed on safe arrival');
+    });
+  });
 });

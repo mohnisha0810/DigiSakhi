@@ -98,40 +98,24 @@ export const MobileHeader: React.FC = () => {
             <div className="space-y-1.5 text-xs font-bold">
               <button
                 onClick={() => {
-                  setCurrentScreen('privacy_settings');
+                  setCurrentScreen('settings');
                   setIsMenuOpen(false);
                 }}
-                className="w-full p-3 rounded-xl bg-slate-50 text-left text-brand-text flex items-center gap-2.5"
-              >
-                <Lock className="w-4 h-4 text-brand-teal" />
-                <span>Privacy & Discreet Camouflage Settings</span>
-              </button>
-
-              <button
-                onClick={() => {
-                  setCurrentScreen('account_settings');
-                  setIsMenuOpen(false);
-                }}
-                className="w-full p-3 rounded-xl bg-slate-50 text-left text-brand-text flex items-center gap-2.5"
+                className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left text-brand-text flex items-center gap-2.5"
               >
                 <Settings className="w-4 h-4 text-brand-violet" />
-                <span>Account & Medical Information</span>
+                <span>Profile & Settings (Privacy, Camouflage, PIN)</span>
               </button>
 
               <button
                 onClick={() => {
-                  setCurrentScreen('notifications_inbox');
+                  setCurrentScreen('safety_setup');
                   setIsMenuOpen(false);
                 }}
-                className="w-full p-3 rounded-xl bg-slate-50 text-left text-brand-text flex items-center justify-between"
+                className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left text-brand-text flex items-center gap-2.5"
               >
-                <div className="flex items-center gap-2.5">
-                  <Bell className="w-4 h-4 text-brand-teal" />
-                  <span>Notification Center</span>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-brand-aqua text-brand-teal font-mono">
-                  {notifications.length}
-                </span>
+                <Shield className="w-4 h-4 text-brand-teal" />
+                <span>Safety Setup (Check-ins, Protocols, Emergency)</span>
               </button>
 
               <button
@@ -139,7 +123,7 @@ export const MobileHeader: React.FC = () => {
                   setIsAuthOpen(true);
                   setIsMenuOpen(false);
                 }}
-                className="w-full p-3 rounded-xl bg-slate-50 text-left text-brand-text flex items-center gap-2.5"
+                className="w-full p-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-left text-brand-text flex items-center gap-2.5"
               >
                 <UserCheck className="w-4 h-4 text-brand-deepTeal" />
                 <span>Switch / Authenticate Account</span>
@@ -150,7 +134,7 @@ export const MobileHeader: React.FC = () => {
                   signOut();
                   setIsMenuOpen(false);
                 }}
-                className="w-full p-3 rounded-xl bg-brand-peach text-left text-brand-coral flex items-center gap-2.5"
+                className="w-full p-3 rounded-xl bg-brand-peach hover:bg-red-100 text-left text-brand-coral flex items-center gap-2.5"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sign Out</span>
