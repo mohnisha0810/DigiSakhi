@@ -158,9 +158,6 @@ const AppShell: React.FC = () => {
 
       {/* Global Toast Notifications */}
       <ToastContainer />
-
-      {/* Discreet Emergency Camouflage Screen (Overlay) */}
-      <QuickExitModal />
     </div>
   );
 };
@@ -195,6 +192,8 @@ export const App: React.FC = () => {
           }}
         />
         <ToastContainer />
+        {/* Discreet Emergency Camouflage Screen (Global Listener & Overlay) */}
+        <QuickExitModal />
       </SafeSphereProvider>
     );
   }
@@ -202,6 +201,8 @@ export const App: React.FC = () => {
   return (
     <SafeSphereProvider>
       <AppShell />
+      {/* Discreet Emergency Camouflage Screen (Global Listener & Overlay) */}
+      <QuickExitModal />
     </SafeSphereProvider>
   );
 };

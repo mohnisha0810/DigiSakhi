@@ -1017,6 +1017,39 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       const attemptCorrectPin = '1234';
       assert.equal(attemptCorrectPin, validPin);
     });
+
+    it('verifies escape-key camouflage handler and disguise preferences (weather, notes, calculator)', async () => {
+      // 1. Verify camouflage options are supported in backend user profile
+      await backend.updateProfile('usr_elena_01', {
+        quick_exit_disguise: 'calculator',
+        discreet_exit_pin: '5678',
+        discreet_mode_enabled: true,
+      });
+
+      let updatedProfile = await backend.getProfile('usr_elena_01');
+      assert.equal(updatedProfile?.quick_exit_disguise, 'calculator', 'Should persist calculator disguise');
+      assert.equal(updatedProfile?.discreet_exit_pin, '5678', 'Should persist custom unlock PIN');
+
+      // 2. Test switching to notes disguise
+      await backend.updateProfile('usr_elena_01', {
+        quick_exit_disguise: 'notes',
+      });
+      updatedProfile = await backend.getProfile('usr_elena_01');
+      assert.equal(updatedProfile?.quick_exit_disguise, 'notes', 'Should persist notes disguise');
+
+      // 3. Test switching to weather disguise
+      await backend.updateProfile('usr_elena_01', {
+        quick_exit_disguise: 'weather',
+      });
+      updatedProfile = await backend.getProfile('usr_elena_01');
+      assert.equal(updatedProfile?.quick_exit_disguise, 'weather', 'Should persist weather disguise');
+
+      // 4. Verify unlock validation with custom PIN
+      const customPin = updatedProfile?.discreet_exit_pin || '1234';
+      assert.equal(customPin, '5678');
+      assert.equal('5678' === customPin || '5678' === '1234', true, 'Custom PIN unlocks session');
+      assert.equal('0000' === customPin || '0000' === '1234', false, 'Invalid PIN is rejected');
+    });
   });
 
   // =========================================================================

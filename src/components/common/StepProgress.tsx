@@ -12,35 +12,11 @@ export const StepProgress: React.FC<StepProgressProps> = ({
   currentStep,
   accentColor = 'teal',
 }) => {
-  const getActiveClass = () => {
-    switch (accentColor) {
-      case 'violet':
-        return 'bg-brand-violet text-white border-brand-violet shadow-violet';
-      case 'coral':
-        return 'bg-brand-coral text-white border-brand-coral shadow-coral';
-      case 'teal':
-      default:
-        return 'bg-brand-teal text-white border-brand-teal shadow-teal';
-    }
-  };
-
-  const getCompletedClass = () => {
-    switch (accentColor) {
-      case 'violet':
-        return 'bg-brand-lavender text-brand-violet border-brand-violet/30';
-      case 'coral':
-        return 'bg-brand-peach text-brand-coral border-brand-coral/30';
-      case 'teal':
-      default:
-        return 'bg-brand-aqua text-brand-teal border-brand-teal/30';
-    }
-  };
-
   return (
     <div className="w-full py-2">
       <div className="flex items-center justify-between relative">
         {/* Background track line */}
-        <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 h-0.5 bg-brand-border -z-0" />
+        <div className="absolute top-1/2 left-4 right-4 -translate-y-1/2 h-0.5 bg-[#E8E1F3] -z-0" />
 
         {steps.map((step, index) => {
           const stepNum = index + 1;
@@ -52,10 +28,10 @@ export const StepProgress: React.FC<StepProgressProps> = ({
               <div
                 className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-bold border transition-all ${
                   isCurrent
-                    ? getActiveClass()
+                    ? 'bg-gradient-to-r from-[#5517C8] to-[#365BFF] text-white border-transparent shadow-md ring-2 ring-[#5517C8]/20'
                     : isCompleted
-                    ? getCompletedClass()
-                    : 'bg-white text-brand-muted border-brand-border'
+                    ? 'bg-[#F2EDFF] text-[#5517C8] border-[#5517C8]/40'
+                    : 'bg-white text-[#716B80] border-[#E8E1F3]'
                 }`}
               >
                 {isCompleted ? <Check className="w-3.5 h-3.5 stroke-[2.5]" /> : stepNum}
@@ -63,10 +39,10 @@ export const StepProgress: React.FC<StepProgressProps> = ({
               <span
                 className={`text-[10px] sm:text-[11px] font-semibold mt-1 max-w-[70px] text-center truncate ${
                   isCurrent
-                    ? 'text-brand-text font-bold'
+                    ? 'text-[#5517C8] font-bold'
                     : isCompleted
-                    ? 'text-brand-muted'
-                    : 'text-brand-muted/70'
+                    ? 'text-[#211638]'
+                    : 'text-[#716B80]'
                 }`}
               >
                 {step.label}
