@@ -65,6 +65,18 @@ export class SupabaseBackendAdapter implements BackendAdapter {
         discreet_mode_enabled: false,
         quick_exit_disguise: 'weather',
         discreet_lockscreen_mask: true,
+        onboarding_completed: false,
+        onboarding_step: 1,
+        check_in_preferences: {
+          enabled: true,
+          interval_minutes: 10,
+          countdown_seconds: 120,
+          notification_type: 'in_app',
+        },
+        emergency_preferences: {
+          emergency_number: '112',
+          share_location: true,
+        },
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
       };

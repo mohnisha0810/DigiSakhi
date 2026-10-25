@@ -15,6 +15,8 @@ import { IncidentDetails } from '@/components/incidents/IncidentDetails';
 import { DashboardSkeleton } from '@/components/common/LoadingSkeleton';
 import { ToastContainer } from '@/components/common/ToastContainer';
 import { InvitationResponseScreen } from '@/components/contacts/InvitationResponseScreen';
+import { WelcomeScreen } from '@/components/auth/WelcomeScreen';
+import { OnboardingWizard } from '@/components/onboarding/OnboardingWizard';
 import {
   AlertCircle,
   CheckCircle2,
@@ -124,6 +126,68 @@ const MainScreenRouter: React.FC = () => {
   );
 };
 
+const AppShell: React.FC = () => {
+  const { isAuthenticated, currentUser, isLoading } = useSafeSphere();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-brand-bg flex items-center justify-center p-6">
+        <div className="max-w-2xl w-full">
+          <DashboardSkeleton />
+        </div>
+      </div>
+    );
+  }
+
+  // 1. Unauthenticated visitors -> Dedicated Welcome Screen
+  if (!isAuthenticated) {
+    return (
+      <>
+        <WelcomeScreen />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  // 2. Authenticated but onboarding incomplete -> Step-by-Step 5-step Wizard
+  if (!currentUser?.onboarding_completed) {
+    return (
+      <>
+        <OnboardingWizard />
+        <ToastContainer />
+      </>
+    );
+  }
+
+  // 3. Authenticated & Onboarding Complete -> Full personalized app layout
+  return (
+    <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col font-sans">
+      {/* Unified Layout: Sidebar on Desktop + Header/BottomNav on Mobile */}
+      <div className="flex-1 flex flex-col lg:flex-row">
+        {/* Desktop Sidebar Navigation */}
+        <SidebarNav />
+
+        {/* Mobile Top Header */}
+        <MobileHeader />
+
+        {/* Main Content Area */}
+        <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-12">
+          <MainScreenRouter />
+        </main>
+      </div>
+
+      {/* Mobile Bottom Navigation Bar */}
+      <MobileNav />
+
+      {/* Global Toast Notifications */}
+      <ToastContainer />
+
+      {/* Discreet Emergency Camouflage Screen (Overlay) */}
+      <QuickExitModal />
+    </div>
+  );
+};
+
 export const App: React.FC = () => {
   const [isInvitePath, setIsInvitePath] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -160,30 +224,7 @@ export const App: React.FC = () => {
 
   return (
     <SafeSphereProvider>
-      <div className="min-h-screen bg-brand-bg text-brand-text flex flex-col font-sans">
-        {/* Unified Layout: Sidebar on Desktop + Header/BottomNav on Mobile */}
-        <div className="flex-1 flex flex-col lg:flex-row">
-          {/* Desktop Sidebar Navigation */}
-          <SidebarNav />
-
-          {/* Mobile Top Header */}
-          <MobileHeader />
-
-          {/* Main Content Area */}
-          <main className="flex-1 max-w-6xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-28 lg:pb-12">
-            <MainScreenRouter />
-          </main>
-        </div>
-
-        {/* Mobile Bottom Navigation Bar */}
-        <MobileNav />
-
-        {/* Global Toast Notifications */}
-        <ToastContainer />
-
-        {/* Discreet Emergency Camouflage Screen (Overlay) */}
-        <QuickExitModal />
-      </div>
+      <AppShell />
     </SafeSphereProvider>
   );
 };

@@ -54,6 +54,7 @@ export type NavigationScreen =
 interface SafeSphereContextType {
   // Authentication & Role
   currentUser: UserProfile;
+  isAuthenticated: boolean;
   currentRole: UserRole;
   allProfiles: UserProfile[];
   backendMode: 'supabase_cloud' | 'local_dev_adapter';
@@ -70,6 +71,8 @@ interface SafeSphereContextType {
     medicalInfo?: string;
   }) => Promise<void>;
   signOut: () => Promise<void>;
+  completeOnboardingStep: (stepNumber: number, data?: Partial<UserProfile>) => Promise<void>;
+  finishOnboarding: () => Promise<void>;
 
   // Loading & Feedback States
   isLoading: boolean;
@@ -232,6 +235,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     ...INITIAL_CONTACT_PROFILES,
   ]);
   const [currentUser, setCurrentUser] = useState<UserProfile>(INITIAL_USER_PROFILE);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   // Status & Feedback
   const [isLoading, setIsLoading] = useState<boolean>(true);
@@ -356,19 +360,28 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Initialize Auth Session on mount
   useEffect(() => {
     const initAuth = async () => {
+      setIsLoading(true);
       try {
         const session = await backendService.getCurrentSession();
         if (session?.profile) {
           setCurrentUser(session.profile);
+          setIsAuthenticated(true);
           await loadUserData(session.profile);
         } else {
-          setCurrentUser(INITIAL_USER_PROFILE);
-          await loadUserData(INITIAL_USER_PROFILE);
+          setIsAuthenticated(false);
+          // When no authenticated session exists, keep collections clean and unseeded
+          setContacts([]);
+          setInvitations([]);
+          setProtocols([]);
+          setCheckIns([]);
+          setJourneys([]);
+          setIncidents([]);
         }
       } catch (err) {
         console.warn('Session check fallback:', err);
-        setCurrentUser(INITIAL_USER_PROFILE);
-        await loadUserData(INITIAL_USER_PROFILE);
+        setIsAuthenticated(false);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -400,9 +413,16 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       const session = await backendService.signIn(email, password);
       setCurrentUser(session.profile);
+      setIsAuthenticated(true);
       await loadUserData(session.profile);
       setSuccessMessage(`Welcome back, ${session.profile.full_name}!`);
-      setCurrentScreen(session.profile.id === INITIAL_USER_PROFILE.id ? 'dashboard' : 'trusted_dashboard');
+      if (session.profile.onboarding_completed) {
+        setCurrentScreen(
+          session.profile.id === 'usr_maya_02' || session.profile.id === 'usr_david_03'
+            ? 'trusted_dashboard'
+            : 'dashboard'
+        );
+      }
     } catch (err: any) {
       setError(err.message || 'Login failed.');
       throw err;
@@ -423,6 +443,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     try {
       const session = await backendService.signUp(params);
       setCurrentUser(session.profile);
+      setIsAuthenticated(true);
       await loadUserData(session.profile);
       setSuccessMessage(`Account created successfully! Welcome to DigiSakhi.`);
       setCurrentScreen('dashboard');
@@ -438,8 +459,14 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setIsLoading(true);
     try {
       await backendService.signOut();
+      setIsAuthenticated(false);
       setCurrentUser(INITIAL_USER_PROFILE);
-      await loadUserData(INITIAL_USER_PROFILE);
+      setContacts([]);
+      setInvitations([]);
+      setProtocols([]);
+      setCheckIns([]);
+      setJourneys([]);
+      setIncidents([]);
       setSuccessMessage('Signed out successfully.');
       setCurrentScreen('dashboard');
     } catch (err: any) {
@@ -453,12 +480,58 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     const target = allProfiles.find((p) => p.id === profileId);
     if (!target) return;
 
-    setCurrentUser(target);
-    await loadUserData(target);
-    if (target.id === 'usr_maya_02' || target.id === 'usr_david_03') {
-      setCurrentScreen('trusted_dashboard');
-    } else {
+    setIsLoading(true);
+    try {
+      const session = await backendService.signIn(target.email);
+      setCurrentUser(session.profile);
+      setIsAuthenticated(true);
+      await loadUserData(session.profile);
+      setSuccessMessage(`Switched active profile to ${session.profile.full_name}`);
+      if (target.id === 'usr_maya_02' || target.id === 'usr_david_03') {
+        setCurrentScreen('trusted_dashboard');
+      } else {
+        setCurrentScreen('dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const completeOnboardingStep = async (stepNumber: number, data?: Partial<UserProfile>) => {
+    try {
+      const updates: Partial<UserProfile> = {
+        onboarding_step: stepNumber,
+        ...data,
+      };
+      const updated = await backendService.updateProfile(currentUser.id, updates);
+      setCurrentUser(updated);
+      await loadUserData(updated);
+    } catch (err: any) {
+      console.error('Failed to save onboarding progress:', err);
+      setError('Failed to save onboarding progress: ' + err.message);
+      throw err;
+    }
+  };
+
+  const finishOnboarding = async () => {
+    setIsLoading(true);
+    try {
+      const updated = await backendService.updateProfile(currentUser.id, {
+        onboarding_completed: true,
+        onboarding_step: 5,
+      });
+      setCurrentUser(updated);
+      await loadUserData(updated);
+      setSuccessMessage(`Welcome to DigiSakhi, ${updated.full_name}! Your dashboard is ready.`);
       setCurrentScreen('dashboard');
+    } catch (err: any) {
+      console.error('Failed to complete onboarding:', err);
+      setError('Could not complete setup: ' + err.message);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -725,12 +798,15 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       });
     }
 
+    const targetIncident = incidents.find((i) => i.id === incidentId);
+    const ownerDisplayName = targetIncident?.owner_name?.split(' ')[0] || 'user';
+
     await backendService.logIncidentEvent({
       incident_id: incidentId,
       event_type: 'response_initiated',
       actor_name: actorName,
       actor_role: 'contact',
-      description: `${actorName} indicated active response: "${note || 'Taking action to support Elena'}".`,
+      description: `${actorName} indicated active response: "${note || `Taking action to support ${ownerDisplayName}`}".`,
     });
 
     await loadUserData(currentUser);
@@ -1548,6 +1624,7 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     <SafeSphereContext.Provider
       value={{
         currentUser,
+        isAuthenticated,
         currentRole,
         allProfiles,
         backendMode,
@@ -1557,6 +1634,8 @@ export const SafeSphereProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         signIn,
         signUp,
         signOut,
+        completeOnboardingStep,
+        finishOnboarding,
         isLoading,
         error,
         successMessage,

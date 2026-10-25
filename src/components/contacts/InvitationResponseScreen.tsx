@@ -91,7 +91,7 @@ export const InvitationResponseScreen: React.FC<{
 
       const invData = {
         ...data.invitation,
-        inviter_name: data.invitation?.inviter_name || urlParams.get('inviter') || 'Elena Rostova',
+        inviter_name: data.invitation?.inviter_name || urlParams.get('inviter') || 'DigiSakhi User',
         invitee_name: data.invitation?.invitee_name || urlParams.get('name') || 'Trusted Contact',
         relationship: data.invitation?.relationship || urlParams.get('rel') || 'Primary Safety Contact',
       };

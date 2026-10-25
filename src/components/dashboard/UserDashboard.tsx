@@ -299,34 +299,33 @@ export const UserDashboard: React.FC = () => {
           </div>
         </div>
       ) : (
-        <div className="p-4 sm:p-5 bg-slate-50 border border-brand-border rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs shadow-2xs">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-white border border-brand-border text-brand-teal flex items-center justify-center shrink-0 shadow-2xs">
-              <ShieldCheck className="w-5 h-5 text-brand-teal" />
+        <div className="p-5 bg-gradient-to-r from-slate-50 to-brand-bg border border-brand-border rounded-2xl flex flex-wrap items-center justify-between gap-4 text-xs shadow-card">
+          <div className="flex items-center gap-3.5">
+            <div className="w-11 h-11 rounded-2xl bg-white border border-brand-border text-brand-teal flex items-center justify-center shrink-0 shadow-xs">
+              <Compass className="w-5 h-5 text-brand-teal" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <strong className="text-brand-text font-bold text-sm">
-                  Standby Protection Active
+                <strong className="text-brand-text font-black text-sm">
+                  You're not currently on a safety journey.
                 </strong>
-                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200/80 text-brand-muted">
-                  Not in active session
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-slate-200/80 text-brand-muted">
+                  Standby Mode
                 </span>
               </div>
-              <span className="text-brand-muted">
-                DigiSakhi is ready. Start a journey or schedule a check-in whenever you need protection.
-              </span>
+              <p className="text-brand-muted text-xs mt-0.5">
+                Start a safety journey with customizable check-ins or automated presets before heading out.
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-brand-muted text-[11px] flex items-center gap-1">
-              <MapPin className="w-3.5 h-3.5 text-brand-teal" />
-              GPS: <strong className="text-brand-text capitalize">{locationPermission}</strong>
-            </span>
-            <span className="text-brand-muted text-[11px] flex items-center gap-1">
-              <Users className="w-3.5 h-3.5 text-brand-violet" />
-              Circle: <strong className="text-brand-text">{acceptedContacts.length} Verified</strong>
-            </span>
+          <div className="flex items-center gap-2.5">
+            <button
+              onClick={() => setCurrentScreen('journeys')}
+              className="px-5 py-2.5 bg-brand-teal hover:bg-brand-deepTeal text-white rounded-xl font-extrabold text-xs shadow-teal transition-all flex items-center gap-2 cursor-pointer active:scale-95"
+            >
+              <Compass className="w-4 h-4" />
+              <span>Start a Safety Journey</span>
+            </button>
           </div>
         </div>
       )}

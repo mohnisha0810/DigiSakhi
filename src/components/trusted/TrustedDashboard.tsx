@@ -20,6 +20,7 @@ import { EmptyState } from '@/components/common/EmptyState';
 export const TrustedDashboard: React.FC = () => {
   const {
     currentUser,
+    allProfiles,
     incidents,
     incidentRecipients,
     journeys,
@@ -40,6 +41,10 @@ export const TrustedDashboard: React.FC = () => {
   const circleActiveJourney = journeys.find(
     (j) => j.status !== 'completed' && j.status !== 'cancelled'
   );
+
+  const primaryContactName = circleActiveJourney
+    ? allProfiles.find((p) => p.id === circleActiveJourney.owner_user_id)?.full_name.split(' ')[0] || 'Your contact'
+    : 'Your contact';
 
   // Check if current contact is authorized to view journey coordinates
   const isAuthorizedForLocation =
@@ -121,7 +126,7 @@ export const TrustedDashboard: React.FC = () => {
                   </span>
                 </div>
                 <p className="text-xs text-brand-muted mt-0.5">
-                  Elena is en route to: <strong className="text-brand-text">{circleActiveJourney.destination_name}</strong>
+                  {primaryContactName} is en route to: <strong className="text-brand-text">{circleActiveJourney.destination_name}</strong>
                 </p>
               </div>
             </div>
@@ -163,7 +168,7 @@ export const TrustedDashboard: React.FC = () => {
                 <span>
                   {circleActiveJourney.share_location
                     ? 'Coordinates hidden by user privacy protocol for this session.'
-                    : 'Manual check-in mode: Elena has not enabled live coordinate broadcasting.'}
+                    : `Manual check-in mode: ${primaryContactName} has not enabled live coordinate broadcasting.`}
                 </span>
               </div>
             )}
@@ -349,12 +354,12 @@ export const TrustedDashboard: React.FC = () => {
                   {showNoteInput[incident.id] && (
                     <div className="p-3 bg-white border border-brand-teal/30 rounded-xl space-y-2 text-xs shadow-xs">
                       <label className="block text-brand-text font-medium">
-                        Response update for circle (visible to Elena & other contacts):
+                        Response update for circle (visible to {incident.owner_name?.split(' ')[0] || 'contact'} & other circle members):
                       </label>
                       <div className="flex gap-2">
                         <input
                           type="text"
-                          placeholder="e.g. On my way to the station / Calling Elena directly"
+                          placeholder={`e.g. On my way to the station / Calling ${incident.owner_name?.split(' ')[0] || 'contact'} directly`}
                           value={customNote[incident.id] || ''}
                           onChange={(e) =>
                             setCustomNote((prev) => ({ ...prev, [incident.id]: e.target.value }))

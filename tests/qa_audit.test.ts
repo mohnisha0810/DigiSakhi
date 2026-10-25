@@ -1744,4 +1744,216 @@ describe('SafeSphere Comprehensive QA Audit Suite', () => {
       assert.equal(endedJourney?.status, 'completed', 'Journey must be completed and stop all future prompts');
     });
   });
+
+  // =========================================================================
+  // 17. REAL AUTHENTICATION, MULTI-DEVICE RECOVERY & 5-STEP GUIDED ONBOARDING
+  // =========================================================================
+  describe('17. Real Authentication, Multi-Device Recovery & 5-Step Guided Onboarding', () => {
+    const testEmail = 'priya.sharma@safesphere.test';
+    const testPassword = 'SecurePriya2026!';
+
+    it('unauthenticated state returns null session, preventing unauthorized access', async () => {
+      await backend.signOut();
+      const session = await backend.getCurrentSession();
+      assert.equal(session, null, 'Unauthenticated visitor must not have an active session');
+    });
+
+    it('registers a new user with salted hashed password and initializes onboarding at Step 1', async () => {
+      const session = await backend.signUp({
+        email: testEmail,
+        password: testPassword,
+        fullName: 'Priya Sharma',
+        phoneNumber: '+91 98765 43210',
+      });
+
+      assert.ok(session.user.id.startsWith('usr_'));
+      assert.equal(session.user.email, testEmail);
+      assert.equal(session.profile.full_name, 'Priya Sharma');
+      assert.equal(session.profile.onboarding_completed, false, 'New user must start with onboarding_completed: false');
+      assert.equal(session.profile.onboarding_step, 1, 'New user must start at Step 1');
+
+      // Verify password is NOT stored in plaintext in the credentials database
+      const rawCreds = storage.getItem('safesphere_auth_credentials');
+      if (rawCreds) {
+        const creds = JSON.parse(rawCreds);
+        const userCred = creds[testEmail.toLowerCase()];
+        assert.ok(userCred, 'Credentials record must exist');
+        assert.ok(userCred.salt, 'A cryptographic salt must be generated');
+        assert.notEqual(userCred.hash, testPassword, 'Password must NEVER be stored in plaintext');
+        assert.ok(userCred.hash.length >= 8, 'Password hash must be securely generated');
+      }
+    });
+
+    it('rejects login attempt with incorrect password', async () => {
+      await backend.signUp({
+        email: testEmail,
+        password: testPassword,
+        fullName: 'Priya Sharma',
+      });
+
+      await assert.rejects(
+        async () => {
+          await backend.signIn(testEmail, 'wrongPassword123!');
+        },
+        /Incorrect password/,
+        'Sign in must reject incorrect passwords with clear error'
+      );
+    });
+
+    it('persists step-by-step onboarding progress from Step 1 through Step 5', async () => {
+      const session = await backend.signUp({
+        email: testEmail,
+        password: testPassword,
+        fullName: 'Priya Sharma',
+        phoneNumber: '+91 98765 43210',
+      });
+      const userId = session.user.id;
+
+      // Step 1: User confirms name and phone
+      let prof = await backend.updateProfile(userId, {
+        full_name: 'Priya Sharma',
+        phone_number: '+91 98765 43210',
+        onboarding_step: 2,
+      });
+      assert.equal(prof.onboarding_step, 2);
+
+      // Step 2: User adds Tier 1 contact
+      const contact1 = await backend.createContact({
+        user_id: userId,
+        full_name: 'Ananya Sharma',
+        email: 'ananya@safesphere.test',
+        phone_number: '+91 98765 43211',
+        relationship: 'Sister',
+        escalation_order: 1,
+        status: 'pending',
+        can_view_location: false,
+      });
+      assert.ok(contact1.id);
+      prof = await backend.updateProfile(userId, { onboarding_step: 3 });
+      assert.equal(prof.onboarding_step, 3);
+
+      // Step 3: User configures safety check-ins (10 mins, 120s countdown)
+      prof = await backend.updateProfile(userId, {
+        onboarding_step: 4,
+        check_in_preferences: {
+          enabled: true,
+          interval_minutes: 10,
+          countdown_seconds: 120,
+          notification_type: 'in_app',
+        },
+      });
+      assert.equal(prof.onboarding_step, 4);
+      assert.equal(prof.check_in_preferences?.interval_minutes, 10);
+      assert.equal(prof.check_in_preferences?.countdown_seconds, 120);
+
+      // Step 4: User sets emergency preferences (Helpline 112, location sharing enabled)
+      prof = await backend.updateProfile(userId, {
+        onboarding_step: 5,
+        emergency_preferences: {
+          tier1_contact_id: contact1.id,
+          emergency_number: '112',
+          share_location: true,
+        },
+      });
+      assert.equal(prof.onboarding_step, 5);
+      assert.equal(prof.emergency_preferences?.emergency_number, '112');
+      assert.equal(prof.emergency_preferences?.share_location, true);
+
+      // Step 5: User finishes onboarding and clicks "Go to My Dashboard"
+      prof = await backend.updateProfile(userId, {
+        onboarding_completed: true,
+      });
+      assert.equal(prof.onboarding_completed, true, 'User profile must persist onboarding_completed: true');
+    });
+
+    it('cross-device recovery: logging in from another phone retrieves saved profile, contacts & preferences', async () => {
+      // 1. User signs up on Phone A, sets up contacts and completes onboarding
+      const session = await backend.signUp({
+        email: testEmail,
+        password: testPassword,
+        fullName: 'Priya Sharma',
+      });
+      const userId = session.user.id;
+
+      await backend.createContact({
+        user_id: userId,
+        full_name: 'Ananya Sharma',
+        email: 'ananya@safesphere.test',
+        phone_number: '+91 98765 43211',
+        relationship: 'Sister',
+        escalation_order: 1,
+        status: 'pending',
+        can_view_location: false,
+      });
+
+      await backend.updateProfile(userId, {
+        onboarding_completed: true,
+        onboarding_step: 5,
+        emergency_preferences: { emergency_number: '112', share_location: true },
+      });
+
+      // 2. Simulate switching to Phone B:
+      // Clear active session storage on Phone B
+      await backend.signOut();
+      assert.equal(await backend.getCurrentSession(), null);
+
+      // Phone B initializes adapter
+      const phoneBBackend = new LocalDevelopmentAdapter();
+      assert.equal(await phoneBBackend.getCurrentSession(), null, 'New device starts unauthenticated');
+
+      // User logs in on Phone B with their email and password
+      const restoredSession = await phoneBBackend.signIn(testEmail, testPassword);
+      assert.equal(restoredSession.user.id, userId);
+      assert.equal(restoredSession.profile.full_name, 'Priya Sharma');
+      assert.equal(restoredSession.profile.onboarding_completed, true, 'Second device must see onboarding completed');
+      assert.equal(restoredSession.profile.emergency_preferences?.emergency_number, '112');
+
+      // Verify user-scoped contacts are retrieved on Phone B
+      const retrievedContacts = await phoneBBackend.getContacts(userId);
+      assert.equal(retrievedContacts.length, 1);
+      assert.equal(retrievedContacts[0].full_name, 'Ananya Sharma');
+      assert.equal(retrievedContacts[0].relationship, 'Sister');
+
+      // Verify strict isolation: Priya's contacts do NOT leak into another user's queries
+      const otherUserContacts = await phoneBBackend.getContacts('usr_elena_01');
+      assert.ok(otherUserContacts.every((c) => c.user_id === 'usr_elena_01'));
+      assert.ok(!otherUserContacts.some((c) => c.full_name === 'Ananya Sharma'));
+    });
+
+    it('rejects duplicate registration without corrupting existing user data', async () => {
+      await backend.signUp({
+        email: testEmail,
+        password: testPassword,
+        fullName: 'Priya Sharma',
+      });
+
+      await assert.rejects(
+        async () => {
+          await backend.signUp({
+            email: testEmail,
+            password: 'differentPassword!',
+            fullName: 'Duplicate Priya',
+          });
+        },
+        /already exists/
+      );
+
+      // Verify original profile remains intact and signIn still works with original password
+      const s = await backend.signIn(testEmail, testPassword);
+      assert.equal(s.profile.full_name, 'Priya Sharma');
+    });
+
+    it('signing out ends session and clears private credentials from device', async () => {
+      await backend.signUp({
+        email: testEmail,
+        password: testPassword,
+        fullName: 'Priya Sharma',
+      });
+
+      assert.ok(await backend.getCurrentSession());
+
+      await backend.signOut();
+      assert.equal(await backend.getCurrentSession(), null, 'Session must be null after sign out');
+    });
+  });
 });

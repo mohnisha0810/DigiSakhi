@@ -28,6 +28,24 @@ import {
 
 const SESSION_STORAGE_KEY = 'safesphere_auth_session';
 
+async function hashPassword(password: string, salt: string): Promise<string> {
+  const enc = new TextEncoder();
+  const data = enc.encode(`${salt}:${password}:digisakhi_secret_salt_2026`);
+  const cryptoObj = typeof window !== 'undefined' ? window.crypto : (globalThis as any).crypto;
+  if (cryptoObj?.subtle) {
+    const hashBuffer = await cryptoObj.subtle.digest('SHA-256', data);
+    return Array.from(new Uint8Array(hashBuffer))
+      .map((b) => b.toString(16).padStart(2, '0'))
+      .join('');
+  }
+  // Robust fallback if subtle is unavailable in non-browser/node environment
+  let h = 0x811c9dc5;
+  for (let i = 0; i < data.length; i++) {
+    h = Math.imul(h ^ data[i], 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+
 export class LocalDevelopmentAdapter implements BackendAdapter {
   readonly mode = 'local_dev_adapter' as const;
   readonly isCloud = false as const;
@@ -50,24 +68,49 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
     emergencyNotes?: string;
     medicalInfo?: string;
   }): Promise<AuthSession> {
+    if (!params.password || params.password.length < 4) {
+      throw new Error('Password must be at least 6 characters.');
+    }
+
     const profiles = LocalStorageDB.getItem<UserProfile[]>('profiles', []);
     const existing = profiles.find((p) => p.email.toLowerCase() === params.email.toLowerCase());
     if (existing) {
       throw new Error('A user with this email address already exists.');
     }
 
+    const salt = Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+    const passwordHash = await hashPassword(params.password, salt);
+    const credentials = LocalStorageDB.getItem<Record<string, { salt: string; hash: string }>>(
+      'safesphere_auth_credentials',
+      {}
+    );
+    credentials[params.email.toLowerCase()] = { salt, hash: passwordHash };
+    LocalStorageDB.setItem('safesphere_auth_credentials', credentials);
+
     const newId = 'usr_' + Math.random().toString(36).substring(2, 9);
     const newProfile: UserProfile = {
       id: newId,
       email: params.email.toLowerCase(),
       full_name: params.fullName,
-      phone_number: params.phoneNumber || '+1 (555) 000-0000',
+      phone_number: params.phoneNumber || '',
       emergency_notes: params.emergencyNotes || '',
       medical_info: params.medicalInfo || '',
       discreet_exit_pin: '1234',
       discreet_mode_enabled: false,
       quick_exit_disguise: 'weather',
       discreet_lockscreen_mask: true,
+      onboarding_completed: false,
+      onboarding_step: 1,
+      check_in_preferences: {
+        enabled: true,
+        interval_minutes: 10,
+        countdown_seconds: 120,
+        notification_type: 'in_app',
+      },
+      emergency_preferences: {
+        emergency_number: '112',
+        share_location: true,
+      },
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
@@ -108,7 +151,7 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
     return session;
   }
 
-  async signIn(email: string, _password?: string): Promise<AuthSession> {
+  async signIn(email: string, password?: string): Promise<AuthSession> {
     const profiles = LocalStorageDB.getItem<UserProfile[]>('profiles', [
       INITIAL_USER_PROFILE,
       ...INITIAL_CONTACT_PROFILES,
@@ -117,6 +160,18 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
     const profile = profiles.find((p) => p.email.toLowerCase() === email.toLowerCase());
     if (!profile) {
       throw new Error(`No account found with email "${email}". Please sign up first.`);
+    }
+
+    const credentials = LocalStorageDB.getItem<Record<string, { salt: string; hash: string }>>(
+      'safesphere_auth_credentials',
+      {}
+    );
+    const cred = credentials[email.toLowerCase()];
+    if (cred && password) {
+      const candidateHash = await hashPassword(password, cred.salt);
+      if (candidateHash !== cred.hash) {
+        throw new Error('Incorrect password. Please verify your password and try again.');
+      }
     }
 
     const session: AuthSession = {
@@ -142,15 +197,19 @@ export class LocalDevelopmentAdapter implements BackendAdapter {
     try {
       const stored = localStorage.getItem(SESSION_STORAGE_KEY);
       if (stored) {
-        return JSON.parse(stored);
+        const session = JSON.parse(stored) as AuthSession;
+        const profiles = LocalStorageDB.getItem<UserProfile[]>('profiles', [
+          INITIAL_USER_PROFILE,
+          ...INITIAL_CONTACT_PROFILES,
+        ]);
+        const freshProfile = profiles.find((p) => p.id === session.user.id);
+        if (freshProfile) {
+          session.profile = freshProfile;
+        }
+        return session;
       }
     } catch {}
-    // Default to Elena Rostova in dev mode
-    return {
-      user: { id: INITIAL_USER_PROFILE.id, email: INITIAL_USER_PROFILE.email },
-      profile: INITIAL_USER_PROFILE,
-      token: 'local_dev_token_elena',
-    };
+    return null;
   }
 
   // --- Profiles ---

@@ -105,7 +105,7 @@ export function buildInvitationMessage(params: {
   inviteUrl: string;
 }): string {
   const rel = params.relationship || 'Friend';
-  const inviter = params.inviterName || 'Elena Rostova';
+  const inviter = params.inviterName || 'DigiSakhi User';
   return `DigiSakhi Safety Circle: ${inviter} has invited you as their trusted emergency contact (${rel}).\n\nTap this secure link to review safety permissions & activate: ${params.inviteUrl}`;
 }
 

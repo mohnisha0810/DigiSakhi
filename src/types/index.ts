@@ -13,6 +13,20 @@ export interface UserProfile {
   discreet_mode_enabled: boolean;
   quick_exit_disguise: 'weather' | 'notes' | 'calculator';
   discreet_lockscreen_mask: boolean;
+  onboarding_completed?: boolean;
+  onboarding_step?: number;
+  check_in_preferences?: {
+    enabled?: boolean;
+    interval_minutes?: number;
+    countdown_seconds?: number;
+    notification_type?: 'in_app' | 'chime' | 'browser_push';
+  };
+  emergency_preferences?: {
+    tier1_contact_id?: string;
+    tier2_contact_id?: string;
+    emergency_number?: string;
+    share_location?: boolean;
+  };
   created_at: string;
   updated_at: string;
 }
